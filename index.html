@@ -62,6 +62,10 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .who.he{background:var(--he-soft)} .who.she{background:var(--she-soft)} .who.n{background:var(--bg)}
 .en{font-family:var(--f-en);font-weight:600;font-size:clamp(34px,6.5vw,54px);line-height:1.15;letter-spacing:.01em;text-wrap:balance}
 .ko{font-size:22px;color:var(--muted)}
+.qline{font-family:var(--f-en);font-weight:700;font-size:clamp(40px,7vw,60px);line-height:1.15;color:var(--ink)}
+.ask{font-family:var(--f-disp);font-size:clamp(24px,4vw,32px);line-height:1.4;color:var(--ink);background:var(--sun-soft);border-radius:18px;padding:12px 20px}
+.mission .plan{font-size:17px;background:rgba(255,255,255,.14);border-radius:14px;padding:10px 14px;line-height:1.6}
+.backbtn{font-size:26px;color:var(--muted);width:48px;height:48px;border-radius:14px}
 .ko.big{font-family:var(--f-disp);font-size:clamp(28px,5vw,40px);color:var(--ink)}
 .hint{font-family:var(--f-disp);font-size:22px;color:var(--pine)}
 .btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
@@ -182,7 +186,7 @@ function setupScreen(msg){
    <div class="err">${msg||""}</div></div>`;
   document.getElementById("packin").onchange=async e=>{
     const f=e.target.files[0]; if(!f) return;
-    try{ const txt=await f.text(); const d=JSON.parse(txt); if(!d.items||!d.talks) throw 0; try{ await idbSet("pack",txt); }catch(_){} main(d); }
+    try{ const txt=await f.text(); const d=JSON.parse(txt); if(!d.items||!d.talks) throw 0; if((d.v||0)<4){ setupScreen("예전 파일이에요. 새로 받은 cheonilmun-pack.json 파일을 골라 주세요."); return; } try{ await idbSet("pack",txt); }catch(_){} main(d); }
     catch(_){ setupScreen("이 파일이 아니에요. cheonilmun-pack.json 파일을 골라 주세요."); }
   };
 }
@@ -190,7 +194,7 @@ function setupScreen(msg){
   const EMBED = null;
   if(EMBED){ main(EMBED); return; }
   let txt=null; try{ txt=await idbGet("pack"); }catch(e){}
-  if(txt){ try{ main(JSON.parse(txt)); return; }catch(e){} }
+  if(txt){ try{ const d=JSON.parse(txt); if((d.v||0)>=4){ main(d); return; } setupScreen("앱이 새로 바뀌었어요. 새로 받은 cheonilmun-pack.json 파일을 한 번만 다시 골라 주세요."); return; }catch(e){} }
   setupScreen();
 })();
 function main(DATA){
@@ -272,6 +276,7 @@ function matches(target,alts,allowIt){
     if(lcs(T,H) < T.length-tol) continue;
     if([...T].some(w=>KEY.has(w)&&!H.includes(w))) continue;
     if(T.some(w=>NEG.has(w)) !== H.some(w=>NEG.has(w))) continue;
+    if(T.includes("not") !== H.includes("not")) continue;
     if(QSTART.has(T[0]) && H[0]!==T[0]) continue;
     return true;
   }
@@ -332,7 +337,7 @@ function buildQueue(){
   const today=todayStr(), q=[], tipsAdded=new Set();
   const due=ITEMS.filter(i=>S.items[i.id]&&S.items[i.id].due<=today).sort((a,b)=>S.items[a.id].due.localeCompare(S.items[b.id].due)||S.items[a.id].box-S.items[b.id].box).slice(0,S.reviewCap);
   const newBook=ITEMS.filter(i=>i.src==="book"&&unlocked(i)&&!S.items[i.id]).slice(0,S.newBook);
-  const addTip=it=>{ for(const c of conceptsOf(it)){ if(!S.tips[c]&&!tipsAdded.has(c)){ tipsAdded.add(c); q.push({type:"tip",c}); } } };
+  const addTip=it=>{};
   newBook.forEach(it=>{
     addTip(it); q.push({type:"say",id:it.id,fresh:true});
     ITEMS.filter(d=>d.src==="drill"&&d.base===it.id&&!S.items[d.id]).forEach(d=>{ addTip(d); q.push({type:"say",id:d.id,fresh:true}); });
@@ -379,7 +384,13 @@ function renderHome(){
   let mission;
   if(doneToday()) mission=`<div class="mission"><h2>오늘 미션 끝! 🎉</h2><div class="done-msg">내일 또 만나요. 스티커 ${h(S.days[today].sticker)} 받았어요!</div><div class="sub">오늘 배운 문장을 아빠한테 영어로 말해 봐요.</div></div>`;
   else if(!q.some(c=>c.type!=="tip")) mission=`<div class="mission"><h2>오늘은 할 게 없어요</h2><div class="sub">내일 다시 와요!</div></div>`;
-  else mission=`<div class="mission"><h2>오늘의 미션</h2><div class="sub">오늘도 비밀 연구 시작해 볼까요?</div><button class="go" id="start">시작하기 ▶</button></div>`;
+  else {
+    const sayN=new Set(q.filter(c=>c.type==="say").map(c=>c.id)).size, pickN=n(c=>c.type==="pick"), talkN=n(c=>c.type==="talk");
+    const nbk=q.filter(c=>c.type==="say"&&c.fresh&&byId[c.id].src==="book").map(c=>byId[c.id]).filter(x=>x.day);
+    const dd=nbk.map(x=>x.day), lo=Math.min(...dd), hi=Math.max(...dd), dl=x=>x.date;
+    const rng=nbk.length?`책 Day ${lo}${hi>lo?` ~ Day ${hi}`:""} (${dl(nbk.find(x=>x.day===lo))}${hi>lo?` ~ ${dl(nbk.find(x=>x.day===hi))}`:""})`:"새 책 문장 없이 복습만";
+    mission=`<div class="mission"><h2>오늘의 미션</h2><div class="plan">말하기 ${sayN}문장${pickN?` · 누구일까 ${pickN}개`:""}${talkN?` · 대화 ${talkN}개`:""}<br>${rng}</div><button class="go" id="start">시작하기 ▶</button></div>`;
+  }
   const dn=["일","월","화","수","목","금","토"], wk=[];
   for(let i=6;i>=0;i--){ const d=addDays(today,-i); const [y,m,dd]=d.split("-").map(Number);
     wk.push(`<div class="wd ${S.days[d]?"on":""} ${i===0?"today":""}">${dn[new Date(y,m-1,dd).getDay()]}<b>${S.days[d]?h(S.days[d].sticker):"·"}</b></div>`); }
@@ -392,7 +403,7 @@ function renderHome(){
 
 function startLesson(){
   const queue=buildQueue();
-  L={queue,i:0,total:queue.filter(c=>c.type!=="tip").length,wrong:new Set(),retried:new Set()};
+  L={queue,i:0,total:queue.filter(c=>c.type!=="tip").length,wrong:new Set(),retried:new Set(),done:new Set()};
   view="lesson"; enterCard(); render();
 }
 function cur(){ return L.queue[L.i]; }
@@ -400,7 +411,7 @@ function enterCard(){
   const c=cur(); c.st={step:0,tries:0,heard:"",fb:null,firstTry:true,picked:[]};
   if(c.type==="say"){
     const it=byId[c.id];
-    c.steps = (c.fresh?["listen"]:[]).concat(["speak"]).concat(it.q?["answer"]:[]);
+    c.steps = ["speak"].concat(it.q?["answer"]:[]);
     c.st.step=0; prepOrder(c,it);
     if(it.q){ c.st.yes=Math.random()<.6; }
   }
@@ -449,7 +460,8 @@ function tagHTML(c,it){
   if(c.type==="say"){ if(it.src==="book") t.push(`<span class="tag">책 ${it.week}주차</span>`); if(!c.fresh) t.push(`<span class="tag rev">복습</span>`); }
   return `<div class="tags">${t.join("")}</div>`;
 }
-function picHTML(it){
+function picHTML(it){ return ""; }
+function picHTML_old(it){
   const w = it.who ? `<span class="who ${it.who===HE?"he":it.who===SHE?"she":"n"}">${it.who}</span>` : "";
   return `<div class="pic">${w}<span>${it.emoji}</span></div>`;
 }
@@ -465,9 +477,10 @@ function renderLesson(){
   else if(c.type==="say") body=sayBody(c);
   else if(c.type==="talk") body=talkBody(c);
   else body=pickBody(c);
-  app.innerHTML=`<div class="lesson"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><div class="prog"><i style="width:${pct}%"></i></div></div>
+  app.innerHTML=`<div class="lesson"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로">←</button><div class="prog"><i style="width:${pct}%"></i></div></div>
    ${stepsHTML(c)}<div class="card ${c.type==="tip"?"tip":""}">${body}</div></div>`;
   document.getElementById("quit").onclick=()=>{stopAll();view="home";render();};
+  document.getElementById("prev").onclick=()=>{ stopAll(); if(L.i>0){ L.i--; enterCard(); render(); } else { view="home"; render(); } };
   bindCard(c);
 }
 function micBlock(c,label){
@@ -482,9 +495,9 @@ function sayBody(c){
   if(step==="listen") return `${tagHTML(c,it)}${picHTML(it)}<div class="en">${h(it.text)}</div><div class="ko">${h(it.ko)}</div>
     <div class="btns"><button class="big play" data-act="play">🔊 듣기</button><button class="big next" data-act="next">다음 →</button></div>`;
   if(step==="speak"){
-    if(c.st.fb==="good") return `${tagHTML(c,it)}${picHTML(it)}<div class="feedback good">딩동댕! 잘 말했어요 ⭐<div class="en">${h(it.text)}</div><button class="big next" data-act="next">계속 →</button></div>`;
+    if(c.st.fb==="good") return `${tagHTML(c,it)}${picHTML(it)}<div class="feedback good">딩동댕! 정답 ⭐<div class="en">${h(it.text)}</div><button class="big next" data-act="next">계속 →</button></div>`;
     if(c.st.fb==="giveup") return `${tagHTML(c,it)}${picHTML(it)}<div class="feedback bad">이렇게 말하는 거예요<div class="en">${h(it.text)}</div><div class="btns"><button class="big play" data-act="play">🔊 듣기</button><button class="big next" data-act="next">알겠어요 →</button></div></div>`;
-    return `${tagHTML(c,it)}${picHTML(it)}<div class="ko big">${h(it.ko)}</div>${micBlock(c,"영어로 말해 봐요!")}
+    return `${tagHTML(c,it)}${picHTML(it)}<div class="ko big">${h(it.ko)}</div>${micBlock(c,"마이크를 누르고 영어로 말해 봐요!")}
       ${c.st.tries>0?`<div class="btns"><button class="big soft" data-act="hint">💡 힌트 듣기</button></div>`:""}`;
   }
   if(step==="order"){
@@ -498,15 +511,18 @@ function sayBody(c){
   }
   if(step==="answer"){
     const ans=it.q[c.st.yes?0:1];
-    if(c.st.fb==="good") return `<div class="thumb">${c.st.yes?"👍":"👎"}</div><div class="feedback good">완벽해요! ⭐<div class="en">${h(ans)}</div><button class="big next" data-act="next">계속 →</button></div>`;
-    if(c.st.fb==="giveup") return `<div class="thumb">${c.st.yes?"👍":"👎"}</div><div class="feedback bad">이렇게 대답해요<div class="en">${h(ans)}</div><button class="big next" data-act="next">알겠어요 →</button></div>`;
-    const body0=`<div class="bubble a"><div class="en">${h(it.text)}</div></div><div class="thumb">${c.st.yes?"👍 응!":"👎 아니!"}</div>`;
+    const yi=c.st.yes?0:1, full=it.qfull?it.qfull[yi]:"";
+    const scene=it.qk?`<div class="ask">${h(it.qk[yi])} 뭐라고 대답할까요?</div>`:`<div class="ask">${c.st.yes?"'응'이라고":"'아니'라고"} 대답해 볼까요?</div>`;
+    const head=`<div class="tags"><span class="tag">질문에 대답해 보아요!</span></div><div class="qline">${h(it.text)}</div>${scene}`;
+    if(c.st.fb==="good") return `${head}<div class="feedback good">딩동댕! 정답 ⭐<div class="en">${h(ans)}</div>${full?`<div class="ko">이렇게 말해도 돼요: ${h(c.st.yes?"Yes, ":"No, ")}${h(full)}</div>`:""}<button class="big next" data-act="next">계속 →</button></div>`;
+    if(c.st.fb==="giveup") return `${head}<div class="feedback bad">이렇게 대답해요<div class="en">${h(ans)}</div>${full?`<div class="ko">또는: ${h(full)}</div>`:""}<button class="big next" data-act="next">알겠어요 →</button></div>`;
+    const body0=head;
     if(false){
       const wrongP=ans.replace(/\b(he|she)\b/i,m=>m.toLowerCase()==="he"?"she":"he"); const wrongY=it.q[c.st.yes?1:0];
       const opts=c.opts||(c.opts=shuffle([...new Set([ans,wrongP,wrongY])]));
       return `${body0}<div class="hint">뭐라고 대답할까?</div><div class="opts">${opts.map((o,k)=>`<button class="opt" data-ans="${k}">${h(o)}</button>`).join("")}</div>`;
     }
-    return `${body0}<div class="btns"><button class="big soft" data-act="playq">🔊 다시 듣기</button></div>${micBlock(c,"영어로 대답해 봐요!")}`;
+    return `${body0}<div class="btns"><button class="big soft" data-act="playq">🔊 다시 듣기</button></div>${micBlock(c,"마이크를 누르고 영어로 대답해 봐요!")}`;
   }
 }
 function talkBody(c){
@@ -527,7 +543,7 @@ function talkBody(c){
   return `${tag}<div class="chat">${meFirst?"":`<div class="bubble a"><div class="en">${h(A.text)}</div><div class="ko">${h(A.ko)}</div></div>`}
      <div class="bubble ${meFirst?"a":"b"}"><div class="ko big">${h(meSay.ko)}</div><div class="ko">${meFirst?"내가 먼저 말해요":"내 차례!"}</div></div></div>
      ${meFirst?"":`<div class="btns"><button class="big soft" data-act="playA">🔊 다시 듣기</button></div>`}
-     ${micBlock(c,"영어로 말해 봐요!")}${c.st.tries>0?`<div class="btns"><button class="big soft" data-act="hintTalk">💡 힌트 듣기</button></div>`:""}`;
+     ${micBlock(c,"마이크를 누르고 영어로 말해 봐요!")}${c.st.tries>0?`<div class="btns"><button class="big soft" data-act="hintTalk">💡 힌트 듣기</button></div>`:""}`;
 }
 function pickBody(c){
   const done=c.st.fb;
@@ -586,7 +602,8 @@ async function act(c,a){
       if(r.err&&!speechOK){ render(); return; }
       const target= step==="answer" ? it.q[c.st.yes?0:1] : it.text;
       c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)";
-      if(r.alts&&matches(target,r.alts,it.week===6)){ c.st.fb="good"; chime(); render(); if(step==="speak") playItem(it); else playSrc("a",null,target); return; }
+      const targets= step==="answer" ? [target].concat(it.qfull?[it.qfull[c.st.yes?0:1],(c.st.yes?"Yes, ":"No, ")+it.qfull[c.st.yes?0:1]]:[]) : [target];
+      if(r.alts&&targets.some(tg=>matches(tg,r.alts,it.week===6))){ c.st.fb="good"; chime(); render(); if(step==="speak") playItem(it); else playSrc("a",null,target); return; }
       c.st.tries++; buzz();
       if(c.st.tries>=3){ c.st.fb="giveup"; markWrong(c); render(); step==="speak"?playItem(it):playSrc("a",null,target); return; }
       render(); return;
@@ -594,7 +611,7 @@ async function act(c,a){
     if(a==="next"){
       if(c.st.step<c.steps.length-1){ c.st.step++; c.st.fb=null; c.st.tries=0; c.st.heard=""; c.st.auto=false; render(); return; }
       // card done: record once
-      if(!L.wrong.has(c.id)) srs(S.items,c.id,c.st.firstTry);
+      if(!L.wrong.has(c.id)&&!L.done.has(c.id)) srs(S.items,c.id,c.st.firstTry); L.done.add(c.id);
       if(!c.st.firstTry){ L.wrong.add(c.id); if(!L.retried.has(c.id)){ L.retried.add(c.id); L.queue.push({type:"say",id:c.id,fresh:false}); } }
       return advance();
     }
@@ -699,8 +716,6 @@ function renderParent(){
   <div class="panel"><h3>바꿔 말하기 문장 (${tx}개: 의문문, 부정문, he/she)</h3>${bar(cx,tx)}<div class="note">한 번도 안 틀리고 세 번 넘게 맞히면 "아는 문장"이 돼요.</div></div>
   <div class="panel"><h3>자주 틀리는 문장 <span class="note">저녁에 이것만 한두 개 같이 말해 보세요</span></h3><div class="list">${weak.length?weak.map(row).join(""):`<div class="note">아직 틀린 문장이 없어요.</div>`}</div></div>
   <div class="panel"><h3>최근 4주</h3><div class="cal">${cells.join("")}</div></div>
-  <div class="panel"><h3>설명 카드 다시 보기</h3><div class="note">처음 나올 때 한 번씩 보여 줘요. 다시 보여 주고 싶은 걸 누르면 내일 미션에 다시 나와요.</div>
-    <div class="tools">${Object.entries(TIPS).map(([k,t])=>`<button class="tbtn" data-tip="${k}">${S.tips[k]?"✓ ":""}${h(t.title)}</button>`).join("")}</div></div>
   <div class="panel"><details><summary>전체 문장 보기 (${avail.length}개)</summary><div class="list">${avail.map(row).join("")}</div></details></div>
   <div class="panel"><h3>설정</h3>
     <div class="field"><label for="bw">책 진도</label><select id="bw">${[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n===S.bookWeek?"selected":""}>${n}주차까지</option>`).join("")}</select></div>
