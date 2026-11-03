@@ -476,9 +476,10 @@ function renderLesson(){
   else if(c.type==="say") body=sayBody(c);
   else if(c.type==="talk") body=talkBody(c);
   else body=pickBody(c);
-  app.innerHTML=`<div class="lesson"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로">←</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${L.i+1} / ${L.queue.length}</div></div>
+  app.innerHTML=`<div class="lesson"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로">←</button><button class="backbtn" id="fwd" aria-label="앞으로" ${L.i>=L.queue.length-1?"disabled style=\"opacity:.3\"":""}>→</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${L.i+1} / ${L.queue.length}</div></div>
    ${stepsHTML(c)}<div class="card ${c.type==="tip"?"tip":""}">${body}</div></div>`;
   document.getElementById("quit").onclick=()=>{stopAll();view="home";render();};
+  document.getElementById("fwd").onclick=()=>{ if(L.i<L.queue.length-1){ stopAll(); L.i++; saveSession(); enterCard(); render(); } };
   document.getElementById("prev").onclick=()=>{ stopAll(); if(L.i>0){ L.i--; saveSession(); enterCard(); render(); } else { view="home"; render(); } };
   bindCard(c);
 }
