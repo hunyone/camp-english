@@ -46,6 +46,7 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .lbar{display:flex;align-items:center;gap:12px}
 .x{font-size:28px;color:var(--muted);width:48px;height:48px;border-radius:14px}
 .prog{flex:1;height:18px;background:var(--line);border-radius:999px;overflow:hidden}
+.pnum{font-family:var(--f-en);font-weight:600;font-size:20px;color:var(--muted);min-width:76px;text-align:right}
 .prog i{display:block;height:100%;background:var(--pine);border-radius:999px;transition:width .3s}
 .steps{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;min-height:36px}
 .step{font-family:var(--f-disp);font-size:17px;padding:6px 14px;border-radius:999px;background:var(--card);border:2px solid var(--line);color:var(--muted)}
@@ -62,6 +63,7 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .who.he{background:var(--he-soft)} .who.she{background:var(--she-soft)} .who.n{background:var(--bg)}
 .en{font-family:var(--f-en);font-weight:600;font-size:clamp(34px,6.5vw,54px);line-height:1.15;letter-spacing:.01em;text-wrap:balance}
 .ko{font-size:22px;color:var(--muted)}
+.again{font-family:var(--f-disp);font-size:24px;color:var(--maple)}
 .qline{font-family:var(--f-en);font-weight:700;font-size:clamp(40px,7vw,60px);line-height:1.15;color:var(--ink)}
 .ask{font-family:var(--f-disp);font-size:clamp(24px,4vw,32px);line-height:1.4;color:var(--ink);background:var(--sun-soft);border-radius:18px;padding:12px 20px}
 .mission .plan{font-size:17px;background:rgba(255,255,255,.14);border-radius:14px;padding:10px 14px;line-height:1.6}
@@ -186,7 +188,7 @@ function setupScreen(msg){
    <div class="err">${msg||""}</div></div>`;
   document.getElementById("packin").onchange=async e=>{
     const f=e.target.files[0]; if(!f) return;
-    try{ const txt=await f.text(); const d=JSON.parse(txt); if(!d.items||!d.talks) throw 0; if((d.v||0)<4){ setupScreen("예전 파일이에요. 새로 받은 cheonilmun-pack.json 파일을 골라 주세요."); return; } try{ await idbSet("pack",txt); }catch(_){} main(d); }
+    try{ const txt=await f.text(); const d=JSON.parse(txt); if(!d.items||!d.talks) throw 0; if((d.v||0)<5){ setupScreen("예전 파일이에요. 새로 받은 cheonilmun-pack.json 파일을 골라 주세요."); return; } try{ await idbSet("pack",txt); }catch(_){} main(d); }
     catch(_){ setupScreen("이 파일이 아니에요. cheonilmun-pack.json 파일을 골라 주세요."); }
   };
 }
@@ -194,7 +196,7 @@ function setupScreen(msg){
   const EMBED = null;
   if(EMBED){ main(EMBED); return; }
   let txt=null; try{ txt=await idbGet("pack"); }catch(e){}
-  if(txt){ try{ const d=JSON.parse(txt); if((d.v||0)>=4){ main(d); return; } setupScreen("앱이 새로 바뀌었어요. 새로 받은 cheonilmun-pack.json 파일을 한 번만 다시 골라 주세요."); return; }catch(e){} }
+  if(txt){ try{ const d=JSON.parse(txt); if((d.v||0)>=5){ main(d); return; } setupScreen("앱이 새로 바뀌었어요. 새로 받은 cheonilmun-pack.json 파일을 한 번만 다시 골라 주세요."); return; }catch(e){} }
   setupScreen();
 })();
 function main(DATA){
@@ -300,10 +302,12 @@ function playSrc(key,src,text,role){
 }
 const playItem=it=>playSrc(it.id,it.src_audio,it.text);
 const playLine=(t,i)=>playSrc(t.id+"_"+i,t.lines[i].src_audio,t.lines[i].text,i===0?"a":"b");
-function chime(big){ try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C());
+function chime(big){ try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C()); if(c.state==="suspended") c.resume();
   (big?[523,659,784,1047]:[659,988]).forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.frequency.value=f; const t=c.currentTime+i*.11;
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.25,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.35); o.connect(g).connect(c.destination); o.start(t); o.stop(t+.4); }); }catch(e){} }
-function buzz(){ try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C()); const o=c.createOscillator(),g=c.createGain(); o.type="triangle"; o.frequency.value=220; const t=c.currentTime; g.gain.setValueAtTime(.18,t); g.gain.exponentialRampToValueAtTime(.0001,t+.3); o.connect(g).connect(c.destination); o.start(t); o.stop(t+.32);}catch(e){} }
+function buzz(){ try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C()); if(c.state==="suspended") c.resume();
+  [[392,0],[294,.16]].forEach(([f,d])=>{ const o=c.createOscillator(),g=c.createGain(); o.type="sine"; o.frequency.value=f; const t=c.currentTime+d;
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.35,t+.03); g.gain.exponentialRampToValueAtTime(.0001,t+.32); o.connect(g).connect(c.destination); o.start(t); o.stop(t+.35); }); }catch(e){} }
 
 // ---------- tips (what dad found hard to explain) ----------
 const TIPS = {
@@ -333,26 +337,20 @@ function conceptsOf(it){
 
 // ---------- daily mission ----------
 const unlocked=it=>it.week<=S.bookWeek;
+function curWeek(){ let w=S.nextWeek||1; if(w>S.bookWeek||w<1) w=1; return w; }
+function weekRange(w){ const b=ITEMS.filter(i=>i.src==="book"&&i.week===w&&i.day); if(!b.length) return ""; const lo=Math.min(...b.map(i=>i.day)), d0=b.find(i=>i.day===lo).date;
+  const m=d0.match(/(\d+)월 (\d+)일/); let end=""; if(m){ const dt=new Date(2026,+m[1]-1,+m[2]+6); end=`${dt.getMonth()+1}월 ${dt.getDate()}일`; }
+  return `책 Day ${lo} ~ Day ${lo+6} (${d0} ~ ${end})`; }
 function buildQueue(){
-  const today=todayStr(), q=[], tipsAdded=new Set();
-  const due=ITEMS.filter(i=>S.items[i.id]&&S.items[i.id].due<=today).sort((a,b)=>S.items[a.id].due.localeCompare(S.items[b.id].due)||S.items[a.id].box-S.items[b.id].box).slice(0,S.reviewCap);
-  const newBook=ITEMS.filter(i=>i.src==="book"&&unlocked(i)&&!S.items[i.id]).slice(0,S.newBook);
-  const addTip=it=>{};
-  newBook.forEach(it=>{
-    addTip(it); q.push({type:"say",id:it.id,fresh:true});
-    ITEMS.filter(d=>d.src==="drill"&&d.base===it.id&&!S.items[d.id]).forEach(d=>{ addTip(d); q.push({type:"say",id:d.id,fresh:true}); });
-  });
-  // quick he/she or this/that check
-  const hsPool=ITEMS.filter(i=>(S.items[i.id]||newBook.some(b=>b.id===i.id||b.id===i.base))&&(i.who===HE||i.who===SHE));
-  shuffle(hsPool).slice(0,S.whoCount||3).forEach(x=>q.push({type:"pick",kind:"hs",id:x.id}));
-  const ttPool=ITEMS.filter(i=>S.items[i.id]&&i.week===5&&!i.q);
-  if(ttPool.length) q.push({type:"pick",kind:"tt",id:pickOne(ttPool).id});
-  due.forEach(it=>q.push({type:"say",id:it.id,fresh:false}));
-  // one conversation: a due one first, else the next new one whose week is done
-  const dueTalk=TALKS.find(t=>S.talks[t.id]&&S.talks[t.id].due<=today);
-  const weekDone=w=>ITEMS.filter(i=>i.src==="book"&&i.week===w).every(i=>S.items[i.id]||newBook.includes(i));
-  const newTalk=TALKS.find(t=>t.week<=S.bookWeek&&!S.talks[t.id]&&weekDone(t.week));
-  const tk=dueTalk||newTalk; if(tk) q.push({type:"talk",id:tk.id});
+  const w=curWeek(), q=[];
+  const book=ITEMS.filter(i=>i.src==="book"&&i.week===w);
+  book.forEach(it=>{ q.push({type:"say",id:it.id,fresh:true}); ITEMS.filter(d=>d.src==="drill"&&d.base===it.id).forEach(d=>q.push({type:"say",id:d.id,fresh:true})); });
+  const hsPool=ITEMS.filter(i=>i.week===w&&(i.who===HE||i.who===SHE)&&/^(he|she|is he|is she|does he|does she)\b/i.test(i.text));
+  shuffle(hsPool).slice(0,S.whoCount??3).forEach(x=>q.push({type:"pick",kind:"hs",id:x.id}));
+  if(w===5){ const tt=ITEMS.filter(i=>i.week===5&&!i.q&&/^(This|That) is/.test(i.text)); if(tt.length) q.push({type:"pick",kind:"tt",id:pickOne(tt).id}); }
+  const weak=ITEMS.filter(i=>i.week!==w&&S.items[i.id]&&S.items[i.id].recentWrong>0).slice(0,S.reviewCap);
+  weak.forEach(it=>q.push({type:"say",id:it.id,fresh:false}));
+  TALKS.filter(t=>t.week===w).forEach(t=>q.push({type:"talk",id:t.id}));
   return q;
 }
 function doneToday(){ return !!S.days[todayStr()]; }
@@ -385,11 +383,9 @@ function renderHome(){
   if(doneToday()) mission=`<div class="mission"><h2>오늘 미션 끝! 🎉</h2><div class="done-msg">내일 또 만나요. 스티커 ${h(S.days[today].sticker)} 받았어요!</div><div class="sub">오늘 배운 문장을 아빠한테 영어로 말해 봐요.</div></div>`;
   else if(!q.some(c=>c.type!=="tip")) mission=`<div class="mission"><h2>오늘은 할 게 없어요</h2><div class="sub">내일 다시 와요!</div></div>`;
   else {
-    const sayN=new Set(q.filter(c=>c.type==="say").map(c=>c.id)).size, pickN=n(c=>c.type==="pick"), talkN=n(c=>c.type==="talk");
-    const nbk=q.filter(c=>c.type==="say"&&c.fresh&&byId[c.id].src==="book").map(c=>byId[c.id]).filter(x=>x.day);
-    const dd=nbk.map(x=>x.day), lo=Math.min(...dd), hi=Math.max(...dd), dl=x=>x.date;
-    const rng=nbk.length?`책 Day ${lo}${hi>lo?` ~ Day ${hi}`:""} (${dl(nbk.find(x=>x.day===lo))}${hi>lo?` ~ ${dl(nbk.find(x=>x.day===hi))}`:""})`:"새 책 문장 없이 복습만";
-    mission=`<div class="mission"><h2>오늘의 미션</h2><div class="plan">말하기 ${sayN}문장${pickN?` · 누구일까 ${pickN}개`:""}${talkN?` · 대화 ${talkN}개`:""}<br>${rng}</div><button class="go" id="start">시작하기 ▶</button></div>`;
+    const w=curWeek(), ss=S.session, resume=ss&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
+    const sayN=q.filter(c=>c.type==="say").length, pickN=n(c=>c.type==="pick"), talkN=n(c=>c.type==="talk");
+    mission=`<div class="mission"><h2>오늘의 미션 · ${w}주차</h2><div class="plan">${weekRange(w)}<br>말하기 ${sayN}문장${pickN?` · 누구일까 ${pickN}개`:""}${talkN?` · 대화 ${talkN}개`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
   }
   const dn=["일","월","화","수","목","금","토"], wk=[];
   for(let i=6;i>=0;i--){ const d=addDays(today,-i); const [y,m,dd]=d.split("-").map(Number);
@@ -401,9 +397,12 @@ function renderHome(){
   bindLogo(); const s=document.getElementById("start"); if(s) s.onclick=startLesson;
 }
 
+function saveSession(){ S.session={date:todayStr(),week:curWeek(),i:L.i,queue:L.queue.map(c=>({type:c.type,id:c.id,kind:c.kind,fresh:c.fresh}))}; save(); }
 function startLesson(){
-  const queue=buildQueue();
-  L={queue,i:0,total:queue.filter(c=>c.type!=="tip").length,wrong:new Set(),retried:new Set(),done:new Set()};
+  const ss=S.session, resume=ss&&ss.date===todayStr()&&ss.week===curWeek()&&ss.i<ss.queue.length;
+  const queue=resume?ss.queue:buildQueue();
+  L={queue,i:resume?ss.i:0,total:queue.length,wrong:new Set(),retried:new Set(),done:new Set()};
+  saveSession();
   view="lesson"; enterCard(); render();
 }
 function cur(){ return L.queue[L.i]; }
@@ -411,7 +410,7 @@ function enterCard(){
   const c=cur(); c.st={step:0,tries:0,heard:"",fb:null,firstTry:true,picked:[]};
   if(c.type==="say"){
     const it=byId[c.id];
-    c.steps = ["speak"].concat(it.q?["answer"]:[]);
+    c.steps = ["speak"];
     c.st.step=0; prepOrder(c,it);
     if(it.q){ c.st.yes=Math.random()<.6; }
   }
@@ -457,7 +456,7 @@ function prepOrder(c,it){
 
 function tagHTML(c,it){
   const t=[];
-  if(c.type==="say"){ if(it.src==="book") t.push(`<span class="tag">책 ${it.week}주차</span>`); if(!c.fresh) t.push(`<span class="tag rev">복습</span>`); }
+  if(c.type==="say"){ if(!c.fresh) t.push(`<span class="tag rev">복습</span>`); }
   return `<div class="tags">${t.join("")}</div>`;
 }
 function picHTML(it){ return ""; }
@@ -466,7 +465,7 @@ function picHTML_old(it){
   return `<div class="pic">${w}<span>${it.emoji}</span></div>`;
 }
 function stepsHTML(c){
-  if(c.type!=="say") return `<div class="steps"></div>`;
+  if(c.type!=="say"||c.steps.length<2) return `<div class="steps"></div>`;
   const N={listen:"듣기",speak:"말하기",answer:"대답하기"};
   return `<div class="steps">${c.steps.map((s,k)=>`<span class="step ${k===c.st.step?"cur":k<c.st.step?"ok":""}">${k<c.st.step?"✓ ":""}${N[s]}</span>`).join("")}</div>`;
 }
@@ -477,10 +476,10 @@ function renderLesson(){
   else if(c.type==="say") body=sayBody(c);
   else if(c.type==="talk") body=talkBody(c);
   else body=pickBody(c);
-  app.innerHTML=`<div class="lesson"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로">←</button><div class="prog"><i style="width:${pct}%"></i></div></div>
+  app.innerHTML=`<div class="lesson"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로">←</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${L.i+1} / ${L.queue.length}</div></div>
    ${stepsHTML(c)}<div class="card ${c.type==="tip"?"tip":""}">${body}</div></div>`;
   document.getElementById("quit").onclick=()=>{stopAll();view="home";render();};
-  document.getElementById("prev").onclick=()=>{ stopAll(); if(L.i>0){ L.i--; enterCard(); render(); } else { view="home"; render(); } };
+  document.getElementById("prev").onclick=()=>{ stopAll(); if(L.i>0){ L.i--; saveSession(); enterCard(); render(); } else { view="home"; render(); } };
   bindCard(c);
 }
 function micBlock(c,label){
@@ -488,7 +487,7 @@ function micBlock(c,label){
     <div class="typein"><input id="sayin" type="text" lang="en" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="여기를 누르고 키보드 🎤 로 말해요"><button class="big next" data-act="mic">확인</button></div>
     <div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>
     <button class="linkbtn" data-act="selfsaid">키보드 음성이 안 되면: 아빠한테 말하고 누르기</button>`;
-  return `<button class="mic ${c.st.listening?"on":""}" data-act="mic" aria-label="말하기">🎤</button><div class="hint">${c.st.listening?"듣고 있어요…":label}</div><div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>`;
+  return `<button class="mic ${c.st.listening?"on":""}" data-act="mic" aria-label="말하기">🎤</button><div class="hint">${c.st.listening?"듣고 있어요…":label}</div><div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>${c.st.tries>0&&!c.st.fb&&!c.st.listening?`<div class="again">앗, 다시 한 번 말해 봐요!</div>`:""}`;
 }
 function sayBody(c){
   const it=byId[c.id], step=c.steps[c.st.step];
@@ -497,8 +496,8 @@ function sayBody(c){
   if(step==="speak"){
     if(c.st.fb==="good") return `${tagHTML(c,it)}${picHTML(it)}<div class="feedback good">딩동댕! 정답 ⭐<div class="en">${h(it.text)}</div><button class="big next" data-act="next">계속 →</button></div>`;
     if(c.st.fb==="giveup") return `${tagHTML(c,it)}${picHTML(it)}<div class="feedback bad">이렇게 말하는 거예요<div class="en">${h(it.text)}</div><div class="btns"><button class="big play" data-act="play">🔊 듣기</button><button class="big next" data-act="next">알겠어요 →</button></div></div>`;
-    return `${tagHTML(c,it)}${picHTML(it)}<div class="ko big">${h(it.ko)}</div>${micBlock(c,"마이크를 누르고 영어로 말해 봐요!")}
-      ${c.st.tries>0?`<div class="btns"><button class="big soft" data-act="hint">💡 힌트 듣기</button></div>`:""}`;
+    return `${tagHTML(c,it)}${picHTML(it)}<div class="ko big">${h(it.ko)}</div>${micBlock(c,"마이크를 터치하고 영어로 말해 봐요!")}
+      ${c.st.tries>0?`<div class="btns"><button class="big soft" data-act="hint">🔊 정답 듣기</button></div>`:""}`;
   }
   if(step==="order"){
     const ans=c.st.picked.map((p,k)=>`<button class="tile" data-a="${k}">${h(c.pool[p].w)}</button>`).join("");
@@ -543,7 +542,7 @@ function talkBody(c){
   return `${tag}<div class="chat">${meFirst?"":`<div class="bubble a"><div class="en">${h(A.text)}</div><div class="ko">${h(A.ko)}</div></div>`}
      <div class="bubble ${meFirst?"a":"b"}"><div class="ko big">${h(meSay.ko)}</div><div class="ko">${meFirst?"내가 먼저 말해요":"내 차례!"}</div></div></div>
      ${meFirst?"":`<div class="btns"><button class="big soft" data-act="playA">🔊 다시 듣기</button></div>`}
-     ${micBlock(c,"마이크를 누르고 영어로 말해 봐요!")}${c.st.tries>0?`<div class="btns"><button class="big soft" data-act="hintTalk">💡 힌트 듣기</button></div>`:""}`;
+     ${micBlock(c,"마이크를 터치하고 영어로 말해 봐요!")}${c.st.tries>0?`<div class="btns"><button class="big soft" data-act="hintTalk">🔊 정답 듣기</button></div>`:""}`;
 }
 function pickBody(c){
   const done=c.st.fb;
@@ -612,7 +611,7 @@ async function act(c,a){
       if(c.st.step<c.steps.length-1){ c.st.step++; c.st.fb=null; c.st.tries=0; c.st.heard=""; c.st.auto=false; render(); return; }
       // card done: record once
       if(!L.wrong.has(c.id)&&!L.done.has(c.id)) srs(S.items,c.id,c.st.firstTry); L.done.add(c.id);
-      if(!c.st.firstTry){ L.wrong.add(c.id); if(!L.retried.has(c.id)){ L.retried.add(c.id); L.queue.push({type:"say",id:c.id,fresh:false}); } }
+      if(!c.st.firstTry){ L.wrong.add(c.id); if(!L.retried.has(c.id)){ L.retried.add(c.id); L.queue.push({type:"say",id:c.id,fresh:false}); L.total=L.queue.length; } }
       return advance();
     }
   }
@@ -653,14 +652,15 @@ function checkOrder(c){
   c.st.fb= ok?"good":"bad"; ok?chime():buzz(); render(); playItem(byId[c.id]);
 }
 function advance(){
-  stopAll(); L.i++;
+  stopAll(); L.i++; if(L.i<L.queue.length) saveSession();
   if(L.i>=L.queue.length) return finishLesson();
   enterCard(); render();
 }
 function finishLesson(){
   const today=todayStr(), owned=new Set(S.stickers), choices=STICKERS.filter(s=>!owned.has(s));
   const pick=pickOne(choices.length?choices:STICKERS);
-  if(!S.days[today]){ S.days[today]={sticker:pick,n:L.total,wrong:L.wrong.size}; S.stickers.push(pick); }
+  const wk=curWeek(); S.nextWeek = wk>=S.bookWeek ? 1 : wk+1; S.session=null;
+  if(!S.days[today]){ S.days[today]={sticker:pick,n:L.total,wrong:L.wrong.size,week:wk}; S.stickers.push(pick); }
   save(); view="finish"; render(); chime(true);
 }
 function renderFinish(){
@@ -719,7 +719,7 @@ function renderParent(){
   <div class="panel"><details><summary>전체 문장 보기 (${avail.length}개)</summary><div class="list">${avail.map(row).join("")}</div></details></div>
   <div class="panel"><h3>설정</h3>
     <div class="field"><label for="bw">책 진도</label><select id="bw">${[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n===S.bookWeek?"selected":""}>${n}주차까지</option>`).join("")}</select></div>
-    <div class="field"><label for="nb">하루 새 책 문장</label><select id="nb">${[1,2,3,4].map(n=>`<option ${n===S.newBook?"selected":""}>${n}</option>`).join("")}</select>
+    <div class="field"><label for="nb">오늘(다음) 할 주차</label><select id="nb">${Array.from({length:S.bookWeek},(_,k)=>k+1).map(n=>`<option value="${n}" ${n===curWeek()?"selected":""}>${n}주차</option>`).join("")}</select>
       <label for="nx">누구일까</label><select id="nx">${[0,1,2,3,4,5].map(n=>`<option ${n===(S.whoCount??3)?"selected":""}>${n}</option>`).join("")}</select>
       <label for="rc">복습 최대</label><select id="rc">${[4,6,8,10,12].map(n=>`<option ${n===S.reviewCap?"selected":""}>${n}</option>`).join("")}</select></div>
     <div class="field"><label for="dep">출발일</label><input type="date" id="dep" value="${S.depart}"></div>
@@ -734,7 +734,7 @@ function renderParent(){
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
   app.querySelectorAll("[data-tip]").forEach(b=>b.onclick=()=>{ delete S.tips[b.dataset.tip]; save(); render(); });
   $("bw").onchange=e=>{S.bookWeek=+e.target.value;save();render();};
-  $("nb").onchange=e=>{S.newBook=+e.target.value;save();};
+  $("nb").onchange=e=>{S.nextWeek=+e.target.value;S.session=null;save();};
   $("nx").onchange=e=>{S.whoCount=+e.target.value;save();};
   $("rc").onchange=e=>{S.reviewCap=+e.target.value;save();};
   $("dep").onchange=e=>{ if(e.target.value){S.depart=e.target.value;save();render();} };
