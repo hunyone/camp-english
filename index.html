@@ -203,7 +203,8 @@ function main(DATA){
 const STICKERS = ["🦫","🫎","🐻","🦝","🍁","🦆","🐿️","🦉","🐟","🏕️","🛶","⛺","🌲","🦊","🐺","🐢","🌈","⭐","🧁","🍪","🐋","🦅","🏒","🥞","🚣","🎒","🔦","🌅","🧭","🪵"];
 const INTERVALS = [0,1,2,4,7,14,30];
 const LS_KEY = "cheonilmun-camp-v3";
-const ITEMS = DATA.items, TALKS = DATA.talks;
+const SKIP = new Set(["He doesn't have a bike.", "He doesn't have a dream.", "He doesn't have a plan.", "He doesn't have a sister.", "He's not angry.", "He's not busy.", "He's not hurt.", "He's not kind.", "He's not late.", "He's not nervous.", "He's not popular.", "He's not sleepy.", "He's not sure.", "He's not tired.", "He's not worried.", "Is he brave?", "Is he busy?", "Is he in the bathroom?", "Is he in the classroom?", "Is he in the kitchen?", "Is he kind?", "Is he late?", "Is he popular?", "Is he sleepy?", "Is he sure?", "Is she cute?", "Is she funny?", "Is she hungry?", "Is she in the playground?", "Is she in the room?", "Is she okay?", "Is she ready?", "Is she smart?", "Is she tall?", "Is she thirsty?", "She doesn't have a brother.", "She doesn't have a pet.", "She doesn't have a question.", "She doesn't have a test.", "She doesn't have homework.", "She's not angry.", "She's not funny.", "She's not hungry.", "She's not hurt.", "She's not nervous.", "She's not okay.", "She's not ready.", "She's not smart.", "She's not tall.", "She's not thirsty.", "She's not tired.", "She's not worried."]); // drills dad asked to drop (2026-11-03): one he + one she per sentence
+const ITEMS = DATA.items.filter(i=>!SKIP.has(i.text)), TALKS = DATA.talks;
 const byId = Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const talkById = Object.fromEntries(TALKS.map(t=>[t.id,t]));
 ITEMS.forEach(it=>{ it.src_audio = it.b64 ? "data:audio/mpeg;base64,"+it.b64 : null; delete it.b64; });
