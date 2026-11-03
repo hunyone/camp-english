@@ -251,14 +251,14 @@ function status(s){ if(!s) return "new"; if(s.box>=3&&s.recentWrong===0) return 
 
 // ---------- speech ----------
 const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
-let speechOK = !!SR;
+let speechOK = !!SR, micBusy = false;
 function listenOnce(){
   return new Promise((res)=>{
     if(!speechOK){ const t=(window._typed||"").trim(); res({alts:t?[t]:[]}); return; }
     let done=false; const r=new SR(); r.lang="en-US"; r.interimResults=false; r.maxAlternatives=5;
     const fin=v=>{ if(done) return; done=true; try{r.abort()}catch(e){} res(v); };
-    r.onresult=e=>{ const alts=[]; for(const res0 of e.results) for(const a of res0) alts.push(a.transcript); fin({alts}); };
-    r.onerror=e=>{ if(e.error==="not-allowed"||e.error==="service-not-allowed"||e.error==="audio-capture"){ speechOK=false; } fin({err:e.error}); };
+    r.onresult=e=>{ micBusy=false; const alts=[]; for(const res0 of e.results) for(const a of res0) alts.push(a.transcript); fin({alts}); };
+    r.onerror=e=>{ if(e.error==="not-allowed"||e.error==="service-not-allowed"){ speechOK=false; } micBusy = e.error==="audio-capture"; fin({err:e.error}); };
     r.onend=()=>fin({alts:[]});
     setTimeout(()=>fin({alts:[]}),8000);
     try{ r.start(); }catch(e){ speechOK=false; fin({err:"start"}); }
@@ -489,7 +489,7 @@ function micBlock(c,label){
     <div class="typein"><input id="sayin" type="text" lang="en" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="여기를 누르고 키보드 🎤 로 말해요"><button class="big next" data-act="mic">확인</button></div>
     <div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>
     <button class="linkbtn" data-act="selfsaid">키보드 음성이 안 되면: 아빠한테 말하고 누르기</button>`;
-  return `<button class="mic ${c.st.listening?"on":""}" data-act="mic" aria-label="말하기">🎤</button><div class="hint">${c.st.listening?"듣고 있어요…":label}</div><div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>${c.st.tries>0&&!c.st.fb&&!c.st.listening?`<div class="again">앗, 다시 한 번 말해 봐요!</div>`:""}`;
+  return `<button class="mic ${c.st.listening?"on":""}" data-act="mic" aria-label="말하기">🎤</button><div class="hint">${c.st.listening?"듣고 있어요…":label}</div><div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>${micBusy&&!c.st.listening?`<div class="again">마이크를 다른 앱(줌 등)이 쓰고 있어요. 그 앱을 끄고 다시 눌러 주세요.</div>`:""}${!micBusy&&c.st.tries>0&&!c.st.fb&&!c.st.listening?`<div class="again">앗, 다시 한 번 말해 봐요!</div>`:""}`;
 }
 function sayBody(c){
   const it=byId[c.id], step=c.steps[c.st.step];
@@ -600,7 +600,7 @@ async function act(c,a){
     if(a==="selfsaid"){ c.st.fb="good"; render(); playItem(it); return; }
     if(a==="mic"){ if(c.st.listening) return; c.st.listening=true; c.st.heard=""; render();
       const r=await listenOnce(); c.st.listening=false;
-      if(r.err&&!speechOK){ render(); return; }
+      if((r.err&&!speechOK)||micBusy){ render(); return; }
       const target= step==="answer" ? it.q[c.st.yes?0:1] : it.text;
       c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)";
       const targets= step==="answer" ? [target].concat(it.qfull?[it.qfull[c.st.yes?0:1],(c.st.yes?"Yes, ":"No, ")+it.qfull[c.st.yes?0:1]]:[]) : [target];
@@ -626,7 +626,7 @@ async function act(c,a){
       const mine=c.mode==="sayB"?1:0;
       let ok=true;
       if(a==="mic"){ if(c.st.listening) return; c.st.listening=true; c.st.heard=""; render(); const r=await listenOnce(); c.st.listening=false;
-        if(r.err&&!speechOK){ render(); return; }
+        if((r.err&&!speechOK)||micBusy){ render(); return; }
         c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; ok=!!(r.alts&&matches(t.lines[mine].text,r.alts,true));
         if(!ok){ c.st.tries++; buzz(); if(c.st.tries<3){ render(); return; } } }
       c.st.fb= ok?"good":"giveup"; srs(S.talks,c.id,ok&&c.st.firstTry); ok?chime():null; render();
