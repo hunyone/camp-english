@@ -200,7 +200,7 @@ async function idbSet(k,v){ const db=await idb(); return new Promise((res,rej)=>
 function setupScreen(msg){
   document.getElementById("app").innerHTML=`<div class="gate"><div class="q">💗 서현이 영어 비밀 연구소 준비하기</div>
    <div class="ko">처음 한 번만 하면 돼요. 받아 둔 <b>천일문 음성 파일</b>(cheonilmun-pack.json)을 골라 주세요.</div>
-   <label class="big next" style="cursor:pointer">파일 고르기<input id="packin" type="file" accept=".json,application/json" hidden></label>
+   <label class="big next" style="cursor:pointer">파일 고르기<input id="packin" type="file" hidden></label>
    <div class="err">${msg||""}</div></div>`;
   document.getElementById("packin").onchange=async e=>{
     const f=e.target.files[0]; if(!f) return;
