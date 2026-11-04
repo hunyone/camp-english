@@ -4,9 +4,9 @@
 <style>
 /* Layout: one centered column like a camp notebook; huge tap targets for a tablet held by a 2nd grader. Single bright look by choice. */
 :root{
-  --bg:#EEF3EA; --card:#FFFFFF; --ink:#1E3832; --muted:#5F776E; --line:#D5E0D2;
-  --pine:#2E6A4E; --pine-soft:#DCEBDF; --maple:#D4472A; --maple-soft:#FBE3DC;
-  --sun:#F2B33D; --sun-soft:#FFF1D2; --lake:#3A7CA5; --lake-soft:#DDEDF6;
+  --bg:#F6F1FC; --card:#FFFFFF; --ink:#3B2E55; --muted:#7E7299; --line:#E6DCF4;
+  --pine:#8E6FD0; --pine-soft:#EEE6FB; --maple:#E06A92; --maple-soft:#FDE6EE;
+  --sun:#FFCF6B; --sun-soft:#FFF4D8; --lake:#6F9BE0; --lake-soft:#E4EDFC;
   --he:#2F6FB3; --he-soft:#DCE9F7; --she:#C2457A; --she-soft:#F8DDE8;
   --f-disp:"Jua","Gowun Dodum",system-ui,sans-serif;
   --f-body:"Gowun Dodum","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
@@ -23,14 +23,14 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .brand{font-family:var(--f-disp);font-size:24px;color:var(--pine);display:flex;align-items:center;gap:8px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;padding:4px 0}
 .chips{display:flex;gap:8px;align-items:center}
 .chip{font-family:var(--f-disp);font-size:20px;background:var(--card);border:2px solid var(--line);border-radius:999px;padding:4px 14px;display:flex;gap:6px;align-items:center}
-.mission{background:var(--pine);color:#fff;border-radius:28px;padding:28px 28px 24px;display:grid;gap:14px;position:relative;overflow:hidden}
+.mission{background:linear-gradient(135deg,#A98BE6 0%,#C99BE3 55%,#F2A9C9 100%);color:#fff;border-radius:28px;padding:28px 28px 24px;display:grid;gap:14px;position:relative;overflow:hidden}
 .mission::after{content:"";position:absolute;right:-30px;bottom:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(255,255,255,.12) 0 60%,transparent 61%)}
 .mission h2{font-size:32px}
 .mission .sub{font-size:18px;opacity:.9}
 .mrow{display:flex;gap:10px;flex-wrap:wrap}
 .mpill{background:rgba(255,255,255,.16);border-radius:14px;padding:8px 14px;font-family:var(--f-disp);font-size:19px}
-.go{justify-self:start;background:var(--sun);color:var(--ink);font-family:var(--f-disp);font-size:28px;padding:14px 34px;border-radius:20px;box-shadow:0 5px 0 #C48A1E;position:relative;z-index:1}
-.go:active{transform:translateY(4px);box-shadow:0 1px 0 #C48A1E}
+.go{justify-self:start;background:var(--sun);color:var(--ink);font-family:var(--f-disp);font-size:28px;padding:14px 34px;border-radius:20px;box-shadow:0 5px 0 #D9A63E;position:relative;z-index:1}
+.go:active{transform:translateY(4px);box-shadow:0 1px 0 #D9A63E}
 .done-msg{font-family:var(--f-disp);font-size:22px}
 .section-t{font-family:var(--f-disp);font-size:22px;color:var(--pine);display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .section-t small{font-family:var(--f-body);font-size:15px;color:var(--muted)}
@@ -72,13 +72,13 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .hint{font-family:var(--f-disp);font-size:22px;color:var(--pine)}
 .btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
 .big{font-family:var(--f-disp);font-size:24px;border-radius:22px;padding:16px 28px;display:flex;align-items:center;gap:10px;min-height:68px}
-.play{background:var(--lake);color:#fff;box-shadow:0 5px 0 #285C7C}
+.play{background:var(--lake);color:#fff;box-shadow:0 5px 0 #4F78BC}
 .soft{background:var(--lake-soft);color:var(--lake)}
-.next{background:var(--pine);color:#fff;box-shadow:0 5px 0 #1E4A35}
-.said{background:var(--maple);color:#fff;box-shadow:0 5px 0 #A3331C}
+.next{background:var(--pine);color:#fff;box-shadow:0 5px 0 #6A4FB0}
+.said{background:var(--maple);color:#fff;box-shadow:0 5px 0 #B84870}
 .big:active{transform:translateY(4px);box-shadow:none}
 .big[disabled]{opacity:.35;pointer-events:none}
-.mic{width:150px;height:150px;border-radius:50%;padding:0;display:grid;place-items:center;filter:drop-shadow(0 6px 0 #E7A9BA)}
+.mic{width:150px;height:150px;border-radius:50%;padding:0;display:grid;place-items:center;filter:drop-shadow(0 6px 0 #D9B8EC)}
 .mic svg{width:100%;height:100%;display:block}
 .mic .ear{transform-box:fill-box;transform-origin:50% 10%}
 .mic.on .ear{animation:wig .45s ease-in-out infinite alternate}
@@ -96,8 +96,8 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .wtable td:first-child,.wtable th:first-child{text-align:left}
 .wtable th{color:var(--muted);font-weight:400}
 .wtable tr.cur td{background:var(--sun-soft)}
-.ring{width:110px;height:110px;border-radius:50%;background:var(--lake);color:#fff;font-size:50px;display:grid;place-items:center;box-shadow:0 6px 0 #285C7C}
-@keyframes pulse{0%{box-shadow:0 7px 0 #A3331C,0 0 0 0 rgba(212,71,42,.45)}100%{box-shadow:0 7px 0 #A3331C,0 0 0 28px rgba(212,71,42,0)}}
+.ring{width:110px;height:110px;border-radius:50%;background:var(--lake);color:#fff;font-size:50px;display:grid;place-items:center;box-shadow:0 6px 0 #4F78BC}
+@keyframes pulse{0%{box-shadow:0 7px 0 #B84870,0 0 0 0 rgba(212,71,42,.45)}100%{box-shadow:0 7px 0 #B84870,0 0 0 28px rgba(212,71,42,0)}}
 .typein{display:flex;gap:10px;width:100%;max-width:620px}
 .typein input{flex:1;min-width:0;font-family:var(--f-en);font-size:26px;padding:12px 16px;border:3px solid var(--lake);border-radius:18px;background:var(--card);color:var(--ink)}
 .linkbtn{font-size:15px;color:var(--muted);text-decoration:underline}
@@ -188,6 +188,22 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 details summary{cursor:pointer;color:var(--pine);font-family:var(--f-disp);font-size:18px}
 @media (max-width:520px){.mission h2{font-size:26px}.pic{font-size:70px}.row{grid-template-columns:auto 1fr auto}.row .pill{display:none}.tile{font-size:24px;padding:6px 14px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.card [data-act="next"]{display:none!important}
+.mission.done{text-align:center;justify-items:center}
+.mission .spark{font-size:30px;letter-spacing:6px;animation:twinkle 1.4s ease-in-out infinite alternate}
+.donerow{display:flex;align-items:center;gap:16px;justify-content:center;flex-wrap:wrap}
+.donestk{font-size:72px;line-height:1;background:rgba(255,255,255,.25);border-radius:24px;padding:8px 14px;animation:pop .7s cubic-bezier(.3,1.6,.5,1)}
+.done-msg{text-align:left}
+@keyframes twinkle{from{opacity:.55;transform:scale(.95)}to{opacity:1;transform:scale(1.06)}}
+.finish{background:linear-gradient(180deg,#FFFFFF 0%,#F7EEFF 100%)}
+.finish .crown{font-size:44px;letter-spacing:8px;animation:twinkle 1s ease-in-out infinite alternate}
+.finish .bigsticker{font-size:150px;animation:pop .8s cubic-bezier(.3,1.6,.5,1),wiggle 1.6s ease-in-out .8s infinite}
+.finish h2{font-size:42px;color:var(--pine)}
+.finish .cheer{font-family:var(--f-disp);font-size:26px;color:var(--maple)}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
+.confetti i{position:absolute;top:-24px;border-radius:3px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 </style>
 
 <div class="wrap" id="app"></div>
@@ -227,7 +243,7 @@ ITEMS.forEach(it=>{ it.src_audio = it.b64 ? "data:audio/mpeg;base64,"+it.b64 : n
 TALKS.forEach(t=>t.lines.forEach(l=>{ l.src_audio = l.b64 ? "data:audio/mpeg;base64,"+l.b64 : null; delete l.b64; }));
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
-const LIMIT=7000;
+const LIMIT=15000;
 const TTS = DATA.tts||{};
 
 // ---------- state ----------
@@ -266,6 +282,7 @@ function srs(store,id,ok){
   else { s.box=1; s.wrong++; s.recentWrong=2; }
   s.due=addDays(today,INTERVALS[s.box]); store[id]=s; save();
 }
+function logHeard(text,alts,ok){ S.heardLog=(S.heardLog||[]); S.heardLog.unshift({d:todayStr(),t:text,h:(alts||[]).slice(0,3).join(" / ")||"(못 들음)",ok}); S.heardLog=S.heardLog.slice(0,80); save(); }
 function status(s){ if(!s) return "new"; if(s.box>=3&&s.recentWrong===0) return "know"; if(s.wrong>0&&s.recentWrong>0) return "weak"; return "learn"; }
 
 // ---------- speech ----------
@@ -291,10 +308,23 @@ function lcs(a,b){ const d=Array(b.length+1).fill(0); for(const x of a){ let pre
 const KEY=new Set(["i","you","he","she","this","that","it","there","we","they"]);
 const NEG=new Set(["not","no"]);
 const QSTART=new Set(["is","are","am","do","does","can","where","who","how","what"]);
+const PRON_FILL=new Set(["hey","hee","hi","a","the","e","uh","ah","eh","it","her","his","see","sea","shi","shee","c","g"]);
+// A child's "he"/"she" is often heard as hey, a, the... or dropped. Only the OTHER pronoun counts as wrong.
+function fixPron(T,H){
+  if(T.includes("he")||T.includes("she")) H=H.join(" ").replace(/\beasy\b/g,"is he").replace(/\bissue\b/g,"is she").replace(/\bdizzy\b/g,"does he").split(" ").filter(Boolean);
+  for(const [p,o] of [["he","she"],["she","he"]]){
+    if(!T.includes(p)||H.includes(p)||H.includes(o)) continue;
+    H=[...H]; const j=H.findIndex(w=>PRON_FILL.has(w)&&!T.includes(w));
+    if(j>=0) H[j]=p; else H.splice(Math.min(T.indexOf(p),H.length),0,p);
+  }
+  for(const p of ["he","she"]){ const ti=T.indexOf(p), hi=H.indexOf(p); // "he's" heard as "hey" swallows the "is"
+    if(ti>=0&&hi>=0&&T[ti+1]==="is"&&H[hi+1]!=="is"&&H[hi-1]!=="is") H=[...H.slice(0,hi+1),"is",...H.slice(hi+1)]; }
+  return H;
+}
 function matches(target,alts,allowIt){
   let T=toks(target);
   for(const alt of alts){
-    let H=toks(alt);
+    let H=fixPron(T,toks(alt));
     if(allowIt) H=H.map(w=>w==="it"&&T.includes("that")?"that":w);
     const tol = T.length>=5?1:0;
     if(lcs(T,H) < T.length-tol) continue;
@@ -368,7 +398,12 @@ function weekRange(w){ const b=ITEMS.filter(i=>i.src==="book"&&i.week===w&&i.day
 function buildQueue(wArg){
   const w=wArg||curWeek(), q=[];
   const book=ITEMS.filter(i=>i.src==="book"&&i.week===w);
-  book.forEach(it=>{ q.push({type:"say",id:it.id,fresh:true}); ITEMS.filter(d=>d.src==="drill"&&d.base===it.id).forEach(d=>q.push({type:"say",id:d.id,fresh:true})); });
+  const pass=(S.weekPass||{})[w]||0;
+  book.forEach((it,k)=>{ q.push({type:"say",id:it.id,fresh:true});
+    const D=ITEMS.filter(d=>d.src==="drill"&&d.base===it.id), X=D.filter(d=>/x\d+$/.test(d.id)), N=D.filter(d=>!/x\d+$/.test(d.id));
+    const pick=[]; for(let j=0;j<Math.min(2,N.length);j++) pick.push(N[(k+pass*2+j)%N.length]);
+    if(X.length) pick.push(X[(k+pass)%X.length]);
+    N.filter(d=>pick.includes(d)).concat(X.filter(d=>pick.includes(d))).forEach(d=>q.push({type:"say",id:d.id,fresh:true})); });
   const hsPool=ITEMS.filter(i=>i.week===w&&(i.who===HE||i.who===SHE)&&/^(he|she|is he|is she|does he|does she)\b/i.test(i.text));
   shuffle(hsPool).slice(0,S.whoCount??3).forEach(x=>q.push({type:"pick",kind:"hs",id:x.id}));
   if(w===5){ const tt=ITEMS.filter(i=>i.week===5&&!i.q&&/^(This|That) is/.test(i.text)); if(tt.length) q.push({type:"pick",kind:"tt",id:pickOne(tt).id}); }
@@ -404,7 +439,7 @@ function renderHome(){
   const nb=n(c=>c.type==="say"&&c.fresh&&byId[c.id].src==="book"), nx=n(c=>c.type==="say"&&c.fresh&&byId[c.id].src==="bonus"), nr=n(c=>c.type==="say"&&!c.fresh), nt=n(c=>c.type==="talk");
   const mins=Math.round(nb*1.1+nx*1.1+nr*.7+nt*1.5+n(c=>c.type==="pick")*.3);
   let mission;
-  if(doneToday()) mission=`<div class="mission"><h2>오늘 미션 끝! 🎉</h2><div class="done-msg">내일 또 만나요. 스티커 ${h(S.days[today].sticker)} 받았어요!</div><div class="sub">오늘 배운 문장을 아빠한테 영어로 말해 봐요.</div></div>`;
+  if(doneToday()) mission=`<div class="mission done"><div class="spark" aria-hidden="true">✨ 🌟 ✨</div><h2>야호! 오늘 미션 성공! 🎉</h2><div class="donerow"><span class="donestk">${h(S.days[today].sticker)}</span><div class="done-msg">새 스티커를 받았어요!<br>서현이 최고! 💜 내일 또 만나요</div></div><div class="sub">오늘 배운 문장을 아빠한테 영어로 자랑해 봐요.</div></div>`;
   else if(!q.some(c=>c.type!=="tip")) mission=`<div class="mission"><h2>오늘은 할 게 없어요</h2><div class="sub">내일 다시 와요!</div></div>`;
   else {
     const w=curWeek(), ss=S.session, resume=ss&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
@@ -639,7 +674,7 @@ async function act(c,a){
     if(a==="play") return playItem(it);
     if(a==="playq") return playSrc("q",null,it.text);
     if(a==="hint"){ c.st.firstTry=false; return playItem(it); }
-    if(a==="selfsaid"){ c.st.fb="good"; render(); playItem(it); return; }
+    if(a==="selfsaid"){ c.st.fb="good"; render(); autoNext(c,playItem(it)); return; }
     if(a==="mic"){ if(c.st.listening||c.st.fb) return; if(!c.st.t0) c.st.t0=Date.now()+300; c.st.listening=true; render();
       const r=await listenOnce();
       if(cur()!==c||c.st.fb==="timeout"||view!=="lesson") return; c.st.listening=false;
@@ -647,7 +682,8 @@ async function act(c,a){
       const target= step==="answer" ? it.q[c.st.yes?0:1] : it.text;
       c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)";
       const targets= step==="answer" ? [target].concat(it.qfull?[it.qfull[c.st.yes?0:1],(c.st.yes?"Yes, ":"No, ")+it.qfull[c.st.yes?0:1]]:[]) : [target];
-      if(r.alts&&targets.some(tg=>matches(tg,r.alts,it.week===6))){ c.st.fb="good"; chime(); render(); autoNext(c,new Promise(r=>setTimeout(r,350)).then(()=>playItem(it))); return; }
+      const okSay=!!(r.alts&&targets.some(tg=>matches(tg,r.alts,it.week===6))); if(r.alts&&r.alts.length) logHeard(it.text,r.alts,okSay);
+      if(okSay){ c.st.fb="good"; chime(); render(); autoNext(c,new Promise(r=>setTimeout(r,350)).then(()=>playItem(it))); return; }
       if(r.alts&&r.alts.length){ c.st.tries++; buzz(); }
       render();
       if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&(!c.st.t0||Date.now()-c.st.t0<LIMIT-1200)) act(c,"mic"); },700);
@@ -672,7 +708,7 @@ async function act(c,a){
       if(a==="mic"){ if(c.st.listening||c.st.fb) return; if(!c.st.t0) c.st.t0=Date.now()+300; c.st.listening=true; render(); const r=await listenOnce();
         if(cur()!==c||c.st.fb==="timeout"||view!=="lesson") return; c.st.listening=false;
         if((r.err&&!speechOK)||micBusy){ render(); return; }
-        c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; ok=!!(r.alts&&matches(t.lines[mine].text,r.alts,true));
+        c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; ok=!!(r.alts&&matches(t.lines[mine].text,r.alts,true)); if(r.alts&&r.alts.length) logHeard(t.lines[mine].text,r.alts,ok);
         if(!ok){ if(r.alts&&r.alts.length){ c.st.tries++; buzz(); } render();
           if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&(!c.st.t0||Date.now()-c.st.t0<LIMIT-1200)) act(c,"mic"); },700);
           return; } }
@@ -708,14 +744,24 @@ function advance(){
 function finishLesson(){
   const today=todayStr(), owned=new Set(S.stickers), choices=STICKERS.filter(s=>!owned.has(s));
   const pick=pickOne(choices.length?choices:STICKERS);
-  const wk=curWeek(); S.nextWeek = wk>=S.bookWeek ? 1 : wk+1; S.session=null;
+  const wk=curWeek(); S.nextWeek = wk>=S.bookWeek ? 1 : wk+1; S.session=null; S.weekPass=S.weekPass||{}; S.weekPass[wk]=(S.weekPass[wk]||0)+1;
   const secs=Math.round(elapsed()/1000);
   if(!S.days[today]){ S.days[today]={sticker:pick,n:L.total,wrong:L.wrong.size,week:wk,secs}; S.stickers.push(pick); }
-  save(); view="finish"; render(); chime(true);
+  save(); view="finish"; render(); fanfare();
 }
+function confetti(){
+  const box=document.createElement("div"); box.className="confetti"; const C=["#A98BE6","#F2A9C9","#FFCF6B","#8FD3C1","#6F9BE0","#FF9DB5"];
+  for(let i=0;i<70;i++){ const p=document.createElement("i"); p.style.left=Math.random()*100+"%"; p.style.background=C[i%C.length];
+    p.style.animationDelay=(Math.random()*1.2)+"s"; p.style.animationDuration=(2.4+Math.random()*1.8)+"s"; p.style.width=p.style.height=(8+Math.random()*8)+"px"; if(i%3===0) p.style.borderRadius="50%"; box.appendChild(p); }
+  document.body.appendChild(box); setTimeout(()=>box.remove(),5000);
+}
+function fanfare(){ try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C()); if(c.state==="suspended") c.resume();
+  [[523,0],[659,.12],[784,.24],[1047,.36],[784,.52],[1047,.64]].forEach(([f,d])=>{ const o=c.createOscillator(),g=c.createGain(); o.type="triangle"; o.frequency.value=f; const t=c.currentTime+d;
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.3,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+(d>.6?.6:.22)); o.connect(g).connect(c.destination); o.start(t); o.stop(t+.7); }); }catch(e){} }
 function renderFinish(){
   const d=S.days[todayStr()];
-  app.innerHTML=`<div class="finish"><div class="bigsticker">${h(d.sticker)}</div><h2>미션 성공!</h2><div class="ko">오늘 ${d.n}개를 연습했어요${d.secs?` (${Math.floor(d.secs/60)}분 ${d.secs%60}초)`:""}. 🔥 ${streak()}일 연속!</div><button class="big next" id="home">스티커 붙이러 가기</button></div>`;
+  app.innerHTML=`<div class="finish"><div class="crown">🎉 👑 🎉</div><div class="bigsticker">${h(d.sticker)}</div><h2>야호! 미션 성공!</h2><div class="cheer">서현이 정말 대단해요! 💜</div><div class="ko">오늘 ${d.n}개를 연습했어요${d.secs?` (${Math.floor(d.secs/60)}분 ${d.secs%60}초)`:""}. 🔥 ${streak()}일 연속!</div><button class="big next" id="home">스티커 붙이러 가기 ✨</button></div>`;
+  confetti();
   document.getElementById("home").onclick=()=>{view="home";render();};
 }
 
@@ -772,6 +818,7 @@ function renderParent(){
   <div class="panel"><h3>책 문장 (${S.bookWeek}주차까지 ${tb}개)</h3>${bar(cb,tb)}</div>
   <div class="panel"><h3>바꿔 말하기 문장 (${tx}개: 의문문, 부정문, he/she)</h3>${bar(cx,tx)}<div class="note">한 번도 안 틀리고 세 번 넘게 맞히면 "아는 문장"이 돼요.</div></div>
   <div class="panel"><h3>자주 틀리는 문장 <span class="note">저녁에 이것만 한두 개 같이 말해 보세요</span></h3><div class="list">${weak.length?weak.map(row).join(""):`<div class="note">아직 틀린 문장이 없어요.</div>`}</div></div>
+  <div class="panel"><details><summary>앱이 들은 말 (최근 ${Math.min(30,(S.heardLog||[]).length)}개)</summary><div class="note">❌는 틀렸다고 나온 것. 서현이가 맞게 말했는데 ❌라면 이 화면을 찍어서 보내 주세요.</div><div class="list">${(S.heardLog||[]).slice(0,30).map(x=>`<div class="row" style="grid-template-columns:auto 1fr"><span>${x.ok?"⭕":"❌"}</span><div class="t">${h(x.t)}<small>들은 말: ${h(x.h)} · ${x.d.slice(5)}</small></div></div>`).join("")||`<div class="note">아직 없어요.</div>`}</div></details></div>
   <div class="panel"><h3>최근 4주</h3><div class="cal">${cells.join("")}</div></div>
   <div class="panel"><details><summary>전체 문장 보기 (${avail.length}개)</summary><div class="list">${avail.map(row).join("")}</div></details></div>
   <div class="panel"><h3>설정</h3>
@@ -803,8 +850,9 @@ function renderParent(){
   if($("nores")) $("nores").onclick=()=>{confirmReset=false;render();};
 }
 render();
-window._dbg={get S(){return S},get L(){return L},render:()=>render(),save:()=>save(),setView:v=>{view=v;render();},get view(){return view}};
+window._dbg={matches,buildQueue,finishLesson,get S(){return S},get L(){return L},render:()=>render(),save:()=>save(),setView:v=>{view=v;render();},get view(){return view}};
 }
 </script>
+
 
 </body></html>
