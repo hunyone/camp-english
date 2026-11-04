@@ -78,15 +78,31 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .said{background:var(--maple);color:#fff;box-shadow:0 5px 0 #A3331C}
 .big:active{transform:translateY(4px);box-shadow:none}
 .big[disabled]{opacity:.35;pointer-events:none}
-.mic{width:132px;height:132px;border-radius:50%;background:var(--maple);color:#fff;font-size:56px;display:grid;place-items:center;box-shadow:0 7px 0 #A3331C}
-.mic.on{animation:pulse 1s ease-out infinite;background:#E2553A}
+.mic{width:150px;height:150px;border-radius:50%;padding:0;display:grid;place-items:center;filter:drop-shadow(0 6px 0 #E7A9BA)}
+.mic svg{width:100%;height:100%;display:block}
+.mic .ear{transform-box:fill-box;transform-origin:50% 10%}
+.mic.on .ear{animation:wig .45s ease-in-out infinite alternate}
+.mic.on .ear.r{animation-delay:.15s}
+.mic.on{animation:bob 1s ease-in-out infinite}
+@keyframes wig{from{transform:rotate(-10deg)}to{transform:rotate(12deg)}}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.timer{width:100%;max-width:520px;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+.timer i{display:block;height:100%;width:0;background:var(--sun);border-radius:999px}
+.timer.late i{background:var(--maple)}
+.clock{font-family:var(--f-en);font-weight:600;font-size:18px;color:var(--muted);background:var(--card);border:2px solid var(--line);border-radius:999px;padding:2px 12px;white-space:nowrap}
+.timeout{font-family:var(--f-en);font-weight:700;font-size:44px;color:var(--maple)}
+.wtable{width:100%;border-collapse:collapse;font-size:16px}
+.wtable td,.wtable th{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right;font-variant-numeric:tabular-nums}
+.wtable td:first-child,.wtable th:first-child{text-align:left}
+.wtable th{color:var(--muted);font-weight:400}
+.wtable tr.cur td{background:var(--sun-soft)}
 .ring{width:110px;height:110px;border-radius:50%;background:var(--lake);color:#fff;font-size:50px;display:grid;place-items:center;box-shadow:0 6px 0 #285C7C}
 @keyframes pulse{0%{box-shadow:0 7px 0 #A3331C,0 0 0 0 rgba(212,71,42,.45)}100%{box-shadow:0 7px 0 #A3331C,0 0 0 28px rgba(212,71,42,0)}}
 .typein{display:flex;gap:10px;width:100%;max-width:620px}
 .typein input{flex:1;min-width:0;font-family:var(--f-en);font-size:26px;padding:12px 16px;border:3px solid var(--lake);border-radius:18px;background:var(--card);color:var(--ink)}
 .linkbtn{font-size:15px;color:var(--muted);text-decoration:underline}
-.heard{font-size:18px;color:var(--muted);min-height:27px}
-.heard b{font-family:var(--f-en);font-weight:500;color:var(--ink)}
+.heard{font-size:22px;color:var(--muted);min-height:40px}
+.heard b{font-family:var(--f-en);font-weight:600;font-size:32px;color:var(--ink)}
 .answer{min-height:78px;width:100%;border-bottom:3px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;padding-bottom:10px}
 .pool{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
 .tile{font-family:var(--f-en);font-weight:600;font-size:30px;background:var(--card);border:3px solid var(--line);border-bottom-width:6px;border-radius:18px;padding:8px 20px;min-height:64px;min-width:56px}
@@ -182,13 +198,13 @@ function idb(){ return new Promise((res,rej)=>{ const r=indexedDB.open(PACK_DB,1
 async function idbGet(k){ const db=await idb(); return new Promise(res=>{ const t=db.transaction("kv").objectStore("kv").get(k); t.onsuccess=()=>res(t.result); t.onerror=()=>res(null); }); }
 async function idbSet(k,v){ const db=await idb(); return new Promise((res,rej)=>{ const t=db.transaction("kv","readwrite"); t.objectStore("kv").put(v,k); t.oncomplete=res; t.onerror=()=>rej(t.error); }); }
 function setupScreen(msg){
-  document.getElementById("app").innerHTML=`<div class="gate"><div class="q">🍁 서현이 영어 비밀 연구소 준비하기</div>
+  document.getElementById("app").innerHTML=`<div class="gate"><div class="q">💗 서현이 영어 비밀 연구소 준비하기</div>
    <div class="ko">처음 한 번만 하면 돼요. 받아 둔 <b>천일문 음성 파일</b>(cheonilmun-pack.json)을 골라 주세요.</div>
    <label class="big next" style="cursor:pointer">파일 고르기<input id="packin" type="file" accept=".json,application/json" hidden></label>
    <div class="err">${msg||""}</div></div>`;
   document.getElementById("packin").onchange=async e=>{
     const f=e.target.files[0]; if(!f) return;
-    try{ const txt=await f.text(); const d=JSON.parse(txt); if(!d.items||!d.talks) throw 0; if((d.v||0)<5){ setupScreen("예전 파일이에요. 새로 받은 cheonilmun-pack.json 파일을 골라 주세요."); return; } try{ await idbSet("pack",txt); }catch(_){} main(d); }
+    try{ const txt=await f.text(); const d=JSON.parse(txt); if(!d.items||!d.talks) throw 0; if((d.v||0)<6){ setupScreen("예전 파일이에요. 새로 받은 cheonilmun-pack.json 파일을 골라 주세요."); return; } try{ await idbSet("pack",txt); }catch(_){} main(d); }
     catch(_){ setupScreen("이 파일이 아니에요. cheonilmun-pack.json 파일을 골라 주세요."); }
   };
 }
@@ -196,11 +212,11 @@ function setupScreen(msg){
   const EMBED = null;
   if(EMBED){ main(EMBED); return; }
   let txt=null; try{ txt=await idbGet("pack"); }catch(e){}
-  if(txt){ try{ const d=JSON.parse(txt); if((d.v||0)>=5){ main(d); return; } setupScreen("앱이 새로 바뀌었어요. 새로 받은 cheonilmun-pack.json 파일을 한 번만 다시 골라 주세요."); return; }catch(e){} }
+  if(txt){ try{ const d=JSON.parse(txt); if((d.v||0)>=6){ main(d); return; } setupScreen("앱이 새로 바뀌었어요. 새로 받은 cheonilmun-pack.json 파일을 한 번만 다시 골라 주세요."); return; }catch(e){} }
   setupScreen();
 })();
 function main(DATA){
-const STICKERS = ["🦫","🫎","🐻","🦝","🍁","🦆","🐿️","🦉","🐟","🏕️","🛶","⛺","🌲","🦊","🐺","🐢","🌈","⭐","🧁","🍪","🐋","🦅","🏒","🥞","🚣","🎒","🔦","🌅","🧭","🪵"];
+const STICKERS = ["🐰","🧁","🦄","💗","🐼","🍓","🌈","🌸","🐥","👑","🐱","🍰","🧚","💖","🐶","🍩","🪄","🌷","🐹","🍭","👸","💕","🐨","🍦","🎀","🌼","🦋","🍒","⭐","🎂"];
 const INTERVALS = [0,1,2,4,7,14,30];
 const LS_KEY = "cheonilmun-camp-v3";
 const SKIP = new Set(["He doesn't have a bike.", "He doesn't have a dream.", "He doesn't have a plan.", "He doesn't have a sister.", "He's not angry.", "He's not busy.", "He's not hurt.", "He's not kind.", "He's not late.", "He's not nervous.", "He's not popular.", "He's not sleepy.", "He's not sure.", "He's not tired.", "He's not worried.", "Is he brave?", "Is he busy?", "Is he in the bathroom?", "Is he in the classroom?", "Is he in the kitchen?", "Is he kind?", "Is he late?", "Is he popular?", "Is he sleepy?", "Is he sure?", "Is she cute?", "Is she funny?", "Is she hungry?", "Is she in the playground?", "Is she in the room?", "Is she okay?", "Is she ready?", "Is she smart?", "Is she tall?", "Is she thirsty?", "She doesn't have a brother.", "She doesn't have a pet.", "She doesn't have a question.", "She doesn't have a test.", "She doesn't have homework.", "She's not angry.", "She's not funny.", "She's not hungry.", "She's not hurt.", "She's not nervous.", "She's not okay.", "She's not ready.", "She's not smart.", "She's not tall.", "She's not thirsty.", "She's not tired.", "She's not worried."]); // drills dad asked to drop (2026-11-03): one he + one she per sentence
@@ -210,6 +226,9 @@ const talkById = Object.fromEntries(TALKS.map(t=>[t.id,t]));
 ITEMS.forEach(it=>{ it.src_audio = it.b64 ? "data:audio/mpeg;base64,"+it.b64 : null; delete it.b64; });
 TALKS.forEach(t=>t.lines.forEach(l=>{ l.src_audio = l.b64 ? "data:audio/mpeg;base64,"+l.b64 : null; delete l.b64; }));
 const HE="👦", SHE="👧";
+const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
+const LIMIT=7000;
+const TTS = DATA.tts||{};
 
 // ---------- state ----------
 function blank(){ return {v:2, items:{}, talks:{}, days:{}, stickers:[], tips:{}, bookWeek:7, newBook:2, whoCount:3, reviewCap:6, depart:"2027-07-01", offset:0, pin:null, updatedAt:0}; }
@@ -252,11 +271,13 @@ function status(s){ if(!s) return "new"; if(s.box>=3&&s.recentWrong===0) return 
 // ---------- speech ----------
 const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
 let speechOK = !!SR, micBusy = false;
-function listenOnce(){
+let curRec=null;
+function listenOnce(onStart){
   return new Promise((res)=>{
     if(!speechOK){ const t=(window._typed||"").trim(); res({alts:t?[t]:[]}); return; }
     let done=false; const r=new SR(); r.lang="en-US"; r.interimResults=false; r.maxAlternatives=5;
-    const fin=v=>{ if(done) return; done=true; try{r.abort()}catch(e){} res(v); };
+    const fin=v=>{ if(done) return; done=true; curRec=null; try{r.abort()}catch(e){} res(v); };
+    curRec={stop:()=>fin({alts:[],aborted:true})}; r.onstart=()=>{ onStart&&onStart(); };
     r.onresult=e=>{ micBusy=false; const alts=[]; for(const res0 of e.results) for(const a of res0) alts.push(a.transcript); fin({alts}); };
     r.onerror=e=>{ if(e.error==="not-allowed"||e.error==="service-not-allowed"){ speechOK=false; } micBusy = e.error==="audio-capture"; fin({err:e.error}); };
     r.onend=()=>fin({alts:[]});
@@ -264,7 +285,7 @@ function listenOnce(){
     try{ r.start(); }catch(e){ speechOK=false; fin({err:"start"}); }
   });
 }
-const EXP=[[/\bi'm\b/g,"i am"],[/\byou're\b/g,"you are"],[/\bhe's\b/g,"he is"],[/\bshe's\b/g,"she is"],[/\bthat's\b/g,"that is"],[/\bit's\b/g,"it is"],[/\bthere's\b/g,"there is"],[/\bisn't\b/g,"is not"],[/\baren't\b/g,"are not"],[/\bdon't\b/g,"do not"],[/\bdoesn't\b/g,"does not"],[/\blet's\b/g,"let us"],[/\bim\b/g,"i am"],[/\bokay\b|\bok\b/g,"okay"]];
+const EXP=[[/\bi'm\b/g,"i am"],[/\byou're\b/g,"you are"],[/\bhe's\b/g,"he is"],[/\bshe's\b/g,"she is"],[/\bthat's\b/g,"that is"],[/\bit's\b/g,"it is"],[/\bthere's\b/g,"there is"],[/\bisn't\b/g,"is not"],[/\baren't\b/g,"are not"],[/\bdon't\b/g,"do not"],[/\bdoesn't\b/g,"does not"],[/\blet's\b/g,"let us"],[/\bim\b/g,"i am"],[/\b(see|sea|shi|shee)\b/g,"she"],[/\b(hi|hee)\b/g,"he"],[/\bhis\b/g,"he is"],[/\bshes\b/g,"she is"],[/\bhes\b/g,"he is"],[/\bokay\b|\bok\b/g,"okay"]];
 function toks(s){ s=" "+s.toLowerCase().replace(/[’]/g,"'")+" "; s=s.replace(/[^a-z' ]/g," "); for(const [a,b] of EXP) s=s.replace(a,b); return s.replace(/\s+/g," ").trim().split(" ").filter(Boolean); }
 function lcs(a,b){ const d=Array(b.length+1).fill(0); for(const x of a){ let prev=0; for(let j=1;j<=b.length;j++){ const t=d[j]; d[j]= x===b[j-1]? prev+1 : Math.max(d[j],d[j-1]); prev=t; } } return d[b.length]; }
 const KEY=new Set(["i","you","he","she","this","that","it","there","we","they"]);
@@ -289,9 +310,10 @@ function matches(target,alts,allowIt){
 // ---------- audio ----------
 const audioCache={};
 let voices=[]; function loadVoices(){ try{ voices=speechSynthesis.getVoices(); }catch(e){} } loadVoices(); try{ speechSynthesis.onvoiceschanged=loadVoices; }catch(e){}
-function stopAll(){ Object.values(audioCache).forEach(a=>{try{a.pause()}catch(e){}}); try{speechSynthesis.cancel()}catch(e){} }
+function stopAll(){ if(curRec) curRec.stop(); Object.values(audioCache).forEach(a=>{try{a.pause()}catch(e){}}); try{speechSynthesis.cancel()}catch(e){} }
 function playSrc(key,src,text,role){
   stopAll();
+  if(!src && TTS[text]){ src="data:audio/mpeg;base64,"+TTS[text]; key="t:"+text; }
   if(src){ const a=audioCache[key]||(audioCache[key]=new Audio(src)); a.currentTime=0;
     return new Promise(res=>{ a.onended=res; a.play().catch(res); setTimeout(res,6000); }); }
   return new Promise(res=>{
@@ -307,8 +329,9 @@ function chime(big){ try{ const C=window.AudioContext||window.webkitAudioContext
   (big?[523,659,784,1047]:[659,988]).forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.frequency.value=f; const t=c.currentTime+i*.11;
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.25,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.35); o.connect(g).connect(c.destination); o.start(t); o.stop(t+.4); }); }catch(e){} }
 function buzz(){ try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C()); if(c.state==="suspended") c.resume();
-  [[392,0],[294,.16]].forEach(([f,d])=>{ const o=c.createOscillator(),g=c.createGain(); o.type="sine"; o.frequency.value=f; const t=c.currentTime+d;
-    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.35,t+.03); g.gain.exponentialRampToValueAtTime(.0001,t+.32); o.connect(g).connect(c.destination); o.start(t); o.stop(t+.35); }); }catch(e){} }
+  [[420,300,0,.12],[360,760,.14,.28]].forEach(([f0,f1,d,dur])=>{ const o=c.createOscillator(),g=c.createGain(); o.type="triangle"; const t=c.currentTime+d;
+    o.frequency.setValueAtTime(f0,t); o.frequency.exponentialRampToValueAtTime(f1,t+dur);
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.35,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+dur); o.connect(g).connect(c.destination); o.start(t); o.stop(t+dur+.02); }); }catch(e){} }
 
 // ---------- tips (what dad found hard to explain) ----------
 const TIPS = {
@@ -342,14 +365,14 @@ function curWeek(){ let w=S.nextWeek||1; if(w>S.bookWeek||w<1) w=1; return w; }
 function weekRange(w){ const b=ITEMS.filter(i=>i.src==="book"&&i.week===w&&i.day); if(!b.length) return ""; const lo=Math.min(...b.map(i=>i.day)), d0=b.find(i=>i.day===lo).date;
   const m=d0.match(/(\d+)월 (\d+)일/); let end=""; if(m){ const dt=new Date(2026,+m[1]-1,+m[2]+6); end=`${dt.getMonth()+1}월 ${dt.getDate()}일`; }
   return `책 Day ${lo} ~ Day ${lo+6} (${d0} ~ ${end})`; }
-function buildQueue(){
-  const w=curWeek(), q=[];
+function buildQueue(wArg){
+  const w=wArg||curWeek(), q=[];
   const book=ITEMS.filter(i=>i.src==="book"&&i.week===w);
   book.forEach(it=>{ q.push({type:"say",id:it.id,fresh:true}); ITEMS.filter(d=>d.src==="drill"&&d.base===it.id).forEach(d=>q.push({type:"say",id:d.id,fresh:true})); });
   const hsPool=ITEMS.filter(i=>i.week===w&&(i.who===HE||i.who===SHE)&&/^(he|she|is he|is she|does he|does she)\b/i.test(i.text));
   shuffle(hsPool).slice(0,S.whoCount??3).forEach(x=>q.push({type:"pick",kind:"hs",id:x.id}));
   if(w===5){ const tt=ITEMS.filter(i=>i.week===5&&!i.q&&/^(This|That) is/.test(i.text)); if(tt.length) q.push({type:"pick",kind:"tt",id:pickOne(tt).id}); }
-  const weak=ITEMS.filter(i=>i.week!==w&&S.items[i.id]&&S.items[i.id].recentWrong>0).slice(0,S.reviewCap);
+  const weak=wArg?[]:ITEMS.filter(i=>i.week!==w&&S.items[i.id]&&S.items[i.id].recentWrong>0).slice(0,S.reviewCap);
   weak.forEach(it=>q.push({type:"say",id:it.id,fresh:false}));
   TALKS.filter(t=>t.week===w).forEach(t=>q.push({type:"talk",id:t.id}));
   return q;
@@ -365,7 +388,7 @@ function render(){
   if(render.last!==view){ window.scrollTo(0,0); render.last=view; }
 }
 function topBar(){
-  return `<div class="top"><div class="brand" id="logo">🍁 서현이 영어 비밀 연구소!</div>
+  return `<div class="top"><div class="brand" id="logo">💗 서현이 영어 비밀 연구소!</div>
   <div class="chips"><span class="chip">🔥 ${streak()}</span><span class="chip">⭐ ${S.stickers.length}</span></div></div>`;
 }
 function bindLogo(){
@@ -398,11 +421,13 @@ function renderHome(){
   bindLogo(); const s=document.getElementById("start"); if(s) s.onclick=startLesson;
 }
 
-function saveSession(){ S.session={date:todayStr(),week:curWeek(),i:L.i,queue:L.queue.map(c=>({type:c.type,id:c.id,kind:c.kind,fresh:c.fresh}))}; save(); }
+function elapsed(){ return L? L.base+(Date.now()-L.tStart) : 0; }
+function mmss(ms){ const s=Math.floor(ms/1000); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+function saveSession(){ S.session={date:todayStr(),week:curWeek(),i:L.i,elapsed:elapsed(),queue:L.queue.map(c=>({type:c.type,id:c.id,kind:c.kind,fresh:c.fresh}))}; save(); }
 function startLesson(){
   const ss=S.session, resume=ss&&ss.date===todayStr()&&ss.week===curWeek()&&ss.i<ss.queue.length;
   const queue=resume?ss.queue:buildQueue();
-  L={queue,i:resume?ss.i:0,total:queue.length,wrong:new Set(),retried:new Set(),done:new Set()};
+  L={queue,i:resume?ss.i:0,total:queue.length,wrong:new Set(),retried:new Set(),done:new Set(),base:resume?(ss.elapsed||0):0,tStart:Date.now()};
   saveSession();
   view="lesson"; enterCard(); render();
 }
@@ -426,7 +451,7 @@ function enterCard(){
   if(c.type==="pick"){
     const it=byId[c.id];
     if(c.kind==="hs"){
-      const boy=Math.random()<.5; const P=boy?pickOne([["👦","Noah","노아는"],["👨","Dad","아빠는"],["👴","Grandpa","할아버지는"],["🧑‍🏫","Mr. Kim","김 선생님은"]]):pickOne([["👧","Jenny","제니는"],["👩","Mom","엄마는"],["👵","Grandma","할머니는"],["👩‍🏫","Ms. Lee","이 선생님은"]]);
+      const boy=Math.random()<.5; c.boy=boy; const P=boy?pickOne([["👨","아빠","아빠는"],["👦","도현 (남동생)","도현이는"],["🧒","로한 (오빠)","로한이는"],["👴","할아버지","할아버지는"]]):pickOne([["👩","엄마","엄마는"],["👧","예은 (여동생)","예은이는"],["👱‍♀️","시온 (언니)","시온이는"],["👵","할머니","할머니는"]]);
       const pron=boy?"He":"She";
       const isQ=/^(Is|Does) (he|she)\b/.test(it.text);
       const rest=isQ? it.text.replace(/^(Is|Does) (he|she)\b/,(m,v)=>v+" #") : it.text.replace(/^(He|She)('s| is| has| doesn't)/,(m,p,v)=>"#"+v);
@@ -477,9 +502,9 @@ function renderLesson(){
   else if(c.type==="say") body=sayBody(c);
   else if(c.type==="talk") body=talkBody(c);
   else body=pickBody(c);
-  app.innerHTML=`<div class="lesson"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로">←</button><button class="backbtn" id="fwd" aria-label="앞으로" ${L.i>=L.queue.length-1?"disabled style=\"opacity:.3\"":""}>→</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${L.i+1} / ${L.queue.length}</div></div>
+  app.innerHTML=`<div class="lesson"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로">←</button><button class="backbtn" id="fwd" aria-label="앞으로" ${L.i>=L.queue.length-1?"disabled style=\"opacity:.3\"":""}>→</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${L.i+1} / ${L.queue.length}</div><div class="clock" id="clock">⏱ ${mmss(elapsed())}</div></div>
    ${stepsHTML(c)}<div class="card ${c.type==="tip"?"tip":""}">${body}</div></div>`;
-  document.getElementById("quit").onclick=()=>{stopAll();view="home";render();};
+  document.getElementById("quit").onclick=()=>{stopAll();saveSession();view="home";render();};
   document.getElementById("fwd").onclick=()=>{ if(L.i<L.queue.length-1){ stopAll(); L.i++; saveSession(); enterCard(); render(); } };
   document.getElementById("prev").onclick=()=>{ stopAll(); if(L.i>0){ L.i--; saveSession(); enterCard(); render(); } else { view="home"; render(); } };
   bindCard(c);
@@ -489,7 +514,7 @@ function micBlock(c,label){
     <div class="typein"><input id="sayin" type="text" lang="en" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="여기를 누르고 키보드 🎤 로 말해요"><button class="big next" data-act="mic">확인</button></div>
     <div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>
     <button class="linkbtn" data-act="selfsaid">키보드 음성이 안 되면: 아빠한테 말하고 누르기</button>`;
-  return `<button class="mic ${c.st.listening?"on":""}" data-act="mic" aria-label="말하기">🎤</button><div class="hint">${c.st.listening?"듣고 있어요…":label}</div><div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>${micBusy&&!c.st.listening?`<div class="again">마이크를 다른 앱(줌 등)이 쓰고 있어요. 그 앱을 끄고 다시 눌러 주세요.</div>`:""}${!micBusy&&c.st.tries>0&&!c.st.fb&&!c.st.listening?`<div class="again">앗, 다시 한 번 말해 봐요!</div>`:""}`;
+  return `<button class="mic ${c.st.listening?"on":""}" data-act="mic" aria-label="말하기">${POODLE}</button><div class="timer" id="tbar"><i style="width:${c.st.t0?Math.max(0,Math.min(100,(Date.now()-c.st.t0)/LIMIT*100)):0}%"></i></div><div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>${micBusy&&!c.st.listening?`<div class="again">마이크를 다른 앱(줌 등)이 쓰고 있어요. 그 앱을 끄고 다시 눌러 주세요.</div>`:""}${!micBusy&&c.st.tries>0&&!c.st.fb&&!c.st.listening?`<div class="again">앗, 다시 한 번 말해 봐요!</div>`:""}`;
 }
 function sayBody(c){
   const it=byId[c.id], step=c.steps[c.st.step];
@@ -497,6 +522,7 @@ function sayBody(c){
     <div class="btns"><button class="big play" data-act="play">🔊 듣기</button><button class="big next" data-act="next">다음 →</button></div>`;
   if(step==="speak"){
     if(c.st.fb==="good") return `${tagHTML(c,it)}${picHTML(it)}<div class="feedback good">딩동댕! 정답 ⭐<div class="en">${h(it.text)}</div><button class="big next" data-act="next">계속 →</button></div>`;
+    if(c.st.fb==="timeout") return `${tagHTML(c,it)}<div class="timeout">Time out!</div><div class="feedback bad">이렇게 말하는 거예요<div class="en">${h(it.text)}</div><div class="ko">${h(it.ko)}</div></div>`;
     if(c.st.fb==="giveup") return `${tagHTML(c,it)}${picHTML(it)}<div class="feedback bad">이렇게 말하는 거예요<div class="en">${h(it.text)}</div><div class="btns"><button class="big play" data-act="play">🔊 듣기</button><button class="big next" data-act="next">알겠어요 →</button></div></div>`;
     return `${tagHTML(c,it)}${picHTML(it)}<div class="ko big">${h(it.ko)}</div>${micBlock(c,"마이크를 터치하고 영어로 말해 봐요!")}
       ${c.st.tries>0?`<div class="btns"><button class="big soft" data-act="hint">🔊 정답 듣기</button></div>`:""}`;
@@ -539,6 +565,7 @@ function talkBody(c){
   }
   const meSay = c.mode==="sayB" ? B : A, other = c.mode==="sayB" ? A : B;
   const meFirst = c.mode==="sayA";
+  if(c.st.fb==="timeout") return `${tag}<div class="timeout">Time out!</div><div class="chat"><div class="bubble a"><div class="en">${h(A.text)}</div></div><div class="bubble b"><div class="en">${h(B.text)}</div></div></div>`;
   if(c.st.fb==="good"||c.st.fb==="giveup") return `${tag}<div class="chat"><div class="bubble a"><div class="en">${h(A.text)}</div></div><div class="bubble b"><div class="en">${h(B.text)}</div></div></div>
      <div class="feedback ${c.st.fb==="good"?"good":"bad"}">${c.st.fb==="good"?"대화 성공! ⭐":"이렇게 말하는 거예요"}<button class="big next" data-act="next">계속 →</button></div>`;
   return `${tag}<div class="chat">${meFirst?"":`<div class="bubble a"><div class="en">${h(A.text)}</div><div class="ko">${h(A.ko)}</div></div>`}
@@ -549,10 +576,10 @@ function talkBody(c){
 function pickBody(c){
   const done=c.st.fb;
   if(c.kind==="hs"){
-    return `<div class="tags"><span class="tag">누구일까?</span></div><div class="pic"><span class="who ${["👦","👨","👴","🧑‍🏫"].includes(c.person[0])?"he":"she"}">${c.person[0]}</span></div>
+    return `<div class="tags"><span class="tag">누구일까?</span></div><div class="pic"><span class="who ${c.boy?"he":"she"}">${c.person[0]}</span></div>
       <div class="ko big">${h(c.ko)}</div><div class="ko">${h(c.person[1])}</div>
       <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
-      ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! ⭐":"앗!"}<small>${["👦","👨","👴","🧑‍🏫"].includes(c.person[0])?"남자는 he":"여자는 she"}</small><button class="big next" data-act="next">계속 →</button></div>`:""}`;
+      ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! ⭐":"앗!"}<small>${c.boy?"남자는 he":"여자는 she"}</small><button class="big next" data-act="next">계속 →</button></div>`:""}`;
   }
   const scene=c.near?`<div class="scene">🙋‍♀️<span>${c.obj}</span></div>`:`<div class="scene">🙋‍♀️👉<span class="dots">· · · · ·</span><span>${c.obj}</span></div>`;
   return `<div class="tags"><span class="tag">가까울까, 멀까?</span></div>${scene}<div class="ko">${c.near?"내 바로 앞에 있어요":"저 멀리 있어요"}</div>
@@ -575,16 +602,31 @@ function bindCard(c){
   if(inp){ inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); const btn=app.querySelector('[data-act="mic"]'); btn&&btn.click(); } }); }
   app.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{ c.st.picked.push(+b.dataset.p); checkOrder(c); });
   app.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{ c.st.picked.splice(+b.dataset.a,1); render(); });
-  app.querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>{ const t=talkById[c.id]; const k=+b.dataset.opt; c.st.chosen=k; const ok=c.opts[k]===t.lines[1].text; c.st.fb=ok?"good":"bad"; srs(S.talks,c.id,ok); ok?chime():buzz(); render(); playLine(t,1); });
-  app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{ const k=+b.dataset.pick; c.st.chosen=k; const ok=c.opts[k]===c.right; c.st.fb=ok?"good":"bad"; ok?chime():buzz(); render(); playSrc("pick",null,c.right); });
+  app.querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>{ const t=talkById[c.id]; const k=+b.dataset.opt; c.st.chosen=k; const ok=c.opts[k]===t.lines[1].text; c.st.fb=ok?"good":"bad"; srs(S.talks,c.id,ok); ok?chime():buzz(); render(); autoNext(c,playLine(t,1),1000); });
+  app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{ const k=+b.dataset.pick; c.st.chosen=k; const ok=c.opts[k]===c.right; c.st.fb=ok?"good":"bad"; ok?chime():buzz(); render(); autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc("pick",null,c.right)),ok?700:1300); });
   app.querySelectorAll("[data-ans]").forEach(b=>b.onclick=()=>{ const it=byId[c.id]; const ans=it.q[c.st.yes?0:1]; const ok=c.opts[+b.dataset.ans]===ans; finishStep(c,ok); playSrc("ans",null,ans); });
   app.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{ const e=TIPS[c.c].ex[+b.dataset.ex][1]; playSrc("tip",null,e.replace("→",". ")); });
-  // automatic sound when a card opens
+  // automatic sound + automatic mic when a card opens
   if(!c.st.auto){ c.st.auto=true;
-    if(c.type==="say"){ const step=c.steps[c.st.step]; if(step==="listen") playItem(byId[c.id]); if(step==="answer") playSrc("q",null,byId[c.id].text); }
-    if(c.type==="talk" && c.mode!=="sayA") playLine(talkById[c.id],0);
+    const wantsMic = speechOK && ((c.type==="say"&&c.steps[c.st.step]==="speak") || (c.type==="talk"&&c.mode!=="choose"));
+    const go=()=>setTimeout(()=>{ if(cur()===c&&view==="lesson"&&!c.st.fb&&!c.st.listening) act(c,"mic"); },350);
+    if(c.type==="talk" && c.mode!=="sayA"){ const p=playLine(talkById[c.id],0); if(wantsMic) p.then(go); }
+    else if(wantsMic) go();
   }
 }
+function autoNext(c,p,wait){ Promise.resolve(p).then(()=>setTimeout(()=>{ if(view==="lesson"&&cur()===c) act(c,"next"); },wait||700)); }
+function timeOut(c){
+  if(c.st.fb) return; if(curRec) curRec.stop(); c.st.listening=false; c.st.fb="timeout"; c.st.firstTry=false; buzz(); render();
+  if(c.type==="say") autoNext(c,new Promise(r=>setTimeout(r,500)).then(()=>playItem(byId[c.id])),1300);
+  else { const t=talkById[c.id]; srs(S.talks,c.id,false); autoNext(c,new Promise(r=>setTimeout(r,500)).then(()=>playLine(t,0)).then(()=>playLine(t,1)),1300); }
+}
+setInterval(()=>{
+  if(view!=="lesson"||!L) return; const ck=document.getElementById("clock"); if(ck) ck.textContent="⏱ "+mmss(elapsed());
+  const c=cur(); if(!c||!c.st||!c.st.t0||c.st.fb) return;
+  const f=(Date.now()-c.st.t0)/LIMIT, tb=document.getElementById("tbar");
+  if(tb){ tb.firstChild.style.width=Math.max(0,Math.min(100,f*100))+"%"; tb.classList.toggle("late",f>.7); }
+  if(f>=1) timeOut(c);
+},100);
 function markWrong(c){ if(c.type==="say"){ c.st.firstTry=false; } }
 function finishStep(c,ok){
   c.st.fb= ok?"good":"giveup"; if(!ok) markWrong(c);
@@ -598,16 +640,18 @@ async function act(c,a){
     if(a==="playq") return playSrc("q",null,it.text);
     if(a==="hint"){ c.st.firstTry=false; return playItem(it); }
     if(a==="selfsaid"){ c.st.fb="good"; render(); playItem(it); return; }
-    if(a==="mic"){ if(c.st.listening) return; c.st.listening=true; c.st.heard=""; render();
-      const r=await listenOnce(); c.st.listening=false;
+    if(a==="mic"){ if(c.st.listening||c.st.fb) return; if(!c.st.t0) c.st.t0=Date.now()+300; c.st.listening=true; render();
+      const r=await listenOnce();
+      if(cur()!==c||c.st.fb==="timeout"||view!=="lesson") return; c.st.listening=false;
       if((r.err&&!speechOK)||micBusy){ render(); return; }
       const target= step==="answer" ? it.q[c.st.yes?0:1] : it.text;
       c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)";
       const targets= step==="answer" ? [target].concat(it.qfull?[it.qfull[c.st.yes?0:1],(c.st.yes?"Yes, ":"No, ")+it.qfull[c.st.yes?0:1]]:[]) : [target];
-      if(r.alts&&targets.some(tg=>matches(tg,r.alts,it.week===6))){ c.st.fb="good"; chime(); render(); if(step==="speak") playItem(it); else playSrc("a",null,target); return; }
-      c.st.tries++; buzz();
-      if(c.st.tries>=3){ c.st.fb="giveup"; markWrong(c); render(); step==="speak"?playItem(it):playSrc("a",null,target); return; }
-      render(); return;
+      if(r.alts&&targets.some(tg=>matches(tg,r.alts,it.week===6))){ c.st.fb="good"; chime(); render(); autoNext(c,new Promise(r=>setTimeout(r,350)).then(()=>playItem(it))); return; }
+      if(r.alts&&r.alts.length){ c.st.tries++; buzz(); }
+      render();
+      if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&(!c.st.t0||Date.now()-c.st.t0<LIMIT-1200)) act(c,"mic"); },700);
+      return;
     }
     if(a==="next"){
       if(c.st.step<c.steps.length-1){ c.st.step++; c.st.fb=null; c.st.tries=0; c.st.heard=""; c.st.auto=false; render(); return; }
@@ -625,13 +669,16 @@ async function act(c,a){
     if(a==="selfsaid"||a==="mic"){
       const mine=c.mode==="sayB"?1:0;
       let ok=true;
-      if(a==="mic"){ if(c.st.listening) return; c.st.listening=true; c.st.heard=""; render(); const r=await listenOnce(); c.st.listening=false;
+      if(a==="mic"){ if(c.st.listening||c.st.fb) return; if(!c.st.t0) c.st.t0=Date.now()+300; c.st.listening=true; render(); const r=await listenOnce();
+        if(cur()!==c||c.st.fb==="timeout"||view!=="lesson") return; c.st.listening=false;
         if((r.err&&!speechOK)||micBusy){ render(); return; }
         c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; ok=!!(r.alts&&matches(t.lines[mine].text,r.alts,true));
-        if(!ok){ c.st.tries++; buzz(); if(c.st.tries<3){ render(); return; } } }
+        if(!ok){ if(r.alts&&r.alts.length){ c.st.tries++; buzz(); } render();
+          if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&(!c.st.t0||Date.now()-c.st.t0<LIMIT-1200)) act(c,"mic"); },700);
+          return; } }
       c.st.fb= ok?"good":"giveup"; srs(S.talks,c.id,ok&&c.st.firstTry); ok?chime():null; render();
-      if(c.mode==="sayA"){ await playLine(t,0); await playLine(t,1); } else playLine(t,1);
-      return;
+      const p = c.mode==="sayA" ? playLine(t,0).then(()=>playLine(t,1)) : playLine(t,1);
+      autoNext(c,p); return;
     }
     if(a==="next") return advance();
   }
@@ -662,12 +709,13 @@ function finishLesson(){
   const today=todayStr(), owned=new Set(S.stickers), choices=STICKERS.filter(s=>!owned.has(s));
   const pick=pickOne(choices.length?choices:STICKERS);
   const wk=curWeek(); S.nextWeek = wk>=S.bookWeek ? 1 : wk+1; S.session=null;
-  if(!S.days[today]){ S.days[today]={sticker:pick,n:L.total,wrong:L.wrong.size,week:wk}; S.stickers.push(pick); }
+  const secs=Math.round(elapsed()/1000);
+  if(!S.days[today]){ S.days[today]={sticker:pick,n:L.total,wrong:L.wrong.size,week:wk,secs}; S.stickers.push(pick); }
   save(); view="finish"; render(); chime(true);
 }
 function renderFinish(){
   const d=S.days[todayStr()];
-  app.innerHTML=`<div class="finish"><div class="bigsticker">${h(d.sticker)}</div><h2>미션 성공!</h2><div class="ko">오늘 ${d.n}개를 연습했어요. 🔥 ${streak()}일 연속!</div><button class="big next" id="home">스티커 붙이러 가기</button></div>`;
+  app.innerHTML=`<div class="finish"><div class="bigsticker">${h(d.sticker)}</div><h2>미션 성공!</h2><div class="ko">오늘 ${d.n}개를 연습했어요${d.secs?` (${Math.floor(d.secs/60)}분 ${d.secs%60}초)`:""}. 🔥 ${streak()}일 연속!</div><button class="big next" id="home">스티커 붙이러 가기</button></div>`;
   document.getElementById("home").onclick=()=>{view="home";render();};
 }
 
@@ -689,6 +737,12 @@ function renderGate(){
     }
     render();
   });
+}
+function weekTable(){
+  const ws=[...new Set(ITEMS.map(i=>i.week))].sort((a,b)=>a-b);
+  const rows=ws.map(w=>{ const q=buildQueue(w); const nb=q.filter(c=>c.type==="say"&&byId[c.id].src==="book").length, nd=q.filter(c=>c.type==="say"&&byId[c.id].src==="drill").length, np=q.filter(c=>c.type==="pick").length, nt=q.filter(c=>c.type==="talk").length;
+    return `<tr class="${w===curWeek()?"cur":""}"><td>${w}주차${w>S.bookWeek?" (아직)":""}</td><td>${nb}</td><td>${nd}</td><td>${np}</td><td>${nt}</td><td><b>${q.length}</b></td></tr>`; }).join("");
+  return `<div style="overflow-x:auto"><table class="wtable"><tr><th>주차</th><th>책</th><th>바꿔 말하기</th><th>누구일까</th><th>대화</th><th>합계</th></tr>${rows}</table></div>`;
 }
 function renderParent(){
   const today=todayStr();
@@ -714,6 +768,7 @@ function renderParent(){
     <div class="stat"><div class="lab">연속 학습</div><div class="num">${streak()}<small>일</small></div></div>
     <div class="stat"><div class="lab">he/she 문장 틀린 횟수</div><div class="num">${hsWrong}<small>번</small></div></div>
   </div>
+  <div class="panel"><h3>주차별 문제 수</h3>${weekTable()}<div class="note">말하기 = 책 문장 + 바꿔 말하기. 틀린 문장 복습(최대 ${S.reviewCap}개)과 다시 나오는 문장은 빼고 센 숫자예요.</div></div>
   <div class="panel"><h3>책 문장 (${S.bookWeek}주차까지 ${tb}개)</h3>${bar(cb,tb)}</div>
   <div class="panel"><h3>바꿔 말하기 문장 (${tx}개: 의문문, 부정문, he/she)</h3>${bar(cx,tx)}<div class="note">한 번도 안 틀리고 세 번 넘게 맞히면 "아는 문장"이 돼요.</div></div>
   <div class="panel"><h3>자주 틀리는 문장 <span class="note">저녁에 이것만 한두 개 같이 말해 보세요</span></h3><div class="list">${weak.length?weak.map(row).join(""):`<div class="note">아직 틀린 문장이 없어요.</div>`}</div></div>
@@ -751,4 +806,5 @@ render();
 window._dbg={get S(){return S},get L(){return L},render:()=>render(),save:()=>save(),setView:v=>{view=v;render();},get view(){return view}};
 }
 </script>
+
 </body></html>
