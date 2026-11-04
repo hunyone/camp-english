@@ -399,11 +399,21 @@ function buildQueue(wArg){
   const w=wArg||curWeek(), q=[];
   const book=ITEMS.filter(i=>i.src==="book"&&i.week===w);
   const pass=(S.weekPass||{})[w]||0;
-  book.forEach((it,k)=>{ q.push({type:"say",id:it.id,fresh:true});
-    const D=ITEMS.filter(d=>d.src==="drill"&&d.base===it.id), X=D.filter(d=>/x\d+$/.test(d.id)), N=D.filter(d=>!/x\d+$/.test(d.id));
-    const pick=[]; for(let j=0;j<Math.min(2,N.length);j++) pick.push(N[(k+pass*2+j)%N.length]);
+  // group book sentences by word (He is shy / She is shy = one topic); ~3 items per topic, he/she only once per topic
+  const topicKey=t=>t.toLowerCase().replace(/[.?!]/g,"").replace(/^(i am|i'm|you are|you're|he is|he's|she is|she's|this is|that is|that's|there is|i have|are you|is he|is she|am i|is this|is that|is there|do you have)\s+(not\s+)?/,"").trim();
+  const topics=[]; const tmap={};
+  book.forEach(it=>{ const k=topicKey(it.text); if(!tmap[k]){ tmap[k]=[]; topics.push(tmap[k]); } tmap[k].push(it); });
+  const HS=/\b(he|she)\b/i;
+  topics.forEach((tb,k)=>{
+    tb.forEach(it=>q.push({type:"say",id:it.id,fresh:true}));
+    const bookTexts=new Set(tb.map(i=>i.text)), bookHS=tb.some(i=>HS.test(i.text));
+    const D=ITEMS.filter(d=>d.src==="drill"&&tb.some(t=>t.id===d.base)&&!bookTexts.has(d.text));
+    const X=D.filter(d=>/x\d+$/.test(d.id)), N=D.filter(d=>!/x\d+$/.test(d.id)&&!(bookHS&&HS.test(d.text)));
+    const want=Math.max(1,3-tb.length), pick=[]; let hs=false;
+    for(let j=0;j<N.length&&pick.length<want;j++){ const d=N[(k+pass*2+j)%N.length]; if(HS.test(d.text)){ if(hs) continue; hs=true; } if(!pick.some(p=>p.text===d.text)) pick.push(d); }
     if(X.length) pick.push(X[(k+pass)%X.length]);
-    N.filter(d=>pick.includes(d)).concat(X.filter(d=>pick.includes(d))).forEach(d=>q.push({type:"say",id:d.id,fresh:true})); });
+    pick.forEach(d=>q.push({type:"say",id:d.id,fresh:true}));
+  });
   const hsPool=ITEMS.filter(i=>i.week===w&&(i.who===HE||i.who===SHE)&&/^(he|she|is he|is she|does he|does she)\b/i.test(i.text));
   shuffle(hsPool).slice(0,S.whoCount??3).forEach(x=>q.push({type:"pick",kind:"hs",id:x.id}));
   if(w===5){ const tt=ITEMS.filter(i=>i.week===5&&!i.q&&/^(This|That) is/.test(i.text)); if(tt.length) q.push({type:"pick",kind:"tt",id:pickOne(tt).id}); }
