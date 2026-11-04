@@ -220,7 +220,7 @@ function setupScreen(msg){
    <div class="err">${msg||""}</div></div>`;
   document.getElementById("packin").onchange=async e=>{
     const f=e.target.files[0]; if(!f) return;
-    try{ const txt=await f.text(); const d=JSON.parse(txt); if(!d.items||!d.talks) throw 0; if((d.v||0)<6){ setupScreen("예전 파일이에요. 새로 받은 cheonilmun-pack.json 파일을 골라 주세요."); return; } try{ await idbSet("pack",txt); }catch(_){} main(d); }
+    try{ const txt=await f.text(); const d=JSON.parse(txt); if(!d.items||!d.talks) throw 0; if((d.v||0)<7){ setupScreen("예전 파일이에요. 새로 받은 cheonilmun-pack.json 파일을 골라 주세요."); return; } try{ await idbSet("pack",txt); }catch(_){} main(d); }
     catch(_){ setupScreen("이 파일이 아니에요. cheonilmun-pack.json 파일을 골라 주세요."); }
   };
 }
@@ -228,7 +228,7 @@ function setupScreen(msg){
   const EMBED = null;
   if(EMBED){ main(EMBED); return; }
   let txt=null; try{ txt=await idbGet("pack"); }catch(e){}
-  if(txt){ try{ const d=JSON.parse(txt); if((d.v||0)>=6){ main(d); return; } setupScreen("앱이 새로 바뀌었어요. 새로 받은 cheonilmun-pack.json 파일을 한 번만 다시 골라 주세요."); return; }catch(e){} }
+  if(txt){ try{ const d=JSON.parse(txt); if((d.v||0)>=7){ main(d); return; } setupScreen("앱이 새로 바뀌었어요. 새로 받은 cheonilmun-pack.json 파일을 한 번만 다시 골라 주세요."); return; }catch(e){} }
   setupScreen();
 })();
 function main(DATA){
