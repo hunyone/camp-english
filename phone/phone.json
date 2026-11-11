@@ -117,28 +117,32 @@
    "lesson": "2026-11-11",
    "text": "My mom gave me a present.",
    "ko": "엄마가 나한테 선물을 줬어요",
-   "url": "phone/975275ed8742.mp3"
+   "url": "phone/975275ed8742.mp3",
+   "pri": true
   },
   {
    "id": "p1111s17",
    "lesson": "2026-11-11",
    "text": "I didn't have time to eat cake.",
    "ko": "나는 케이크 먹을 시간이 없었어요",
-   "url": "phone/9037d2b9353f.mp3"
+   "url": "phone/9037d2b9353f.mp3",
+   "pri": true
   },
   {
    "id": "p1111s18",
    "lesson": "2026-11-11",
    "text": "I had a party with my family.",
    "ko": "나는 가족이랑 파티를 했어요",
-   "url": "phone/80d631f9e6e3.mp3"
+   "url": "phone/80d631f9e6e3.mp3",
+   "pri": true
   },
   {
    "id": "p1111s19",
    "lesson": "2026-11-11",
    "text": "It's very cold in Korea.",
    "ko": "한국은 정말 추워요",
-   "url": "phone/e0cb709be43d.mp3"
+   "url": "phone/e0cb709be43d.mp3",
+   "pri": true
   },
   {
    "id": "p1111w0",
@@ -146,7 +150,8 @@
    "kind": "word",
    "text": "street",
    "ko": "거리",
-   "url": "phone/3ea0aa9b69e1.mp3"
+   "url": "phone/3ea0aa9b69e1.mp3",
+   "pri": true
   },
   {
    "id": "p1111w1",
@@ -154,7 +159,8 @@
    "kind": "word",
    "text": "people",
    "ko": "사람들",
-   "url": "phone/1b6948fd1d61.mp3"
+   "url": "phone/1b6948fd1d61.mp3",
+   "pri": true
   }
  ],
  "talks": [
@@ -236,7 +242,8 @@
      "ko": "나는 가족이랑 파티를 했어요",
      "url": "phone/80d631f9e6e3.mp3"
     }
-   ]
+   ],
+   "pri": true
   }
  ]
 }

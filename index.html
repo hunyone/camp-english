@@ -249,12 +249,12 @@ PHONE.forEach(i=>{ i.src="phone"; i.src_audio=i.url; byId[i.id]=i; });
 PTALKS.forEach(t=>{ t.src="phone"; t.lines.forEach(l=>l.src_audio=l.url); talkById[t.id]=t; });
 const PHONE_SAY=6, PHONE_TALK=2;
 function phoneCards(){ const today=todayStr();
-  const rank=s=>!s?1:(s.recentWrong>0?0:(s.due<=today?2:9));
-  const order=(arr,store,n)=>arr.map((x,k)=>({x,k,r:rank(store[x.id])})).filter(o=>o.r<9).sort((a,b)=>a.r-b.r||(b.x.lesson>a.x.lesson?1:b.x.lesson<a.x.lesson?-1:a.k-b.k)).slice(0,n).map(o=>o.x);
+  const rank=(s,x)=>!s?(x.pri?-1:1):(s.recentWrong>0?0:(s.due<=today?2:9));
+  const order=(arr,store,n)=>arr.map((x,k)=>({x,k,r:rank(store[x.id],x)})).filter(o=>o.r<9).sort((a,b)=>a.r-b.r||(b.x.lesson>a.x.lesson?1:b.x.lesson<a.x.lesson?-1:a.k-b.k)).slice(0,n).map(o=>o.x);
   return order(PHONE,S.items,PHONE_SAY).map(i=>({type:"say",id:i.id,fresh:true,phone:true})).concat(order(PTALKS,S.talks,PHONE_TALK).map(t=>({type:"talk",id:t.id,phone:true}))); }
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
-const LIMIT=15000;
+const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
 const TTS = DATA.tts||{};
 
 // ---------- state ----------
@@ -438,7 +438,7 @@ function doneToday(){ return !!S.days[todayStr()]; }
 function streak(){ let n=0,d=todayStr(); if(!S.days[d]) d=addDays(d,-1); while(S.days[d]){n++; d=addDays(d,-1);} return n; }
 
 // ---------- views ----------
-let view="home", L=null, gate=null, confirmReset=false;
+let view="home", L=null, gate=null, confirmReset=false, confirmToday=false;
 const app=document.getElementById("app");
 function render(){
   ({home:renderHome,lesson:renderLesson,finish:renderFinish,gate:renderGate,parent:renderParent})[view]();
@@ -573,7 +573,7 @@ function micBlock(c,label){
     <div class="typein"><input id="sayin" type="text" lang="en" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="여기를 누르고 키보드 🎤 로 말해요"><button class="big next" data-act="mic">확인</button></div>
     <div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>
     <button class="linkbtn" data-act="selfsaid">키보드 음성이 안 되면: 아빠한테 말하고 누르기</button>`;
-  return `<button class="mic ${c.st.listening?"on":""}" data-act="mic" aria-label="말하기">${POODLE}</button><div class="timer" id="tbar"><i style="width:${c.st.t0?Math.max(0,Math.min(100,(Date.now()-c.st.t0)/LIMIT*100)):0}%"></i></div><div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>${micBusy&&!c.st.listening?`<div class="again">마이크를 다른 앱(줌 등)이 쓰고 있어요. 그 앱을 끄고 다시 눌러 주세요.</div>`:""}${!micBusy&&c.st.tries>0&&!c.st.fb&&!c.st.listening?`<div class="again">앗, 다시 한 번 말해 봐요!</div>`:""}`;
+  return `<button class="mic ${c.st.listening?"on":""}" data-act="mic" aria-label="말하기">${POODLE}</button><div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>${micBusy&&!c.st.listening?`<div class="again">마이크를 다른 앱(줌 등)이 쓰고 있어요. 그 앱을 끄고 다시 눌러 주세요.</div>`:""}${!micBusy&&c.st.tries>0&&!c.st.fb&&!c.st.listening?`<div class="again">앗, 다시 한 번 말해 봐요!</div>`:""}`;
 }
 function sayBody(c){
   const it=byId[c.id], step=c.steps[c.st.step];
@@ -710,7 +710,7 @@ async function act(c,a){
       if(okSay){ c.st.fb="good"; chime(); render(); autoNext(c,new Promise(r=>setTimeout(r,350)).then(()=>playItem(it))); return; }
       if(r.alts&&r.alts.length){ c.st.tries++; buzz(); }
       render();
-      if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&(!c.st.t0||Date.now()-c.st.t0<LIMIT-1200)) act(c,"mic"); },700);
+      if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&(c.st.relis=(c.st.relis||0)+1)<=3) act(c,"mic"); },700);
       return;
     }
     if(a==="next"){
@@ -734,7 +734,7 @@ async function act(c,a){
         if((r.err&&!speechOK)||micBusy){ render(); return; }
         c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; ok=!!(r.alts&&matches(t.lines[mine].match||t.lines[mine].text,r.alts,true)); if(r.alts&&r.alts.length) logHeard(t.lines[mine].text,r.alts,ok);
         if(!ok){ if(r.alts&&r.alts.length){ c.st.tries++; buzz(); } render();
-          if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&(!c.st.t0||Date.now()-c.st.t0<LIMIT-1200)) act(c,"mic"); },700);
+          if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&(c.st.relis=(c.st.relis||0)+1)<=3) act(c,"mic"); },700);
           return; } }
       c.st.fb= ok?"good":"giveup"; srs(S.talks,c.id,ok&&c.st.firstTry); ok?chime():null; render();
       const p = c.mode==="sayA" ? playLine(t,0).then(()=>playLine(t,1)) : playLine(t,1);
@@ -855,7 +855,7 @@ function renderParent(){
     <div class="note">음성인식: ${speechOK?"켜짐 (아이가 말하면 앱이 듣고 확인해요)":"이 화면에서는 키보드 음성 입력(🎤)으로 말한 걸 글자로 받아서 확인해요. 키보드 음성 입력 언어를 영어로 해 두세요."}</div>
     <h3>테스트용</h3>
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
-    <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}<button class="tbtn" id="today0">오늘 공부 처음부터</button><button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
+    <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
     <div class="note">${syncState}</div></div></div>`;
   const $=id=>document.getElementById(id);
@@ -868,7 +868,11 @@ function renderParent(){
   $("rc").onchange=e=>{S.reviewCap=+e.target.value;save();};
   $("dep").onchange=e=>{ if(e.target.value){S.depart=e.target.value;save();render();} };
   $("skip").onclick=()=>{S.offset++;save();render();};
-  $("today0").onclick=()=>{ const today=todayStr(), sn=S.daySnap; // undo everything done today: answers, timer, sticker
+  if($("markdone")) $("markdone").onclick=()=>{ const today=todayStr(), wk=curWeek(), owned=new Set(S.stickers), ch=STICKERS.filter(x=>!owned.has(x)), pk=pickOne(ch.length?ch:STICKERS);
+    S.days[today]={sticker:pk,n:0,wrong:0,week:wk,secs:0}; S.stickers.push(pk); S.weekPass=S.weekPass||{}; S.weekPass[wk]=(S.weekPass[wk]||0)+1; S.nextWeek=wk>=S.bookWeek?1:wk+1; S.session=null; save(); render(); };
+  if($("today0ask")) $("today0ask").onclick=()=>{ confirmToday=true; render(); };
+  if($("today0no")) $("today0no").onclick=()=>{ confirmToday=false; render(); };
+  if($("today0")) $("today0").onclick=()=>{ confirmToday=false; const today=todayStr(), sn=S.daySnap; // undo everything done today: answers, timer, sticker
     if(sn&&sn.date===today){ S.items=sn.items; S.talks=sn.talks; S.weekPass=sn.weekPass; S.nextWeek=sn.nextWeek; }
     if(S.days[today]){ const k=S.stickers.lastIndexOf(S.days[today].sticker); if(k>=0) S.stickers.splice(k,1); delete S.days[today]; }
     S.heardLog=(S.heardLog||[]).filter(x=>x.d!==today); S.session=null; S.daySnap=null; save(); view="home"; render(); };
