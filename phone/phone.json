@@ -3,10 +3,9 @@
   {
    "id": "p1111s0",
    "lesson": "2026-11-11",
-   "text": "I went to Dugeun Dugeun.",
+   "text": "I went to the playground.",
    "ko": "나는 두근두근 다녀왔어요",
-   "url": "phone/9f9e66b2dac1.mp3",
-   "match": "I went to"
+   "url": "phone/617ace994f6c.mp3"
   },
   {
    "id": "p1111s1",
@@ -56,6 +55,62 @@
    "text": "It was fun!",
    "ko": "재미있었어요",
    "url": "phone/fa9450f08fae.mp3"
+  },
+  {
+   "id": "p1111s8",
+   "lesson": "2026-11-11",
+   "text": "I went to school.",
+   "ko": "나는 학교에 갔어요",
+   "url": "phone/f2dc6bd50e51.mp3"
+  },
+  {
+   "id": "p1111s9",
+   "lesson": "2026-11-11",
+   "text": "I like ice cream.",
+   "ko": "나는 아이스크림이 좋아요",
+   "url": "phone/e0d8535fc714.mp3"
+  },
+  {
+   "id": "p1111s10",
+   "lesson": "2026-11-11",
+   "text": "I don't like summer.",
+   "ko": "나는 여름이 싫어요",
+   "url": "phone/65c9d32952de.mp3"
+  },
+  {
+   "id": "p1111s11",
+   "lesson": "2026-11-11",
+   "text": "It was cold this morning.",
+   "ko": "오늘 아침은 추웠어요",
+   "url": "phone/1feb284a2fff.mp3"
+  },
+  {
+   "id": "p1111s12",
+   "lesson": "2026-11-11",
+   "text": "It was my birthday!",
+   "ko": "내 생일이었어요!",
+   "url": "phone/0be8cd733343.mp3"
+  },
+  {
+   "id": "p1111s13",
+   "lesson": "2026-11-11",
+   "text": "I had a party.",
+   "ko": "나는 파티를 했어요",
+   "url": "phone/6cd68c457b78.mp3"
+  },
+  {
+   "id": "p1111s14",
+   "lesson": "2026-11-11",
+   "text": "I had cake.",
+   "ko": "나는 케이크를 먹었어요",
+   "url": "phone/05f8319e2a39.mp3"
+  },
+  {
+   "id": "p1111s15",
+   "lesson": "2026-11-11",
+   "text": "I have a new room.",
+   "ko": "나는 새 방이 생겼어요",
+   "url": "phone/6994d333f93b.mp3"
   }
  ],
  "talks": [
@@ -85,10 +140,9 @@
      "url": "phone/d713c8282fd1.mp3"
     },
     {
-     "text": "I went to Dugeun Dugeun.",
+     "text": "I went to the playground.",
      "ko": "나는 두근두근 다녀왔어요",
-     "url": "phone/9f9e66b2dac1.mp3",
-     "match": "I went to"
+     "url": "phone/617ace994f6c.mp3"
     }
    ]
   },

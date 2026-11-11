@@ -247,7 +247,7 @@ TALKS.forEach(t=>t.lines.forEach(l=>{ l.src_audio = l.b64 ? "data:audio/mpeg;bas
 const PHONE=(DATA.phone&&DATA.phone.items)||[], PTALKS=(DATA.phone&&DATA.phone.talks)||[];
 PHONE.forEach(i=>{ i.src="phone"; i.src_audio=i.url; byId[i.id]=i; });
 PTALKS.forEach(t=>{ t.src="phone"; t.lines.forEach(l=>l.src_audio=l.url); talkById[t.id]=t; });
-const PHONE_SAY=4, PHONE_TALK=2;
+const PHONE_SAY=6, PHONE_TALK=2;
 function phoneCards(){ const today=todayStr();
   const rank=s=>!s?1:(s.recentWrong>0?0:(s.due<=today?2:9));
   const order=(arr,store,n)=>arr.map((x,k)=>({x,k,r:rank(store[x.id])})).filter(o=>o.r<9).sort((a,b)=>a.r-b.r||(b.x.lesson>a.x.lesson?1:b.x.lesson<a.x.lesson?-1:a.k-b.k)).slice(0,n).map(o=>o.x);
