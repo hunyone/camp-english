@@ -109,6 +109,14 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .tile{font-family:var(--f-en);font-weight:600;font-size:30px;background:var(--card);border:3px solid var(--line);border-bottom-width:6px;border-radius:18px;padding:8px 20px;min-height:64px;min-width:56px}
 .tile.used{visibility:hidden}
 .answer .tile{border-color:var(--lake);color:var(--lake)}
+.combo{position:absolute;top:-22px;right:14px;background:linear-gradient(135deg,#FF7EB3,#A77BF3);color:#fff;font-family:var(--f-disp);font-size:26px;padding:6px 16px;border-radius:999px;box-shadow:0 6px 16px rgba(167,123,243,.4);animation:pop .5s cubic-bezier(.2,1.6,.4,1) both;z-index:5}
+@keyframes pop{from{transform:scale(.3) rotate(-8deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.card{position:relative}
+.hintans{font-family:var(--f-disp);font-size:30px;color:var(--ink);background:#F3ECFF;border-radius:18px;padding:10px 18px;margin-top:6px;text-align:center}
+.kobtn{border:0;background:none;color:var(--muted);font-size:15px;text-decoration:underline;padding:2px 0;cursor:pointer}
+.pickstk{display:flex;gap:16px;justify-content:center;margin:10px 0}
+.pickstk button{font-size:64px;width:110px;height:110px;border-radius:28px;border:3px solid #E6DAFA;background:#fff;cursor:pointer}
+.pickstk button.on{border-color:#A77BF3;background:#F3ECFF;transform:scale(1.08)}
 .feedback{width:100%;border-radius:22px;padding:16px;font-family:var(--f-disp);font-size:24px;display:flex;flex-direction:column;align-items:center;gap:10px}
 .feedback.good{background:var(--pine-soft);color:var(--pine)}
 .feedback.bad{background:var(--maple-soft);color:var(--maple)}
@@ -366,10 +374,10 @@ function playSrc(key,src,text,role){
 }
 const playItem=it=>playSrc(it.id,it.src_audio,it.text);
 const playLine=(t,i)=>playSrc(t.id+"_"+i,t.lines[i].src_audio,t.lines[i].text,i===0?"a":"b");
-function chime(big){ try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C()); if(c.state==="suspended") c.resume();
+function chime(big){ if(!big&&L&&view==="lesson"){ const c=cur(); if(c&&c.st){ L.combo=c.st.firstTry===false?0:(L.combo||0)+1; c.st.combo=L.combo; } } try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C()); if(c.state==="suspended") c.resume();
   (big?[523,659,784,1047]:[659,988]).forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.frequency.value=f; const t=c.currentTime+i*.11;
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.25,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.35); o.connect(g).connect(c.destination); o.start(t); o.stop(t+.4); }); }catch(e){} }
-function buzz(){ try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C()); if(c.state==="suspended") c.resume();
+function buzz(){ if(L) L.combo=0; try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C()); if(c.state==="suspended") c.resume();
   [[420,300,0,.12],[360,760,.14,.28]].forEach(([f0,f1,d,dur])=>{ const o=c.createOscillator(),g=c.createGain(); o.type="triangle"; const t=c.currentTime+d;
     o.frequency.setValueAtTime(f0,t); o.frequency.exponentialRampToValueAtTime(f1,t+dur);
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.35,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+dur); o.connect(g).connect(c.destination); o.start(t); o.stop(t+dur+.02); }); }catch(e){} }
@@ -562,7 +570,7 @@ function renderLesson(){
   else if(c.type==="talk") body=talkBody(c);
   else body=pickBody(c);
   app.innerHTML=`<div class="lesson"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로">←</button><button class="backbtn" id="fwd" aria-label="앞으로" ${L.i>=L.queue.length-1?"disabled style=\"opacity:.3\"":""}>→</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${L.i+1} / ${L.queue.length}</div><div class="clock" id="clock">⏱ ${mmss(elapsed())}</div></div>
-   ${stepsHTML(c)}<div class="card ${c.type==="tip"?"tip":""}">${body}</div></div>`;
+   ${stepsHTML(c)}<div class="card ${c.type==="tip"?"tip":""}">${c.st&&c.st.fb==="good"&&c.st.combo>=2?`<div class="combo">COMBO ${c.st.combo}! 🔥</div>`:""}${body}</div></div>`;
   document.getElementById("quit").onclick=()=>{stopAll();saveSession();view="home";render();};
   document.getElementById("fwd").onclick=()=>{ if(L.i<L.queue.length-1){ stopAll(); L.i++; saveSession(); enterCard(); render(); } };
   document.getElementById("prev").onclick=()=>{ stopAll(); if(L.i>0){ L.i--; saveSession(); enterCard(); render(); } else { view="home"; render(); } };
@@ -580,17 +588,17 @@ function sayBody(c){
   if(step==="listen") return `${tagHTML(c,it)}${picHTML(it)}<div class="en">${h(it.text)}</div><div class="ko">${h(it.ko)}</div>
     <div class="btns"><button class="big play" data-act="play">🔊 듣기</button><button class="big next" data-act="next">다음 →</button></div>`;
   if(step==="speak"){
-    if(c.st.fb==="good") return `${tagHTML(c,it)}${picHTML(it)}<div class="feedback good">딩동댕! 정답 ⭐<div class="en">${h(it.text)}</div><button class="big next" data-act="next">계속 →</button></div>`;
+    if(c.st.fb==="good") return `${tagHTML(c,it)}${picHTML(it)}<div class="feedback good">딩동댕! 정답 💖<div class="en">${h(it.text)}</div><button class="big next" data-act="next">계속 →</button></div>`;
     if(c.st.fb==="timeout") return `${tagHTML(c,it)}<div class="timeout">Time out!</div><div class="feedback bad">이렇게 말하는 거예요<div class="en">${h(it.text)}</div><div class="ko">${h(it.ko)}</div></div>`;
     if(c.st.fb==="giveup") return `${tagHTML(c,it)}${picHTML(it)}<div class="feedback bad">이렇게 말하는 거예요<div class="en">${h(it.text)}</div><div class="btns"><button class="big play" data-act="play">🔊 듣기</button><button class="big next" data-act="next">알겠어요 →</button></div></div>`;
     return `${tagHTML(c,it)}${picHTML(it)}<div class="ko big">${h(it.ko)}</div>${micBlock(c,"마이크를 터치하고 영어로 말해 봐요!")}
-      ${c.st.tries>0?`<div class="btns"><button class="big soft" data-act="hint">🔊 정답 듣기</button></div>`:""}`;
+      ${c.st.showAns?`<div class="hintans">${h(it.text)}</div>`:""}<div class="btns"><button class="big soft" data-act="hint">🔊 정답 듣기</button></div>`;
   }
   if(step==="order"){
     const ans=c.st.picked.map((p,k)=>`<button class="tile" data-a="${k}">${h(c.pool[p].w)}</button>`).join("");
     const pool=c.pool.map((p,k)=>`<button class="tile ${c.st.picked.includes(k)?"used":""}" data-p="${k}">${h(p.w)}</button>`).join("");
     let fb="";
-    if(c.st.fb==="good") fb=`<div class="feedback good">정답! ⭐<div class="en">${h(it.text)}</div><button class="big next" data-act="next">계속 →</button></div>`;
+    if(c.st.fb==="good") fb=`<div class="feedback good">정답! 💖<div class="en">${h(it.text)}</div><button class="big next" data-act="next">계속 →</button></div>`;
     if(c.st.fb==="bad") fb=`<div class="feedback bad">${c.st.why||"앗, 다시 볼까요?"}<div class="en">${h(it.text)}</div><div class="btns"><button class="big play" data-act="play">🔊 듣기</button><button class="big next" data-act="next">알겠어요 →</button></div></div>`;
     return `${tagHTML(c,it)}${picHTML(it)}<div class="ko big">${h(it.ko)}</div>${c.st.fb?"":`<div class="hint">영어 순서대로 눌러요 (. 이나 ? 도!)</div>`}
       <div class="answer">${ans}</div>${c.st.fb?"":`<div class="pool">${pool}</div>`}${fb}`;
@@ -600,7 +608,7 @@ function sayBody(c){
     const yi=c.st.yes?0:1, full=it.qfull?it.qfull[yi]:"";
     const scene=it.qk?`<div class="ask">${h(it.qk[yi])} 뭐라고 대답할까요?</div>`:`<div class="ask">${c.st.yes?"'응'이라고":"'아니'라고"} 대답해 볼까요?</div>`;
     const head=`<div class="tags"><span class="tag">질문에 대답해 보아요!</span></div><div class="qline">${h(it.text)}</div>${scene}`;
-    if(c.st.fb==="good") return `${head}<div class="feedback good">딩동댕! 정답 ⭐<div class="en">${h(ans)}</div>${full?`<div class="ko">이렇게 말해도 돼요: ${h(c.st.yes?"Yes, ":"No, ")}${h(full)}</div>`:""}<button class="big next" data-act="next">계속 →</button></div>`;
+    if(c.st.fb==="good") return `${head}<div class="feedback good">딩동댕! 정답 💖<div class="en">${h(ans)}</div>${full?`<div class="ko">이렇게 말해도 돼요: ${h(c.st.yes?"Yes, ":"No, ")}${h(full)}</div>`:""}<button class="big next" data-act="next">계속 →</button></div>`;
     if(c.st.fb==="giveup") return `${head}<div class="feedback bad">이렇게 대답해요<div class="en">${h(ans)}</div>${full?`<div class="ko">또는: ${h(full)}</div>`:""}<button class="big next" data-act="next">알겠어요 →</button></div>`;
     const body0=head;
     if(false){
@@ -611,12 +619,13 @@ function sayBody(c){
     return `${body0}<div class="btns"><button class="big soft" data-act="playq">🔊 다시 듣기</button></div>${micBlock(c,"마이크를 누르고 영어로 대답해 봐요!")}`;
   }
 }
+function koA(c,A){ return c.st.showKo||c.st.fb?`<div class="ko">${h(A.ko)}</div>`:`<button class="kobtn" data-act="showKo">한국말 보기</button>`; }
 function talkBody(c){
   const t=talkById[c.id], A=t.lines[0], B=t.lines[1];
   const tag=`<div class="tags"><span class="tag talk">${t.src==="phone"?"📞 전화영어 · 선생님 질문":"💬 대화 "+(t.src==="extra"?"· 캠프 생활":"· 책 "+t.week+"주차")}</span></div>`;
   if(c.mode==="choose"){
     const done=c.st.fb;
-    return `${tag}<div class="chat"><div class="bubble a"><div class="en">${h(A.text)}</div><div class="ko">${h(A.ko)}</div></div>
+    return `${tag}<div class="chat"><div class="bubble a"><div class="en">${h(A.text)}</div>${koA(c,A)}</div>
       ${done?`<div class="bubble b"><div class="en">${h(B.text)}</div><div class="ko">${h(B.ko)}</div></div>`:""}</div>
       ${done?"":`<div class="hint">뭐라고 대답할까?</div>`}
       <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===B.text?"right":""} ${done&&c.st.chosen===k&&o!==B.text?"wrong":""}" data-opt="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
@@ -626,11 +635,11 @@ function talkBody(c){
   const meFirst = c.mode==="sayA";
   if(c.st.fb==="timeout") return `${tag}<div class="timeout">Time out!</div><div class="chat"><div class="bubble a"><div class="en">${h(A.text)}</div></div><div class="bubble b"><div class="en">${h(B.text)}</div></div></div>`;
   if(c.st.fb==="good"||c.st.fb==="giveup") return `${tag}<div class="chat"><div class="bubble a"><div class="en">${h(A.text)}</div></div><div class="bubble b"><div class="en">${h(B.text)}</div></div></div>
-     <div class="feedback ${c.st.fb==="good"?"good":"bad"}">${c.st.fb==="good"?"대화 성공! ⭐":"이렇게 말하는 거예요"}<button class="big next" data-act="next">계속 →</button></div>`;
-  return `${tag}<div class="chat">${meFirst?"":`<div class="bubble a"><div class="en">${h(A.text)}</div><div class="ko">${h(A.ko)}</div></div>`}
+     <div class="feedback ${c.st.fb==="good"?"good":"bad"}">${c.st.fb==="good"?"대화 성공! 💖":"이렇게 말하는 거예요"}<button class="big next" data-act="next">계속 →</button></div>`;
+  return `${tag}<div class="chat">${meFirst?"":`<div class="bubble a"><div class="en">${h(A.text)}</div>${koA(c,A)}</div>`}
      <div class="bubble ${meFirst?"a":"b"}"><div class="ko big">${h(meSay.ko)}</div><div class="ko">${meFirst?"내가 먼저 말해요":"내 차례!"}</div></div></div>
      ${meFirst?"":`<div class="btns"><button class="big soft" data-act="playA">🔊 다시 듣기</button></div>`}
-     ${micBlock(c,"마이크를 터치하고 영어로 말해 봐요!")}${c.st.tries>0?`<div class="btns"><button class="big soft" data-act="hintTalk">🔊 정답 듣기</button></div>`:""}`;
+     ${micBlock(c,"마이크를 터치하고 영어로 말해 봐요!")}${c.st.showAns?`<div class="hintans">${h(meSay.text)}</div>`:""}<div class="btns"><button class="big soft" data-act="hintTalk">🔊 정답 듣기</button></div>`;
 }
 function pickBody(c){
   const done=c.st.fb;
@@ -638,12 +647,12 @@ function pickBody(c){
     return `<div class="tags"><span class="tag">누구일까?</span></div><div class="pic"><span class="who ${c.boy?"he":"she"}">${c.person[0]}</span></div>
       <div class="ko big">${h(c.ko)}</div><div class="ko">${h(c.person[1])}</div>
       <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
-      ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! ⭐":"앗!"}<small>${c.boy?"남자는 he":"여자는 she"}</small><button class="big next" data-act="next">계속 →</button></div>`:""}`;
+      ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! 💖":"앗!"}<small>${c.boy?"남자는 he":"여자는 she"}</small><button class="big next" data-act="next">계속 →</button></div>`:""}`;
   }
   const scene=c.near?`<div class="scene">🙋‍♀️<span>${c.obj}</span></div>`:`<div class="scene">🙋‍♀️👉<span class="dots">· · · · ·</span><span>${c.obj}</span></div>`;
   return `<div class="tags"><span class="tag">가까울까, 멀까?</span></div>${scene}<div class="ko">${c.near?"내 바로 앞에 있어요":"저 멀리 있어요"}</div>
     <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
-    ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! ⭐":"앗!"}<small>가까우면 this, 멀면 that</small><button class="big next" data-act="next">계속 →</button></div>`:""}`;
+    ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! 💖":"앗!"}<small>가까우면 this, 멀면 that</small><button class="big next" data-act="next">계속 →</button></div>`:""}`;
 }
 function tipBody(c){
   const T=TIPS[c.c];
@@ -697,7 +706,7 @@ async function act(c,a){
     const it=byId[c.id], step=c.steps[c.st.step];
     if(a==="play") return playItem(it);
     if(a==="playq") return playSrc("q",null,it.text);
-    if(a==="hint"){ c.st.firstTry=false; return playItem(it); }
+    if(a==="hint"){ c.st.firstTry=false; c.st.showAns=true; render(); return playItem(it); }
     if(a==="selfsaid"){ c.st.fb="good"; render(); autoNext(c,playItem(it)); return; }
     if(a==="mic"){ if(c.st.listening||c.st.fb) return; if(!c.st.t0) c.st.t0=Date.now()+300; c.st.listening=true; render();
       const r=await listenOnce();
@@ -725,7 +734,8 @@ async function act(c,a){
     const t=talkById[c.id];
     if(a==="playA") return playLine(t,0);
     if(a==="replay"){ await playLine(t,0); return playLine(t,1); }
-    if(a==="hintTalk"){ c.st.firstTry=false; return playLine(t,c.mode==="sayB"?1:0); }
+    if(a==="showKo"){ c.st.showKo=true; return render(); }
+    if(a==="hintTalk"){ c.st.firstTry=false; c.st.showAns=true; render(); return playLine(t,c.mode==="sayB"?1:0); }
     if(a==="selfsaid"||a==="mic"){
       const mine=c.mode==="sayB"?1:0;
       let ok=true;
@@ -767,7 +777,7 @@ function advance(){
 }
 function finishLesson(){
   const today=todayStr(), owned=new Set(S.stickers), choices=STICKERS.filter(s=>!owned.has(s));
-  const pick=pickOne(choices.length?choices:STICKERS);
+  const opts=shuffle(choices.length>=3?choices:STICKERS).slice(0,3), pick=opts[0]; L.stkOpts=opts;
   const wk=curWeek(); S.nextWeek = wk>=S.bookWeek ? 1 : wk+1; S.session=null; S.weekPass=S.weekPass||{}; S.weekPass[wk]=(S.weekPass[wk]||0)+1;
   const secs=Math.round(elapsed()/1000);
   if(!S.days[today]){ S.days[today]={sticker:pick,n:L.total,wrong:L.wrong.size,week:wk,secs}; S.stickers.push(pick); }
@@ -784,9 +794,10 @@ function fanfare(){ try{ const C=window.AudioContext||window.webkitAudioContext;
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.3,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+(d>.6?.6:.22)); o.connect(g).connect(c.destination); o.start(t); o.stop(t+.7); }); }catch(e){} }
 function renderFinish(){
   const d=S.days[todayStr()];
-  app.innerHTML=`<div class="finish"><div class="crown">🎉 👑 🎉</div><div class="bigsticker">${h(d.sticker)}</div><h2>야호! 미션 성공!</h2><div class="cheer">서현이 정말 대단해요! 💜</div><div class="ko">오늘 ${d.n}개를 연습했어요${d.secs?` (${Math.floor(d.secs/60)}분 ${d.secs%60}초)`:""}. 🔥 ${streak()}일 연속!</div><button class="big next" id="home">스티커 붙이러 가기 ✨</button></div>`;
+  app.innerHTML=`<div class="finish"><div class="crown">🎉 👑 🎉</div>${L&&L.stkOpts?`<h2>야호! 미션 성공!</h2><div class="cheer">마음에 드는 스티커를 골라요!</div><div class="pickstk">${L.stkOpts.map(x=>`<button class="${x===d.sticker&&L.stkPicked?"on":""}" data-stk="${x}">${x}</button>`).join("")}</div>`:`<div class="bigsticker">${h(d.sticker)}</div><h2>야호! 미션 성공!</h2>`}<div class="cheer">서현이 정말 대단해요! 💜</div><div class="ko">오늘 ${d.n}개를 연습했어요${d.secs?` (${Math.floor(d.secs/60)}분 ${d.secs%60}초)`:""}. 🔥 ${streak()}일 연속!</div><button class="big next" id="home">스티커 붙이러 가기 ✨</button></div>`;
   confetti();
   document.getElementById("home").onclick=()=>{view="home";render();};
+  app.querySelectorAll("[data-stk]").forEach(b=>b.onclick=()=>{ const x=b.dataset.stk; const k=S.stickers.lastIndexOf(d.sticker); if(k>=0) S.stickers[k]=x; d.sticker=x; L.stkPicked=true; save(); app.querySelectorAll("[data-stk]").forEach(y=>y.classList.toggle("on",y===b)); chime(true); });
 }
 
 // ---------- parent ----------
