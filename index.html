@@ -450,7 +450,7 @@ function topBar(){
 }
 function bindLogo(){
   const el=document.getElementById("logo"); if(!el) return; let t=null;
-  const start=e=>{ e.preventDefault(); t=setTimeout(()=>{ t=null; openGate(); },3000); };
+  const start=e=>{ e.preventDefault(); t=setTimeout(()=>{ t=null; openGate(); },1000); };
   const end=()=>{ if(t){clearTimeout(t); t=null;} };
   el.addEventListener("pointerdown",start); el.addEventListener("pointerup",end); el.addEventListener("pointerleave",end); el.addEventListener("pointercancel",end);
   el.addEventListener("contextmenu",e=>e.preventDefault());
@@ -483,6 +483,7 @@ function mmss(ms){ const s=Math.floor(ms/1000); return Math.floor(s/60)+":"+Stri
 function saveSession(){ S.session={date:todayStr(),week:curWeek(),i:L.i,elapsed:elapsed(),queue:L.queue.map(c=>({type:c.type,id:c.id,kind:c.kind,fresh:c.fresh}))}; save(); }
 function startLesson(){
   const ss=S.session, resume=ss&&ss.date===todayStr()&&ss.week===curWeek()&&ss.i<ss.queue.length;
+  if(!S.daySnap||S.daySnap.date!==todayStr()) S.daySnap={date:todayStr(),items:JSON.parse(JSON.stringify(S.items)),talks:JSON.parse(JSON.stringify(S.talks)),weekPass:JSON.parse(JSON.stringify(S.weekPass||{})),nextWeek:S.nextWeek};
   const queue=resume?ss.queue:buildQueue();
   if(resume&&!queue.some(c=>(byId[c.id]&&byId[c.id].src==="phone")||(c.type==="talk"&&talkById[c.id]&&talkById[c.id].src==="phone"))) queue.splice(ss.i,0,...phoneCards()); // mission started before the phone corner existed
   L={queue,i:resume?ss.i:0,total:queue.length,wrong:new Set(),retried:new Set(),done:new Set(),base:resume?(ss.elapsed||0):0,tStart:Date.now()};
@@ -854,7 +855,7 @@ function renderParent(){
     <div class="note">음성인식: ${speechOK?"켜짐 (아이가 말하면 앱이 듣고 확인해요)":"이 화면에서는 키보드 음성 입력(🎤)으로 말한 걸 글자로 받아서 확인해요. 키보드 음성 입력 언어를 영어로 해 두세요."}</div>
     <h3>테스트용</h3>
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
-    <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
+    <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}<button class="tbtn" id="today0">오늘 공부 처음부터</button><button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
     <div class="note">${syncState}</div></div></div>`;
   const $=id=>document.getElementById(id);
@@ -867,6 +868,10 @@ function renderParent(){
   $("rc").onchange=e=>{S.reviewCap=+e.target.value;save();};
   $("dep").onchange=e=>{ if(e.target.value){S.depart=e.target.value;save();render();} };
   $("skip").onclick=()=>{S.offset++;save();render();};
+  $("today0").onclick=()=>{ const today=todayStr(), sn=S.daySnap; // undo everything done today: answers, timer, sticker
+    if(sn&&sn.date===today){ S.items=sn.items; S.talks=sn.talks; S.weekPass=sn.weekPass; S.nextWeek=sn.nextWeek; }
+    if(S.days[today]){ const k=S.stickers.lastIndexOf(S.days[today].sticker); if(k>=0) S.stickers.splice(k,1); delete S.days[today]; }
+    S.heardLog=(S.heardLog||[]).filter(x=>x.d!==today); S.session=null; S.daySnap=null; save(); view="home"; render(); };
   if($("real")) $("real").onclick=()=>{S.offset=0;save();render();};
   $("pinchg").onclick=()=>{ gate={mode:"new",input:"",first:null,err:""}; view="gate"; render(); };
   if($("reset")) $("reset").onclick=()=>{confirmReset=true;render();};
