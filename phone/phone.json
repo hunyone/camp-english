@@ -3,9 +3,10 @@
   {
    "id": "p1111s0",
    "lesson": "2026-11-11",
-   "text": "I went to the playground.",
-   "ko": "나는 놀이터에 갔어요",
-   "url": "phone/617ace994f6c.mp3"
+   "text": "I went to Dugeun Dugeun.",
+   "ko": "나는 두근두근 다녀왔어요",
+   "url": "phone/9f9e66b2dac1.mp3",
+   "match": "I went to"
   },
   {
    "id": "p1111s1",
@@ -84,9 +85,10 @@
      "url": "phone/d713c8282fd1.mp3"
     },
     {
-     "text": "I went to the playground.",
-     "ko": "나는 놀이터에 갔어요",
-     "url": "phone/617ace994f6c.mp3"
+     "text": "I went to Dugeun Dugeun.",
+     "ko": "나는 두근두근 다녀왔어요",
+     "url": "phone/9f9e66b2dac1.mp3",
+     "match": "I went to"
     }
    ]
   },

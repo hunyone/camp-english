@@ -702,7 +702,7 @@ async function act(c,a){
       const r=await listenOnce();
       if(cur()!==c||c.st.fb==="timeout"||view!=="lesson") return; c.st.listening=false;
       if((r.err&&!speechOK)||micBusy){ render(); return; }
-      const target= step==="answer" ? it.q[c.st.yes?0:1] : it.text;
+      const target= step==="answer" ? it.q[c.st.yes?0:1] : (it.match||it.text);
       c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)";
       const targets= step==="answer" ? [target].concat(it.qfull?[it.qfull[c.st.yes?0:1],(c.st.yes?"Yes, ":"No, ")+it.qfull[c.st.yes?0:1]]:[]) : [target];
       const okSay=!!(r.alts&&targets.some(tg=>matches(tg,r.alts,it.week===6))); if(r.alts&&r.alts.length) logHeard(it.text,r.alts,okSay);
@@ -731,7 +731,7 @@ async function act(c,a){
       if(a==="mic"){ if(c.st.listening||c.st.fb) return; if(!c.st.t0) c.st.t0=Date.now()+300; c.st.listening=true; render(); const r=await listenOnce();
         if(cur()!==c||c.st.fb==="timeout"||view!=="lesson") return; c.st.listening=false;
         if((r.err&&!speechOK)||micBusy){ render(); return; }
-        c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; ok=!!(r.alts&&matches(t.lines[mine].text,r.alts,true)); if(r.alts&&r.alts.length) logHeard(t.lines[mine].text,r.alts,ok);
+        c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; ok=!!(r.alts&&matches(t.lines[mine].match||t.lines[mine].text,r.alts,true)); if(r.alts&&r.alts.length) logHeard(t.lines[mine].text,r.alts,ok);
         if(!ok){ if(r.alts&&r.alts.length){ c.st.tries++; buzz(); } render();
           if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&(!c.st.t0||Date.now()-c.st.t0<LIMIT-1200)) act(c,"mic"); },700);
           return; } }
