@@ -484,6 +484,7 @@ function saveSession(){ S.session={date:todayStr(),week:curWeek(),i:L.i,elapsed:
 function startLesson(){
   const ss=S.session, resume=ss&&ss.date===todayStr()&&ss.week===curWeek()&&ss.i<ss.queue.length;
   const queue=resume?ss.queue:buildQueue();
+  if(resume&&!queue.some(c=>(byId[c.id]&&byId[c.id].src==="phone")||(c.type==="talk"&&talkById[c.id]&&talkById[c.id].src==="phone"))) queue.splice(ss.i,0,...phoneCards()); // mission started before the phone corner existed
   L={queue,i:resume?ss.i:0,total:queue.length,wrong:new Set(),retried:new Set(),done:new Set(),base:resume?(ss.elapsed||0):0,tStart:Date.now()};
   saveSession();
   view="lesson"; enterCard(); render();
