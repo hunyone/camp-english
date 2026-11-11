@@ -55,6 +55,7 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .card{background:var(--card);border:2px solid var(--line);border-radius:30px;padding:26px 22px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;min-height:420px;justify-content:center}
 .tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .tag{font-family:var(--f-disp);font-size:15px;padding:3px 12px;border-radius:999px;background:var(--sun-soft);color:#8A5A00}
+.tag.phone{background:#E8DDF7;color:#6B4FA0}
 .tag.rev{background:var(--lake-soft);color:var(--lake)}
 .tag.bonus{background:var(--maple-soft);color:var(--maple)}
 .tag.talk{background:var(--pine-soft);color:var(--pine)}
@@ -220,7 +221,7 @@ function setupScreen(msg){
    <div class="err">${msg||""}</div></div>`;
   document.getElementById("packin").onchange=async e=>{
     const f=e.target.files[0]; if(!f) return;
-    try{ const txt=await f.text(); const d=JSON.parse(txt); if(!d.items||!d.talks) throw 0; if((d.v||0)<7){ setupScreen("예전 파일이에요. 새로 받은 cheonilmun-pack.json 파일을 골라 주세요."); return; } try{ await idbSet("pack",txt); }catch(_){} main(d); }
+    try{ const txt=await f.text(); const d=JSON.parse(txt); if(!d.items||!d.talks) throw 0; if((d.v||0)<7){ setupScreen("예전 파일이에요. 새로 받은 cheonilmun-pack.json 파일을 골라 주세요."); return; } try{ await idbSet("pack",txt); }catch(_){} d.phone=await getPhone(); main(d); }
     catch(_){ setupScreen("이 파일이 아니에요. cheonilmun-pack.json 파일을 골라 주세요."); }
   };
 }
@@ -228,9 +229,10 @@ function setupScreen(msg){
   const EMBED = null;
   if(EMBED){ main(EMBED); return; }
   let txt=null; try{ txt=await idbGet("pack"); }catch(e){}
-  if(txt){ try{ const d=JSON.parse(txt); if((d.v||0)>=7){ main(d); return; } setupScreen("앱이 새로 바뀌었어요. 새로 받은 cheonilmun-pack.json 파일을 한 번만 다시 골라 주세요."); return; }catch(e){} }
+  if(txt){ try{ const d=JSON.parse(txt); if((d.v||0)>=7){ d.phone=await getPhone(); main(d); return; } setupScreen("앱이 새로 바뀌었어요. 새로 받은 cheonilmun-pack.json 파일을 한 번만 다시 골라 주세요."); return; }catch(e){} }
   setupScreen();
 })();
+async function getPhone(){ try{ const r=await fetch("phone/phone.json",{cache:"no-cache"}); if(r.ok) return await r.json(); }catch(e){} return null; }
 function main(DATA){
 const STICKERS = ["🐰","🧁","🦄","💗","🐼","🍓","🌈","🌸","🐥","👑","🐱","🍰","🧚","💖","🐶","🍩","🪄","🌷","🐹","🍭","👸","💕","🐨","🍦","🎀","🌼","🦋","🍒","⭐","🎂"];
 const INTERVALS = [0,1,2,4,7,14,30];
@@ -241,6 +243,15 @@ const byId = Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const talkById = Object.fromEntries(TALKS.map(t=>[t.id,t]));
 ITEMS.forEach(it=>{ it.src_audio = it.b64 ? "data:audio/mpeg;base64,"+it.b64 : null; delete it.b64; });
 TALKS.forEach(t=>t.lines.forEach(l=>{ l.src_audio = l.b64 ? "data:audio/mpeg;base64,"+l.b64 : null; delete l.b64; }));
+// 전화영어 corner: sentences from 서현's phone-English classes (phone/phone.json in the repo)
+const PHONE=(DATA.phone&&DATA.phone.items)||[], PTALKS=(DATA.phone&&DATA.phone.talks)||[];
+PHONE.forEach(i=>{ i.src="phone"; i.src_audio=i.url; byId[i.id]=i; });
+PTALKS.forEach(t=>{ t.src="phone"; t.lines.forEach(l=>l.src_audio=l.url); talkById[t.id]=t; });
+const PHONE_SAY=4, PHONE_TALK=2;
+function phoneCards(){ const today=todayStr();
+  const rank=s=>!s?1:(s.recentWrong>0?0:(s.due<=today?2:9));
+  const order=(arr,store,n)=>arr.map((x,k)=>({x,k,r:rank(store[x.id])})).filter(o=>o.r<9).sort((a,b)=>a.r-b.r||(b.x.lesson>a.x.lesson?1:b.x.lesson<a.x.lesson?-1:a.k-b.k)).slice(0,n).map(o=>o.x);
+  return order(PHONE,S.items,PHONE_SAY).map(i=>({type:"say",id:i.id,fresh:true,phone:true})).concat(order(PTALKS,S.talks,PHONE_TALK).map(t=>({type:"talk",id:t.id,phone:true}))); }
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=15000;
@@ -397,6 +408,7 @@ function weekRange(w){ const b=ITEMS.filter(i=>i.src==="book"&&i.week===w&&i.day
   return `책 Day ${lo} ~ Day ${lo+6} (${d0} ~ ${end})`; }
 function buildQueue(wArg){
   const w=wArg||curWeek(), q=[];
+  const ph=wArg?[]:phoneCards(); q.push(...ph);
   const book=ITEMS.filter(i=>i.src==="book"&&i.week===w);
   const pass=(S.weekPass||{})[w]||0;
   // group book sentences by word (He is shy / She is shy = one topic); ~3 items per topic, he/she only once per topic
@@ -417,7 +429,7 @@ function buildQueue(wArg){
   const hsPool=ITEMS.filter(i=>i.week===w&&(i.who===HE||i.who===SHE)&&/^(he|she|is he|is she|does he|does she)\b/i.test(i.text));
   shuffle(hsPool).slice(0,S.whoCount??3).forEach(x=>q.push({type:"pick",kind:"hs",id:x.id}));
   if(w===5){ const tt=ITEMS.filter(i=>i.week===5&&!i.q&&/^(This|That) is/.test(i.text)); if(tt.length) q.push({type:"pick",kind:"tt",id:pickOne(tt).id}); }
-  const weak=wArg?[]:ITEMS.filter(i=>i.week!==w&&S.items[i.id]&&S.items[i.id].recentWrong>0).slice(0,S.reviewCap);
+  const weak=wArg?[]:ITEMS.filter(i=>i.week!==w&&S.items[i.id]&&S.items[i.id].recentWrong>0).slice(0,ph.length?Math.max(2,S.reviewCap-2):S.reviewCap);
   weak.forEach(it=>q.push({type:"say",id:it.id,fresh:false}));
   TALKS.filter(t=>t.week===w).forEach(t=>q.push({type:"talk",id:t.id}));
   return q;
@@ -453,8 +465,8 @@ function renderHome(){
   else if(!q.some(c=>c.type!=="tip")) mission=`<div class="mission"><h2>오늘은 할 게 없어요</h2><div class="sub">내일 다시 와요!</div></div>`;
   else {
     const w=curWeek(), ss=S.session, resume=ss&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
-    const sayN=q.filter(c=>c.type==="say").length, pickN=n(c=>c.type==="pick"), talkN=n(c=>c.type==="talk");
-    mission=`<div class="mission"><h2>오늘의 미션 · ${w}주차</h2><div class="plan">${weekRange(w)}<br>말하기 ${sayN}문장${pickN?` · 누구일까 ${pickN}개`:""}${talkN?` · 대화 ${talkN}개`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
+    const phN=q.filter(c=>c.phone).length, sayN=q.filter(c=>c.type==="say").length, pickN=n(c=>c.type==="pick"), talkN=n(c=>c.type==="talk");
+    mission=`<div class="mission"><h2>오늘의 미션 · ${w}주차</h2><div class="plan">${weekRange(w)}<br>말하기 ${sayN}문장${pickN?` · 누구일까 ${pickN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${phN?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
   }
   const dn=["일","월","화","수","목","금","토"], wk=[];
   for(let i=6;i>=0;i--){ const d=addDays(today,-i); const [y,m,dd]=d.split("-").map(Number);
@@ -489,7 +501,7 @@ function enterCard(){
     const t=talkById[c.id], s=S.talks[c.id];
     c.mode = !s||s.box<2 ? "choose" : (s.box<4 ? "sayB" : "sayA");
     if(c.mode==="choose"){
-      const others=shuffle(TALKS.filter(x=>x.id!==t.id&&x.week<=Math.max(S.bookWeek,2)).map(x=>x.lines[1].text).filter(x=>x!==t.lines[1].text));
+      const others=shuffle((t.src==="phone"?PTALKS:TALKS).filter(x=>x.id!==t.id&&(t.src==="phone"||x.week<=Math.max(S.bookWeek,2))).map(x=>x.lines[1].text).filter(x=>x!==t.lines[1].text));
       c.opts=shuffle([t.lines[1].text,...[...new Set(others)].slice(0,2)]);
     }
   }
@@ -527,7 +539,7 @@ function prepOrder(c,it){
 
 function tagHTML(c,it){
   const t=[];
-  if(c.type==="say"){ if(!c.fresh) t.push(`<span class="tag rev">복습</span>`); }
+  if(c.type==="say"){ if(it&&it.src==="phone") t.push(`<span class="tag phone">📞 전화영어</span>`); if(!c.fresh) t.push(`<span class="tag rev">복습</span>`); }
   return `<div class="tags">${t.join("")}</div>`;
 }
 function picHTML(it){ return ""; }
@@ -599,7 +611,7 @@ function sayBody(c){
 }
 function talkBody(c){
   const t=talkById[c.id], A=t.lines[0], B=t.lines[1];
-  const tag=`<div class="tags"><span class="tag talk">💬 대화 ${t.src==="extra"?"· 캠프 생활":"· 책 "+t.week+"주차"}</span></div>`;
+  const tag=`<div class="tags"><span class="tag talk">${t.src==="phone"?"📞 전화영어 · 선생님 질문":"💬 대화 "+(t.src==="extra"?"· 캠프 생활":"· 책 "+t.week+"주차")}</span></div>`;
   if(c.mode==="choose"){
     const done=c.st.fb;
     return `${tag}<div class="chat"><div class="bubble a"><div class="en">${h(A.text)}</div><div class="ko">${h(A.ko)}</div></div>
@@ -829,6 +841,7 @@ function renderParent(){
   <div class="panel"><h3>바꿔 말하기 문장 (${tx}개: 의문문, 부정문, he/she)</h3>${bar(cx,tx)}<div class="note">한 번도 안 틀리고 세 번 넘게 맞히면 "아는 문장"이 돼요.</div></div>
   <div class="panel"><h3>자주 틀리는 문장 <span class="note">저녁에 이것만 한두 개 같이 말해 보세요</span></h3><div class="list">${weak.length?weak.map(row).join(""):`<div class="note">아직 틀린 문장이 없어요.</div>`}</div></div>
   <div class="panel"><details><summary>앱이 들은 말 (최근 ${Math.min(30,(S.heardLog||[]).length)}개)</summary><div class="note">❌는 틀렸다고 나온 것. 서현이가 맞게 말했는데 ❌라면 이 화면을 찍어서 보내 주세요.</div><div class="list">${(S.heardLog||[]).slice(0,30).map(x=>`<div class="row" style="grid-template-columns:auto 1fr"><span>${x.ok?"⭕":"❌"}</span><div class="t">${h(x.t)}<small>들은 말: ${h(x.h)} · ${x.d.slice(5)}</small></div></div>`).join("")||`<div class="note">아직 없어요.</div>`}</div></details></div>
+  ${PHONE.length?`<div class="panel"><h3>📞 전화영어 문장 (${PHONE.length+PTALKS.length}개)</h3><div class="note">하루에 문장 ${PHONE_SAY}개 + 선생님 질문 ${PHONE_TALK}개씩 4주차 미션 앞에 섞여 나와요. 맞히면 덜 나오고, 틀리면 다음 날 다시 나와요.</div><div class="list">${PHONE.map(i=>{ const s=S.items[i.id], k=status(s); return `<div class="row" style="grid-template-columns:1fr auto auto"><div class="t">${h(i.text)}<small>${h(i.ko)} · ${i.lesson.slice(5).replace("-","/")} 수업${s?` · 틀림 ${s.wrong}번`:""}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span><button class="mini" data-play="${i.id}" aria-label="듣기">🔊</button></div>`; }).join("")}${PTALKS.map(t=>{ const s=S.talks[t.id], k=status(s); return `<div class="row" style="grid-template-columns:1fr auto"><div class="t">${h(t.lines[0].text)} → ${h(t.lines[1].text)}<small>선생님 질문 · ${t.lines[1].ko}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span></div>`; }).join("")}</div></div>`:""}
   <div class="panel"><h3>최근 4주</h3><div class="cal">${cells.join("")}</div></div>
   <div class="panel"><details><summary>전체 문장 보기 (${avail.length}개)</summary><div class="list">${avail.map(row).join("")}</div></details></div>
   <div class="panel"><h3>설정</h3>
