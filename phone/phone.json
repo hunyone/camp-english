@@ -111,6 +111,50 @@
    "text": "I have a new room.",
    "ko": "나는 새 방이 생겼어요",
    "url": "phone/6994d333f93b.mp3"
+  },
+  {
+   "id": "p1111s16",
+   "lesson": "2026-11-11",
+   "text": "My mom gave me a present.",
+   "ko": "엄마가 나한테 선물을 줬어요",
+   "url": "phone/975275ed8742.mp3"
+  },
+  {
+   "id": "p1111s17",
+   "lesson": "2026-11-11",
+   "text": "I didn't have time to eat cake.",
+   "ko": "나는 케이크 먹을 시간이 없었어요",
+   "url": "phone/9037d2b9353f.mp3"
+  },
+  {
+   "id": "p1111s18",
+   "lesson": "2026-11-11",
+   "text": "I had a party with my family.",
+   "ko": "나는 가족이랑 파티를 했어요",
+   "url": "phone/80d631f9e6e3.mp3"
+  },
+  {
+   "id": "p1111s19",
+   "lesson": "2026-11-11",
+   "text": "It's very cold in Korea.",
+   "ko": "한국은 정말 추워요",
+   "url": "phone/e0cb709be43d.mp3"
+  },
+  {
+   "id": "p1111w0",
+   "lesson": "2026-11-11",
+   "kind": "word",
+   "text": "street",
+   "ko": "거리",
+   "url": "phone/3ea0aa9b69e1.mp3"
+  },
+  {
+   "id": "p1111w1",
+   "lesson": "2026-11-11",
+   "kind": "word",
+   "text": "people",
+   "ko": "사람들",
+   "url": "phone/1b6948fd1d61.mp3"
   }
  ],
  "talks": [
@@ -175,6 +219,22 @@
      "text": "It's in my room.",
      "ko": "내 방에 있어요",
      "url": "phone/033dedfad7a3.mp3"
+    }
+   ]
+  },
+  {
+   "id": "p1111t4",
+   "lesson": "2026-11-11",
+   "lines": [
+    {
+     "text": "How was your birthday?",
+     "ko": "생일 어땠어?",
+     "url": "phone/d0f4ece881ba.mp3"
+    },
+    {
+     "text": "I had a party with my family.",
+     "ko": "나는 가족이랑 파티를 했어요",
+     "url": "phone/80d631f9e6e3.mp3"
     }
    ]
   }

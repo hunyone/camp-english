@@ -541,7 +541,7 @@ function prepOrder(c,it){
 
 function tagHTML(c,it){
   const t=[];
-  if(c.type==="say"){ if(it&&it.src==="phone") t.push(`<span class="tag phone">📞 전화영어</span>`); if(!c.fresh) t.push(`<span class="tag rev">복습</span>`); }
+  if(c.type==="say"){ if(it&&it.src==="phone") t.push(`<span class="tag phone">📞 전화영어${it.kind==="word"?" · 단어":""}</span>`); if(!c.fresh) t.push(`<span class="tag rev">복습</span>`); }
   return `<div class="tags">${t.join("")}</div>`;
 }
 function picHTML(it){ return ""; }
