@@ -261,7 +261,7 @@ TALKS.forEach(t=>t.lines.forEach(l=>{ l.src_audio = l.b64 ? "data:audio/mpeg;bas
 const PHONE=(DATA.phone&&DATA.phone.items)||[], PTALKS=(DATA.phone&&DATA.phone.talks)||[];
 PHONE.forEach(i=>{ i.src="phone"; i.src_audio=i.url; byId[i.id]=i; });
 PTALKS.forEach(t=>{ t.src="phone"; t.lines.forEach(l=>l.src_audio=l.url); talkById[t.id]=t; });
-const PHONE_SAY=10, PHONE_TALK=2, TENSE_N=2;
+const PHONE_UNITS=2, PHONE_SAY=10, PHONE_TALK=1, TENSE_N=2; // dad 2026-11-13: few sentences a day, each drilled as a pattern
 const TENSE=(DATA.phone&&DATA.phone.tense)||[];
 // Phone sentences repeat as patterns (dad 2026-11-13): base sentence, then stage 1 (swap the last word), stage 2 (swap who), stage 3 (question & answer).
 // Stage 1 comes right after the base sentence; the next stage opens once every card of the stage before was answered right (and not missed lately).
@@ -276,9 +276,9 @@ function phoneCards(){ const today=todayStr();
   const units=PBASE.map((b,k)=>{ const st=openStage(b); const list=[];
     const rb=rank(S.items[b.id],b); if(rb<9) list.push({x:b,r:rb});
     if(st===1||st===2) pDrills(b,st).forEach(d=>{ const r=rank(S.items[d.id],{pri:b.pri}); if(r<9) list.push({x:d,r}); });
-    return {b,k,list:list.slice(0,4),r:Math.min(...list.map(o=>o.r),9)}; }).filter(u=>u.list.length)
+    return {b,k,list:list.slice(0,5),r:Math.min(...list.map(o=>o.r),9)}; }).filter(u=>u.list.length)
     .sort((a,b)=>a.r-b.r||(b.b.lesson>a.b.lesson?1:b.b.lesson<a.b.lesson?-1:a.k-b.k));
-  const say=[]; for(const u of units){ if(say.length>=PHONE_SAY) break; say.push(...u.list.map(o=>o.x)); }
+  const say=[]; for(const u of units.slice(0,PHONE_UNITS)) say.push(...u.list.map(o=>o.x));
   const talks=PTALKS.map((t,k)=>{ if(t.base){ const b=byId[t.base]; if(!b||openStage(b)<3) return null; } const r=rank(S.talks[t.id],t); return r<9?{t,k,r}:null; }).filter(Boolean)
     .sort((a,b)=>a.r-b.r||a.k-b.k).slice(0,PHONE_TALK).map(o=>o.t);
   const tz=shuffle(TENSE).sort((a,b)=>((S.items[b.id]||{}).recentWrong||0)-((S.items[a.id]||{}).recentWrong||0)).slice(0,TENSE_N);
@@ -893,7 +893,7 @@ function renderParent(){
   <div class="panel"><h3>바꿔 말하기 문장 (${tx}개: 의문문, 부정문, he/she)</h3>${bar(cx,tx)}<div class="note">한 번도 안 틀리고 세 번 넘게 맞히면 "아는 문장"이 돼요.</div></div>
   <div class="panel"><h3>자주 틀리는 문장 <span class="note">저녁에 이것만 한두 개 같이 말해 보세요</span></h3><div class="list">${weak.length?weak.map(row).join(""):`<div class="note">아직 틀린 문장이 없어요.</div>`}</div></div>
   <div class="panel"><details><summary>앱이 들은 말 (최근 ${Math.min(30,(S.heardLog||[]).length)}개)</summary><div class="note">❌는 틀렸다고 나온 것. 서현이가 맞게 말했는데 ❌라면 이 화면을 찍어서 보내 주세요.</div><div class="list">${(S.heardLog||[]).slice(0,30).map(x=>`<div class="row" style="grid-template-columns:auto 1fr"><span>${x.ok?"⭕":"❌"}</span><div class="t">${h(x.t)}<small>들은 말: ${h(x.h)} · ${x.d.slice(5)}</small></div></div>`).join("")||`<div class="note">아직 없어요.</div>`}</div></details></div>
-  ${PHONE.length?`<div class="panel"><h3>📞 전화영어 (수업 문장 ${PBASE.length}개 · 바꿔 말하기 포함 ${PHONE.length}개)</h3><div class="note">매일 미션 맨 앞에 수업 문장과 그 패턴 연습이 ${PHONE_SAY}개 정도, 선생님 질문 ${PHONE_TALK}개, 어제/매일 고르기 ${TENSE_N}개가 나와요. 각 문장은 ① 뒤 단어 바꾸기 → ② 앞 사람 바꾸기 → ③ 질문하고 대답하기 순서로, 앞 단계 문장을 다 맞히면 다음 단계가 열려요.</div><div class="list">${PBASE.map(i=>{ const s=S.items[i.id], k=status(s), st=openStage(i), stl=[1,2,3].some(n=>pDrills(i,n).length)?" · 지금 "+["","① 뒤 단어 바꾸기","② 앞 사람 바꾸기","③ 질문·대답"][st]:""; return `<div class="row" style="grid-template-columns:1fr auto auto"><div class="t">${h(i.text)}<small>${h(i.ko)} · ${i.lesson.slice(5).replace("-","/")} 수업${stl}${s?` · 틀림 ${s.wrong}번`:""}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span><button class="mini" data-play="${i.id}" aria-label="듣기">🔊</button></div>`; }).join("")}${PTALKS.filter(t=>!t.base).map(t=>{ const s=S.talks[t.id], k=status(s); return `<div class="row" style="grid-template-columns:1fr auto"><div class="t">${h(t.lines[0].text)} → ${h(t.lines[1].text)}<small>선생님 질문 · ${t.lines[1].ko}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span></div>`; }).join("")}</div></div>`:""}
+  ${PHONE.length?`<div class="panel"><h3>📞 전화영어 (수업 문장 ${PBASE.length}개 · 바꿔 말하기 포함 ${PHONE.length}개)</h3><div class="note">매일 미션 맨 앞에 수업 문장 ${PHONE_UNITS}개와 각 문장의 패턴 연습(문장마다 최대 5장), 선생님 질문 ${PHONE_TALK}개, 어제/매일 고르기 ${TENSE_N}개가 나와요. 각 문장은 ① 뒤 단어 바꾸기 → ② 앞 사람 바꾸기 → ③ 질문하고 대답하기 순서로, 앞 단계 문장을 다 맞히면 다음 단계가 열려요.</div><div class="list">${PBASE.map(i=>{ const s=S.items[i.id], k=status(s), st=openStage(i), stl=[1,2,3].some(n=>pDrills(i,n).length)?" · 지금 "+["","① 뒤 단어 바꾸기","② 앞 사람 바꾸기","③ 질문·대답"][st]:""; return `<div class="row" style="grid-template-columns:1fr auto auto"><div class="t">${h(i.text)}<small>${h(i.ko)} · ${i.lesson.slice(5).replace("-","/")} 수업${stl}${s?` · 틀림 ${s.wrong}번`:""}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span><button class="mini" data-play="${i.id}" aria-label="듣기">🔊</button></div>`; }).join("")}${PTALKS.filter(t=>!t.base).map(t=>{ const s=S.talks[t.id], k=status(s); return `<div class="row" style="grid-template-columns:1fr auto"><div class="t">${h(t.lines[0].text)} → ${h(t.lines[1].text)}<small>선생님 질문 · ${t.lines[1].ko}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span></div>`; }).join("")}</div></div>`:""}
   <div class="panel"><h3>최근 4주</h3><div class="cal">${cells.join("")}</div></div>
   <div class="panel"><details><summary>전체 문장 보기 (${avail.length}개)</summary><div class="list">${avail.map(row).join("")}</div></details></div>
   <div class="panel"><h3>설정</h3>
