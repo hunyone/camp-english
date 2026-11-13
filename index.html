@@ -119,7 +119,8 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .pickstk button.on{border-color:#A77BF3;background:#F3ECFF;transform:scale(1.08)}
 .big.skip{background:var(--lake);color:#fff}
 .hintans.frame{letter-spacing:1px;color:#6B4FA0}
-.when{font-family:var(--f-disp);font-size:26px;padding:6px 18px;border-radius:999px;margin-bottom:4px}
+.when{font-family:var(--f-disp);font-size:44px;padding:14px 40px;border-radius:24px;margin:6px 0 10px;border:3px solid currentColor}
+.tag.tz{font-size:22px;padding:6px 18px}
 .when.w-past{background:#FFE3EE;color:#C2457A}
 .when.w-now{background:#E3F4EA;color:#2E8B57}
 .feedback{width:100%;border-radius:22px;padding:16px;font-family:var(--f-disp);font-size:24px;display:flex;flex-direction:column;align-items:center;gap:10px}
@@ -672,7 +673,7 @@ function talkBody(c){
 function pickBody(c){
   const done=c.st.fb;
   if(c.kind==="tense"){ const z=TZ[c.id];
-    return `<div class="tags"><span class="tag phone">📞 어제 일? 매일 일?</span></div><div class="when w-${z.when==="어제"?"past":"now"}">${z.when==="어제"?"📅 어제":z.when==="매일"?"🔁 매일":"⏰ 지금"}</div><div class="ko big">${h(z.ko)}</div>
+    return `<div class="tags"><span class="tag phone tz">📞 어제 일? 매일 일?</span></div><div class="when w-${z.when==="어제"?"past":"now"}">${z.when==="어제"?"📅 어제":z.when==="매일"?"🔁 매일":"⏰ 지금"}</div><div class="ko big">${h(z.ko)}</div>
       <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
       ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! 💖":"앗!"}<small>${h(z.note)}</small><button class="big next" data-act="next">계속 →</button></div>`:""}`; }
   if(c.kind==="hs"){
