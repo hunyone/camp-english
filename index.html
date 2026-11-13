@@ -516,7 +516,10 @@ function startLesson(){
   const ss=S.session, resume=ss&&ss.date===todayStr()&&ss.week===curWeek()&&ss.i<ss.queue.length;
   if(!S.daySnap||S.daySnap.date!==todayStr()) S.daySnap={date:todayStr(),items:JSON.parse(JSON.stringify(S.items)),talks:JSON.parse(JSON.stringify(S.talks)),weekPass:JSON.parse(JSON.stringify(S.weekPass||{})),nextWeek:S.nextWeek};
   const queue=resume?ss.queue:buildQueue();
-  if(resume&&!queue.some(c=>(byId[c.id]&&byId[c.id].src==="phone")||(c.type==="talk"&&talkById[c.id]&&talkById[c.id].src==="phone"))) queue.splice(ss.i,0,...phoneCards()); // mission started before the phone corner existed
+  if(resume){ // phone cards not reached yet are rebuilt, so a mission saved before an update still gets the newest phone sentences
+    const isPh=c=>c.phone||(byId[c.id]&&byId[c.id].src==="phone")||(c.type==="talk"&&talkById[c.id]&&talkById[c.id].src==="phone")||c.kind==="tense";
+    const done=queue.slice(0,ss.i), rest=queue.slice(ss.i).filter(c=>!isPh(c)), fresh=phoneCards().filter(c=>!done.some(d=>d.id===c.id));
+    queue.splice(0,queue.length,...done,...fresh,...rest); }
   L={queue,i:resume?ss.i:0,total:queue.length,wrong:new Set(),retried:new Set(),done:new Set(),base:resume?(ss.elapsed||0):0,tStart:Date.now()};
   saveSession();
   view="lesson"; enterCard(); render();
@@ -907,7 +910,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState}</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/13-3 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
