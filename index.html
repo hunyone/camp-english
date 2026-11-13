@@ -117,6 +117,11 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .pickstk{display:flex;gap:16px;justify-content:center;margin:10px 0}
 .pickstk button{font-size:64px;width:110px;height:110px;border-radius:28px;border:3px solid #E6DAFA;background:#fff;cursor:pointer}
 .pickstk button.on{border-color:#A77BF3;background:#F3ECFF;transform:scale(1.08)}
+.big.skip{background:var(--lake);color:#fff}
+.hintans.frame{letter-spacing:1px;color:#6B4FA0}
+.when{font-family:var(--f-disp);font-size:26px;padding:6px 18px;border-radius:999px;margin-bottom:4px}
+.when.w-past{background:#FFE3EE;color:#C2457A}
+.when.w-now{background:#E3F4EA;color:#2E8B57}
 .feedback{width:100%;border-radius:22px;padding:16px;font-family:var(--f-disp);font-size:24px;display:flex;flex-direction:column;align-items:center;gap:10px}
 .feedback.good{background:var(--pine-soft);color:var(--pine)}
 .feedback.bad{background:var(--maple-soft);color:var(--maple)}
@@ -255,11 +260,28 @@ TALKS.forEach(t=>t.lines.forEach(l=>{ l.src_audio = l.b64 ? "data:audio/mpeg;bas
 const PHONE=(DATA.phone&&DATA.phone.items)||[], PTALKS=(DATA.phone&&DATA.phone.talks)||[];
 PHONE.forEach(i=>{ i.src="phone"; i.src_audio=i.url; byId[i.id]=i; });
 PTALKS.forEach(t=>{ t.src="phone"; t.lines.forEach(l=>l.src_audio=l.url); talkById[t.id]=t; });
-const PHONE_SAY=6, PHONE_TALK=2;
+const PHONE_SAY=10, PHONE_TALK=2, TENSE_N=2;
+const TENSE=(DATA.phone&&DATA.phone.tense)||[];
+// Phone sentences repeat as patterns (dad 2026-11-13): base sentence, then stage 1 (swap the last word), stage 2 (swap who), stage 3 (question & answer).
+// Stage 1 comes right after the base sentence; the next stage opens once every card of the stage before was answered right (and not missed lately).
+const TZ=Object.fromEntries(TENSE.map(z=>[z.id,z]));
+const PBASE=PHONE.filter(i=>!i.base);
+const pDrills=(b,st)=>st===3?PTALKS.filter(t=>t.base===b.id):PHONE.filter(i=>i.base===b.id&&i.stage===st);
+const mastered=(arr,store)=>arr.every(x=>store[x.id]&&store[x.id].box>=1&&store[x.id].recentWrong===0);
+function openStage(b){ let st=1;
+  for(;st<=2;st++){ const d=pDrills(b,st); if(d.length&&!mastered(d,S.items)) return st; } return 3; }
 function phoneCards(){ const today=todayStr();
   const rank=(s,x)=>!s?(x.pri?-1:1):(s.recentWrong>0?0:(s.due<=today?2:9));
-  const order=(arr,store,n)=>arr.map((x,k)=>({x,k,r:rank(store[x.id],x)})).filter(o=>o.r<9).sort((a,b)=>a.r-b.r||(b.x.lesson>a.x.lesson?1:b.x.lesson<a.x.lesson?-1:a.k-b.k)).slice(0,n).map(o=>o.x);
-  return order(PHONE,S.items,PHONE_SAY).map(i=>({type:"say",id:i.id,fresh:true,phone:true})).concat(order(PTALKS,S.talks,PHONE_TALK).map(t=>({type:"talk",id:t.id,phone:true}))); }
+  const units=PBASE.map((b,k)=>{ const st=openStage(b); const list=[];
+    const rb=rank(S.items[b.id],b); if(rb<9) list.push({x:b,r:rb});
+    if(st===1||st===2) pDrills(b,st).forEach(d=>{ const r=rank(S.items[d.id],{pri:b.pri}); if(r<9) list.push({x:d,r}); });
+    return {b,k,list:list.slice(0,4),r:Math.min(...list.map(o=>o.r),9)}; }).filter(u=>u.list.length)
+    .sort((a,b)=>a.r-b.r||(b.b.lesson>a.b.lesson?1:b.b.lesson<a.b.lesson?-1:a.k-b.k));
+  const say=[]; for(const u of units){ if(say.length>=PHONE_SAY) break; say.push(...u.list.map(o=>o.x)); }
+  const talks=PTALKS.map((t,k)=>{ if(t.base){ const b=byId[t.base]; if(!b||openStage(b)<3) return null; } const r=rank(S.talks[t.id],t); return r<9?{t,k,r}:null; }).filter(Boolean)
+    .sort((a,b)=>a.r-b.r||a.k-b.k).slice(0,PHONE_TALK).map(o=>o.t);
+  const tz=shuffle(TENSE).sort((a,b)=>((S.items[b.id]||{}).recentWrong||0)-((S.items[a.id]||{}).recentWrong||0)).slice(0,TENSE_N);
+  return say.map(i=>({type:"say",id:i.id,fresh:true,phone:true})).concat(talks.map(t=>({type:"talk",id:t.id,phone:true})),tz.map(z=>({type:"pick",kind:"tense",id:z.id,phone:true}))); }
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -515,6 +537,7 @@ function enterCard(){
       c.opts=shuffle([t.lines[1].text,...[...new Set(others)].slice(0,2)]);
     }
   }
+  if(c.type==="pick"&&c.kind==="tense"){ const z=TZ[c.id]; c.right=z.right; c.opts=shuffle([z.right,z.wrong]); return; }
   if(c.type==="pick"){
     const it=byId[c.id];
     if(c.kind==="hs"){
@@ -592,7 +615,7 @@ function sayBody(c){
     if(c.st.fb==="timeout") return `${tagHTML(c,it)}<div class="timeout">Time out!</div><div class="feedback bad">이렇게 말하는 거예요<div class="en">${h(it.text)}</div><div class="ko">${h(it.ko)}</div></div>`;
     if(c.st.fb==="giveup") return `${tagHTML(c,it)}${picHTML(it)}<div class="feedback bad">이렇게 말하는 거예요<div class="en">${h(it.text)}</div><div class="btns"><button class="big play" data-act="play">🔊 듣기</button><button class="big next" data-act="next">알겠어요 →</button></div></div>`;
     return `${tagHTML(c,it)}${picHTML(it)}<div class="ko big">${h(it.ko)}</div>${micBlock(c,"마이크를 터치하고 영어로 말해 봐요!")}
-      ${c.st.showAns?`<div class="hintans">${h(it.text)}</div>`:""}<div class="btns"><button class="big soft" data-act="hint">🔊 정답 듣기</button></div>`;
+      ${helpRow(c,it.text)}`;
   }
   if(step==="order"){
     const ans=c.st.picked.map((p,k)=>`<button class="tile" data-a="${k}">${h(c.pool[p].w)}</button>`).join("");
@@ -619,6 +642,11 @@ function sayBody(c){
     return `${body0}<div class="btns"><button class="big soft" data-act="playq">🔊 다시 듣기</button></div>${micBlock(c,"마이크를 누르고 영어로 대답해 봐요!")}`;
   }
 }
+// hint = the sentence frame: first words kept, the rest as first letters ("My mom g___ me a p______.")
+function frameOf(t){ const w=t.split(" "), keep=w.length<=3?1:2; return w.map((x,k)=>k<keep?x:x.replace(/^([A-Za-z])([A-Za-z']*)/,(m,a,b)=>a+"_".repeat(b.length))).join(" "); }
+function helpRow(c,text,hintAct){
+  const box=c.st.showAns?`<div class="hintans">${h(text)}</div>`:(c.st.showHint?`<div class="hintans frame">${h(frameOf(text))}</div>`:"");
+  return `${box}<div class="btns">${c.st.showAns||c.st.showHint?"":`<button class="big soft" data-act="hintTxt">💡 힌트</button>`}<button class="big soft" data-act="${hintAct||"hint"}">🔊 정답 듣기</button>${c.st.showAns?`<button class="big skip" data-act="skip">다음 →</button>`:""}</div>`; }
 function koA(c,A){ return c.st.showKo||c.st.fb?`<div class="ko">${h(A.ko)}</div>`:`<button class="kobtn" data-act="showKo">한국말 보기</button>`; }
 function talkBody(c){
   const t=talkById[c.id], A=t.lines[0], B=t.lines[1];
@@ -639,10 +667,14 @@ function talkBody(c){
   return `${tag}<div class="chat">${meFirst?"":`<div class="bubble a"><div class="en">${h(A.text)}</div>${koA(c,A)}</div>`}
      <div class="bubble ${meFirst?"a":"b"}"><div class="ko big">${h(meSay.ko)}</div><div class="ko">${meFirst?"내가 먼저 말해요":"내 차례!"}</div></div></div>
      ${meFirst?"":`<div class="btns"><button class="big soft" data-act="playA">🔊 다시 듣기</button></div>`}
-     ${micBlock(c,"마이크를 터치하고 영어로 말해 봐요!")}${c.st.showAns?`<div class="hintans">${h(meSay.text)}</div>`:""}<div class="btns"><button class="big soft" data-act="hintTalk">🔊 정답 듣기</button></div>`;
+     ${micBlock(c,"마이크를 터치하고 영어로 말해 봐요!")}${helpRow(c,meSay.text,"hintTalk")}`;
 }
 function pickBody(c){
   const done=c.st.fb;
+  if(c.kind==="tense"){ const z=TZ[c.id];
+    return `<div class="tags"><span class="tag phone">📞 어제 일? 매일 일?</span></div><div class="when w-${z.when==="어제"?"past":"now"}">${z.when==="어제"?"📅 어제":z.when==="매일"?"🔁 매일":"⏰ 지금"}</div><div class="ko big">${h(z.ko)}</div>
+      <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
+      ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! 💖":"앗!"}<small>${h(z.note)}</small><button class="big next" data-act="next">계속 →</button></div>`:""}`; }
   if(c.kind==="hs"){
     return `<div class="tags"><span class="tag">누구일까?</span></div><div class="pic"><span class="who ${c.boy?"he":"she"}">${c.person[0]}</span></div>
       <div class="ko big">${h(c.ko)}</div><div class="ko">${h(c.person[1])}</div>
@@ -671,7 +703,9 @@ function bindCard(c){
   app.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{ c.st.picked.push(+b.dataset.p); checkOrder(c); });
   app.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{ c.st.picked.splice(+b.dataset.a,1); render(); });
   app.querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>{ const t=talkById[c.id]; const k=+b.dataset.opt; c.st.chosen=k; const ok=c.opts[k]===t.lines[1].text; c.st.fb=ok?"good":"bad"; srs(S.talks,c.id,ok); ok?chime():buzz(); render(); autoNext(c,playLine(t,1),1000); });
-  app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{ const k=+b.dataset.pick; c.st.chosen=k; const ok=c.opts[k]===c.right; c.st.fb=ok?"good":"bad"; ok?chime():buzz(); render(); autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc("pick",null,c.right)),ok?700:1300); });
+  app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{ const k=+b.dataset.pick; c.st.chosen=k; const ok=c.opts[k]===c.right; c.st.fb=ok?"good":"bad"; ok?chime():buzz(); render();
+    if(c.kind==="tense"){ srs(S.items,c.id,ok); const z=TZ[c.id]; autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc(z.id,z.url,z.right)),ok?900:2600); return; }
+    autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc("pick",null,c.right)),ok?700:1300); });
   app.querySelectorAll("[data-ans]").forEach(b=>b.onclick=()=>{ const it=byId[c.id]; const ans=it.q[c.st.yes?0:1]; const ok=c.opts[+b.dataset.ans]===ans; finishStep(c,ok); playSrc("ans",null,ans); });
   app.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{ const e=TIPS[c.c].ex[+b.dataset.ex][1]; playSrc("tip",null,e.replace("→",". ")); });
   // automatic sound + automatic mic when a card opens
@@ -706,6 +740,8 @@ async function act(c,a){
     const it=byId[c.id], step=c.steps[c.st.step];
     if(a==="play") return playItem(it);
     if(a==="playq") return playSrc("q",null,it.text);
+    if(a==="hintTxt"){ c.st.showHint=true; return render(); }
+    if(a==="skip"){ c.st.firstTry=false; return act(c,"next"); }
     if(a==="hint"){ c.st.firstTry=false; c.st.showAns=true; render(); return playItem(it); }
     if(a==="selfsaid"){ c.st.fb="good"; render(); autoNext(c,playItem(it)); return; }
     if(a==="mic"){ if(c.st.listening||c.st.fb) return; if(!c.st.t0) c.st.t0=Date.now()+300; c.st.listening=true; render();
@@ -734,6 +770,8 @@ async function act(c,a){
     const t=talkById[c.id];
     if(a==="playA") return playLine(t,0);
     if(a==="replay"){ await playLine(t,0); return playLine(t,1); }
+    if(a==="hintTxt"){ c.st.showHint=true; return render(); }
+    if(a==="skip"){ if(!c.st.fb) srs(S.talks,c.id,false); return advance(); }
     if(a==="showKo"){ c.st.showKo=true; return render(); }
     if(a==="hintTalk"){ c.st.firstTry=false; c.st.showAns=true; render(); return playLine(t,c.mode==="sayB"?1:0); }
     if(a==="selfsaid"||a==="mic"){
@@ -854,7 +892,7 @@ function renderParent(){
   <div class="panel"><h3>바꿔 말하기 문장 (${tx}개: 의문문, 부정문, he/she)</h3>${bar(cx,tx)}<div class="note">한 번도 안 틀리고 세 번 넘게 맞히면 "아는 문장"이 돼요.</div></div>
   <div class="panel"><h3>자주 틀리는 문장 <span class="note">저녁에 이것만 한두 개 같이 말해 보세요</span></h3><div class="list">${weak.length?weak.map(row).join(""):`<div class="note">아직 틀린 문장이 없어요.</div>`}</div></div>
   <div class="panel"><details><summary>앱이 들은 말 (최근 ${Math.min(30,(S.heardLog||[]).length)}개)</summary><div class="note">❌는 틀렸다고 나온 것. 서현이가 맞게 말했는데 ❌라면 이 화면을 찍어서 보내 주세요.</div><div class="list">${(S.heardLog||[]).slice(0,30).map(x=>`<div class="row" style="grid-template-columns:auto 1fr"><span>${x.ok?"⭕":"❌"}</span><div class="t">${h(x.t)}<small>들은 말: ${h(x.h)} · ${x.d.slice(5)}</small></div></div>`).join("")||`<div class="note">아직 없어요.</div>`}</div></details></div>
-  ${PHONE.length?`<div class="panel"><h3>📞 전화영어 문장 (${PHONE.length+PTALKS.length}개)</h3><div class="note">하루에 문장 ${PHONE_SAY}개 + 선생님 질문 ${PHONE_TALK}개씩 4주차 미션 앞에 섞여 나와요. 맞히면 덜 나오고, 틀리면 다음 날 다시 나와요.</div><div class="list">${PHONE.map(i=>{ const s=S.items[i.id], k=status(s); return `<div class="row" style="grid-template-columns:1fr auto auto"><div class="t">${h(i.text)}<small>${h(i.ko)} · ${i.lesson.slice(5).replace("-","/")} 수업${s?` · 틀림 ${s.wrong}번`:""}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span><button class="mini" data-play="${i.id}" aria-label="듣기">🔊</button></div>`; }).join("")}${PTALKS.map(t=>{ const s=S.talks[t.id], k=status(s); return `<div class="row" style="grid-template-columns:1fr auto"><div class="t">${h(t.lines[0].text)} → ${h(t.lines[1].text)}<small>선생님 질문 · ${t.lines[1].ko}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span></div>`; }).join("")}</div></div>`:""}
+  ${PHONE.length?`<div class="panel"><h3>📞 전화영어 (수업 문장 ${PBASE.length}개 · 바꿔 말하기 포함 ${PHONE.length}개)</h3><div class="note">매일 미션 맨 앞에 수업 문장과 그 패턴 연습이 ${PHONE_SAY}개 정도, 선생님 질문 ${PHONE_TALK}개, 어제/매일 고르기 ${TENSE_N}개가 나와요. 각 문장은 ① 뒤 단어 바꾸기 → ② 앞 사람 바꾸기 → ③ 질문하고 대답하기 순서로, 앞 단계 문장을 다 맞히면 다음 단계가 열려요.</div><div class="list">${PBASE.map(i=>{ const s=S.items[i.id], k=status(s), st=openStage(i), stl=["","① 뒤 단어 바꾸기","② 앞 사람 바꾸기","③ 질문·대답"][st]; return `<div class="row" style="grid-template-columns:1fr auto auto"><div class="t">${h(i.text)}<small>${h(i.ko)} · ${i.lesson.slice(5).replace("-","/")} 수업 · 지금 ${stl}${s?` · 틀림 ${s.wrong}번`:""}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span><button class="mini" data-play="${i.id}" aria-label="듣기">🔊</button></div>`; }).join("")}${PTALKS.filter(t=>!t.base).map(t=>{ const s=S.talks[t.id], k=status(s); return `<div class="row" style="grid-template-columns:1fr auto"><div class="t">${h(t.lines[0].text)} → ${h(t.lines[1].text)}<small>선생님 질문 · ${t.lines[1].ko}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span></div>`; }).join("")}</div></div>`:""}
   <div class="panel"><h3>최근 4주</h3><div class="cal">${cells.join("")}</div></div>
   <div class="panel"><details><summary>전체 문장 보기 (${avail.length}개)</summary><div class="list">${avail.map(row).join("")}</div></details></div>
   <div class="panel"><h3>설정</h3>
