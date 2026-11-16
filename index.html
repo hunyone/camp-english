@@ -630,7 +630,7 @@ function coachMsg(target,heard){
   const miss=T.filter(w=>!Hs.has(w)&&!SMALL.has(w)), extra=H.filter(w=>!Ts.has(w)&&!SMALL.has(w));
     if(!H.length) return "정답 듣기를 눌러서 한 번 들어 볼까?";
   // coach shows WHERE (gap), the 💡 hint shows first letters, 정답 듣기 gives the answer
-  const gapped=()=>target.split(" ").map(w=>{ const k=toks(w)[0]; return k&&miss.includes(k)?"( ? )"+(/[.?!]$/.test(w)?w.slice(-1):""):w; }).join(" ");
+  const gapped=()=>target.split(" ").map(w=>{ const k=toks(w)[0]; return k&&miss.includes(k)?w.replace(/^[A-Za-z]+/,"( ? )"):w; }).join(" ");
   if(extra.length&&miss.length) return `"${extra[0]}" 말고 다른 단어를 넣어 볼까? ${gapped()}`;
   if(miss.length) return `빠진 말이 있어요! ${gapped()}`;
   if(extra.length) return `"${extra[0]}"는 빼고 말해 볼까?`;
