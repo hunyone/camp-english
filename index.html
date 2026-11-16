@@ -786,7 +786,7 @@ async function act(c,a){
       if(cur()!==c||c.st.fb==="timeout"||view!=="lesson") return; c.st.listening=false;
       if((r.err&&!speechOK)||micBusy){ render(); return; }
       const target= step==="answer" ? it.q[c.st.yes?0:1] : (it.match||it.text);
-      c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; if(r.alts&&r.alts[0]){ c.st.raw=r.alts[0]; c.st.tgt=target; }
+      c.st.heard=(r.alts&&r.alts[0])||c.st.raw||"(잘 안 들렸어요)"; if(r.alts&&r.alts[0]){ c.st.raw=r.alts[0]; c.st.tgt=target; }
       const targets= step==="answer" ? [target].concat(it.qfull?[it.qfull[c.st.yes?0:1],(c.st.yes?"Yes, ":"No, ")+it.qfull[c.st.yes?0:1]]:[]) : [target];
       const okSay=!!(r.alts&&targets.some(tg=>matches(tg,r.alts,it.week===6))); if(r.alts&&r.alts.length) logHeard(it.text,r.alts,okSay);
       if(okSay){ c.st.fb="good"; chime(); render(); autoNext(c,new Promise(r=>setTimeout(r,350)).then(()=>playItem(it))); return; }
@@ -817,7 +817,7 @@ async function act(c,a){
       if(a==="mic"){ if(c.st.listening||c.st.fb) return; if(!c.st.t0) c.st.t0=Date.now()+300; c.st.listening=true; render(); const r=await listenOnce();
         if(cur()!==c||c.st.fb==="timeout"||view!=="lesson") return; c.st.listening=false;
         if((r.err&&!speechOK)||micBusy){ render(); return; }
-        c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; if(r.alts&&r.alts[0]){ c.st.raw=r.alts[0]; c.st.tgt=t.lines[mine].match||t.lines[mine].text; } ok=!!(r.alts&&matches(t.lines[mine].match||t.lines[mine].text,r.alts,true)); if(r.alts&&r.alts.length) logHeard(t.lines[mine].text,r.alts,ok);
+        c.st.heard=(r.alts&&r.alts[0])||c.st.raw||"(잘 안 들렸어요)"; if(r.alts&&r.alts[0]){ c.st.raw=r.alts[0]; c.st.tgt=t.lines[mine].match||t.lines[mine].text; } ok=!!(r.alts&&matches(t.lines[mine].match||t.lines[mine].text,r.alts,true)); if(r.alts&&r.alts.length) logHeard(t.lines[mine].text,r.alts,ok);
         if(!ok){ if(r.alts&&r.alts.length){ c.st.tries++; buzz(); } render();
           if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&!document.hidden) act(c,"mic"); },700);
           return; } }
