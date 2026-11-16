@@ -119,6 +119,9 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .pickstk button.on{border-color:#A77BF3;background:#F3ECFF;transform:scale(1.08)}
 .big.skip{background:var(--lake);color:#fff}
 .hintans.frame{letter-spacing:1px;color:#6B4FA0}
+.coach{background:#FFF4D6;border:2px solid #F5C451;color:#6A4A00;border-radius:18px;padding:10px 16px;font-size:20px;margin-top:6px;text-align:center}
+.testbanner{background:#FFE1E1;color:#B3261E;border-radius:16px;padding:10px 14px;margin:0 0 12px;font-size:16px;text-align:center}
+.wd small{display:block;font-size:11px;color:var(--muted)}
 .when{font-family:var(--f-disp);font-size:44px;padding:14px 40px;border-radius:24px;margin:6px 0 10px;border:3px solid currentColor}
 .tag.tz{font-size:22px;padding:6px 18px}
 .when.w-past{background:#FFE3EE;color:#C2457A}
@@ -293,6 +296,12 @@ function blank(){ return {v:2, items:{}, talks:{}, days:{}, stickers:[], tips:{}
 let S = blank();
 let dbDoc=null, syncState="이 기기에 저장 중";
 try{ const r=localStorage.getItem(LS_KEY); if(r) S=Object.assign(blank(),JSON.parse(r)); }catch(e){}
+function fixOffset(){ // "하루 넘기기" was left on from 11/13: move the records made since then back to their real dates
+  if(!S.offset||S.mig1116) return; const n=S.offset, nd={};
+  for(const [d,v] of Object.entries(S.days)){ if(d>="2026-11-14"){ const r=addDays(d,-n); if(!S.days[r]||r>="2026-11-14") nd[r]=v; } else if(!nd[d]) nd[d]=v; }
+  S.days=nd; if(S.session&&S.session.date>="2026-11-14") S.session.date=addDays(S.session.date,-n); if(S.daySnap&&S.daySnap.date>="2026-11-14") S.daySnap.date=addDays(S.daySnap.date,-n);
+  if(S.comboLog){ const c2={}; for(const [d,v] of Object.entries(S.comboLog)) c2[d>="2026-11-14"?addDays(d,-n):d]=v; S.comboLog=c2; }
+  S.offset=0; S.mig1116=true; save(); }
 function save(){
   S.updatedAt=Date.now();
   try{ localStorage.setItem(LS_KEY,JSON.stringify(S)); }catch(e){}
@@ -363,13 +372,17 @@ function fixPron(T,H){
     if(ti>=0&&hi>=0&&T[ti+1]==="is"&&H[hi+1]!=="is"&&H[hi-1]!=="is") H=[...H.slice(0,hi+1),"is",...H.slice(hi+1)]; }
   return H;
 }
+// same-meaning words and sound-alikes the recognizer writes differently (dad 2026-11-16)
+const SAME=[["restroom","toilet","washroom","bathroom"],["mom","mommy","mother","mum"],["dad","daddy","father"],["bee","b","be"],["okay","ok"],["cookie","cookies"],["candy","candies"]];
+const SMALL=new Set(["a","an","the"]);
+function sameWords(T,H){ return H.map(w=>{ for(const g of SAME){ if(g.includes(w)){ const t=T.find(x=>g.includes(x)); if(t) return t; } } return w; }); }
 function matches(target,alts,allowIt){
   let T=toks(target);
-  for(const alt of alts){
-    let H=fixPron(T,toks(alt));
-    if(allowIt) H=H.map(w=>w==="it"&&T.includes("that")?"that":w);
-    const tol = T.length>=5?1:0;
-    if(lcs(T,H) < T.length-tol) continue;
+  for(const alt of (alts||[]).slice(0,1)){ // only the recognizer's first guess (others made wrong answers pass)
+    let H=sameWords(T,fixPron(T,toks(alt)));
+    // (2026-11-16) "It's great" no longer passes for "That's great": the coach bubble says "it 말고 다른 단어"
+    const core=T.filter(w=>!SMALL.has(w)); // only a / an / the may be dropped
+    if(lcs(core,H.filter(w=>!SMALL.has(w))) < core.length) continue;
     if([...T].some(w=>KEY.has(w)&&!H.includes(w))) continue;
     if(T.some(w=>NEG.has(w)) !== H.some(w=>NEG.has(w))) continue;
     if(T.includes("not") !== H.includes("not")) continue;
@@ -397,7 +410,8 @@ function playSrc(key,src,text,role){
 }
 const playItem=it=>playSrc(it.id,it.src_audio,it.text);
 const playLine=(t,i)=>playSrc(t.id+"_"+i,t.lines[i].src_audio,t.lines[i].text,i===0?"a":"b");
-function chime(big){ if(!big&&L&&view==="lesson"){ const c=cur(); if(c&&c.st){ L.combo=c.st.firstTry===false?0:(L.combo||0)+1; c.st.combo=L.combo; } } try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C()); if(c.state==="suspended") c.resume();
+function chime(big){ if(!big&&L&&view==="lesson"){ const c=cur(); if(c&&c.st){ L.combo=c.st.firstTry===false?0:(L.combo||0)+1; c.st.combo=L.combo;
+      if(L.combo>=2){ const d=todayStr(); S.comboLog=S.comboLog||{}; if(L.combo>(S.comboLog[d]||0)) S.comboLog[d]=L.combo; if(L.combo>(S.bestCombo||0)){ S.bestCombo=L.combo; c.st.record=true; } } } } try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C()); if(c.state==="suspended") c.resume();
   (big?[523,659,784,1047]:[659,988]).forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.frequency.value=f; const t=c.currentTime+i*.11;
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.25,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.35); o.connect(g).connect(c.destination); o.start(t); o.stop(t+.4); }); }catch(e){} }
 function buzz(){ if(L) L.combo=0; try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C()); if(c.state==="suspended") c.resume();
@@ -433,11 +447,18 @@ function conceptsOf(it){
 
 // ---------- daily mission ----------
 const unlocked=it=>it.week<=S.bookWeek;
-function curWeek(){ let w=S.nextWeek||1; if(w>S.bookWeek||w<1) w=1; return w; }
+function curWeek(){ if(S.nextWeek===0) return 0; let w=S.nextWeek||1; if(w>S.bookWeek||w<1) w=1; return w; }
 function weekRange(w){ const b=ITEMS.filter(i=>i.src==="book"&&i.week===w&&i.day); if(!b.length) return ""; const lo=Math.min(...b.map(i=>i.day)), d0=b.find(i=>i.day===lo).date;
   const m=d0.match(/(\d+)월 (\d+)일/); let end=""; if(m){ const dt=new Date(2026,+m[1]-1,+m[2]+6); end=`${dt.getMonth()+1}월 ${dt.getDate()}일`; }
   return `책 Day ${lo} ~ Day ${lo+6} (${d0} ~ ${end})`; }
+function reviewAllQueue(){ // "전체 복습": a few book sentences from every open week + one dialogue per week + recent mistakes
+  const q=[...phoneCards()];
+  for(let w=1;w<=S.bookWeek;w++){ shuffle(ITEMS.filter(i=>i.src==="book"&&i.week===w)).slice(0,3).forEach(i=>q.push({type:"say",id:i.id,fresh:true})); }
+  shuffle(TALKS.filter(t=>t.week<=S.bookWeek)).slice(0,S.bookWeek).forEach(t=>q.push({type:"talk",id:t.id}));
+  ITEMS.filter(i=>S.items[i.id]&&S.items[i.id].recentWrong>0&&!q.some(c=>c.id===i.id)).slice(0,6).forEach(i=>q.push({type:"say",id:i.id,fresh:false}));
+  return q; }
 function buildQueue(wArg){
+  if(!wArg&&curWeek()===0) return reviewAllQueue();
   const w=wArg||curWeek(), q=[];
   const ph=wArg?[]:phoneCards(); q.push(...ph);
   const book=ITEMS.filter(i=>i.src==="book"&&i.week===w);
@@ -477,7 +498,7 @@ function render(){
 }
 function topBar(){
   return `<div class="top"><div class="brand" id="logo">💗 서현이 영어 비밀 연구소!</div>
-  <div class="chips"><span class="chip">🔥 ${streak()}</span><span class="chip">⭐ ${S.stickers.length}</span></div></div>`;
+  <div class="chips"><span class="chip">🔥 ${streak()}</span><span class="chip">⭐ ${S.stickers.length}</span>${S.bestCombo?`<span class="chip">💥 최고 콤보 ${S.bestCombo}</span>`:""}</div></div>`;
 }
 function bindLogo(){
   const el=document.getElementById("logo"); if(!el) return; let t=null;
@@ -497,14 +518,15 @@ function renderHome(){
   else {
     const w=curWeek(), ss=S.session, resume=ss&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
     const phN=q.filter(c=>c.phone).length, sayN=q.filter(c=>c.type==="say").length, pickN=n(c=>c.type==="pick"), talkN=n(c=>c.type==="talk");
-    mission=`<div class="mission"><h2>오늘의 미션 · ${w}주차</h2><div class="plan">${weekRange(w)}<br>말하기 ${sayN}문장${pickN?` · 누구일까 ${pickN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${phN?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
+    mission=`<div class="mission"><h2>오늘의 미션 · ${w?w+"주차":"전체 복습"}</h2><div class="plan">${w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${pickN?` · 누구일까 ${pickN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${phN?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
   }
   const dn=["일","월","화","수","목","금","토"], wk=[];
   for(let i=6;i>=0;i--){ const d=addDays(today,-i); const [y,m,dd]=d.split("-").map(Number);
-    wk.push(`<div class="wd ${S.days[d]?"on":""} ${i===0?"today":""}">${dn[new Date(y,m-1,dd).getDay()]}<b>${S.days[d]?h(S.days[d].sticker):"·"}</b></div>`); }
+    wk.push(`<div class="wd ${S.days[d]?"on":""} ${i===0?"today":""}">${dn[new Date(y,m-1,dd).getDay()]}<b>${S.days[d]?h(S.days[d].sticker):"·"}</b>${(S.comboLog||{})[d]>=2?`<small>콤보 ${S.comboLog[d]}</small>`:""}</div>`); }
   const slots=[]; const N=Math.max(20,Math.ceil((S.stickers.length+1)/10)*10);
   for(let i=0;i<N;i++) slots.push(S.stickers[i]?`<div class="slot">${S.stickers[i]}</div>`:`<div class="slot empty">${i+1}</div>`);
-  app.innerHTML=topBar()+mission+`<div class="section-t">이번 주 <small>매일 하면 불꽃이 커져요</small></div><div class="week">${wk.join("")}</div>`+
+  const banner=S.offset?`<div class="testbanner">⚠️ 테스트 날짜 모드예요 (실제보다 ${S.offset}일 뒤). 아빠 화면 → "오늘로 돌아오기"를 눌러 주세요.</div>`:"";
+  app.innerHTML=topBar()+banner+mission+`<div class="section-t">이번 주 <small>매일 하면 불꽃이 커져요</small></div><div class="week">${wk.join("")}</div>`+
     `<div class="section-t">스티커 모음 <small>${S.stickers.length}개 모았어요</small></div><div class="board">${slots.join("")}</div>`;
   bindLogo(); const s=document.getElementById("start"); if(s) s.onclick=startLesson;
 }
@@ -597,18 +619,29 @@ function renderLesson(){
   else if(c.type==="talk") body=talkBody(c);
   else body=pickBody(c);
   app.innerHTML=`<div class="lesson"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로">←</button><button class="backbtn" id="fwd" aria-label="앞으로" ${L.i>=L.queue.length-1?"disabled style=\"opacity:.3\"":""}>→</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${L.i+1} / ${L.queue.length}</div><div class="clock" id="clock">⏱ ${mmss(elapsed())}</div></div>
-   ${stepsHTML(c)}<div class="card ${c.type==="tip"?"tip":""}">${c.st&&c.st.fb==="good"&&c.st.combo>=2?`<div class="combo">COMBO ${c.st.combo}! 🔥</div>`:""}${body}</div></div>`;
+   ${stepsHTML(c)}<div class="card ${c.type==="tip"?"tip":""}">${c.st&&c.st.fb==="good"&&c.st.combo>=2?`<div class="combo">COMBO ${c.st.combo}! 🔥${c.st.record&&c.st.combo>=3?" 신기록!":""}</div>`:""}${body}</div></div>`;
   document.getElementById("quit").onclick=()=>{stopAll();saveSession();view="home";render();};
   document.getElementById("fwd").onclick=()=>{ if(L.i<L.queue.length-1){ stopAll(); L.i++; saveSession(); enterCard(); render(); } };
   document.getElementById("prev").onclick=()=>{ stopAll(); if(L.i>0){ L.i--; saveSession(); enterCard(); render(); } else { view="home"; render(); } };
   bindCard(c);
 }
+function coachMsg(target,heard){
+  const T=toks(target), H=sameWords(T,toks(heard||"")), Hs=new Set(H), Ts=new Set(T);
+  const miss=T.filter(w=>!Hs.has(w)&&!SMALL.has(w)), extra=H.filter(w=>!Ts.has(w)&&!SMALL.has(w));
+  const blank=w=>w[0]+"_".repeat(Math.max(0,w.length-1));
+  if(!H.length) return "정답 듣기를 눌러서 한 번 들어 볼까?";
+  if(extra.length&&miss.length) return `"${extra[0]}" 말고 다른 단어로 말해 볼까? 힌트: ${blank(miss[0])}`;
+  if(miss.length) return `빠진 말이 있어요! ${target.split(" ").map(w=>{ const k=toks(w)[0]; return k&&miss.includes(k)?blank(w.replace(/[.?!,]/g,"")):w; }).join(" ")}`;
+  if(extra.length) return `"${extra[0]}"는 빼고 말해 볼까?`;
+  return "순서를 바꿔서 말해 볼까? 💡 힌트를 눌러 봐요";
+}
+document.addEventListener("visibilitychange",()=>{ if(document.hidden||view!=="lesson"||!L) return; const c=cur(); if(c&&c.st&&!c.st.fb&&!c.st.listening&&speechOK&&((c.type==="say"&&c.steps&&c.steps[c.st.step]==="speak")||(c.type==="talk"&&c.mode!=="choose"))) setTimeout(()=>act(c,"mic"),400); });
 function micBlock(c,label){
   if(!speechOK) return `<div class="hint">${label}</div>
     <div class="typein"><input id="sayin" type="text" lang="en" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="여기를 누르고 키보드 🎤 로 말해요"><button class="big next" data-act="mic">확인</button></div>
     <div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>
     <button class="linkbtn" data-act="selfsaid">키보드 음성이 안 되면: 아빠한테 말하고 누르기</button>`;
-  return `<button class="mic ${c.st.listening?"on":""}" data-act="mic" aria-label="말하기">${POODLE}</button><div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>${micBusy&&!c.st.listening?`<div class="again">마이크를 다른 앱(줌 등)이 쓰고 있어요. 그 앱을 끄고 다시 눌러 주세요.</div>`:""}${!micBusy&&c.st.tries>0&&!c.st.fb&&!c.st.listening?`<div class="again">앗, 다시 한 번 말해 봐요!</div>`:""}`;
+  return `<button class="mic ${c.st.listening?"on":""}" data-act="mic" aria-label="말하기">${POODLE}</button><div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>${micBusy&&!c.st.listening?`<div class="again">마이크를 다른 앱(줌 등)이 쓰고 있어요. 그 앱을 끄고 다시 눌러 주세요.</div>`:""}${!micBusy&&c.st.tries>=3&&!c.st.fb&&c.st.tgt?`<div class="coach">🐩 ${h(coachMsg(c.st.tgt,c.st.raw))}</div>`:!micBusy&&c.st.tries>0&&!c.st.fb&&!c.st.listening?`<div class="again">앗, 다시 한 번 말해 봐요!</div>`:""}`;
 }
 function sayBody(c){
   const it=byId[c.id], step=c.steps[c.st.step];
@@ -753,13 +786,13 @@ async function act(c,a){
       if(cur()!==c||c.st.fb==="timeout"||view!=="lesson") return; c.st.listening=false;
       if((r.err&&!speechOK)||micBusy){ render(); return; }
       const target= step==="answer" ? it.q[c.st.yes?0:1] : (it.match||it.text);
-      c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)";
+      c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; if(r.alts&&r.alts[0]){ c.st.raw=r.alts[0]; c.st.tgt=target; }
       const targets= step==="answer" ? [target].concat(it.qfull?[it.qfull[c.st.yes?0:1],(c.st.yes?"Yes, ":"No, ")+it.qfull[c.st.yes?0:1]]:[]) : [target];
       const okSay=!!(r.alts&&targets.some(tg=>matches(tg,r.alts,it.week===6))); if(r.alts&&r.alts.length) logHeard(it.text,r.alts,okSay);
       if(okSay){ c.st.fb="good"; chime(); render(); autoNext(c,new Promise(r=>setTimeout(r,350)).then(()=>playItem(it))); return; }
       if(r.alts&&r.alts.length){ c.st.tries++; buzz(); }
       render();
-      if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&(c.st.relis=(c.st.relis||0)+1)<=3) act(c,"mic"); },700);
+      if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&!document.hidden) act(c,"mic"); },700);
       return;
     }
     if(a==="next"){
@@ -784,9 +817,9 @@ async function act(c,a){
       if(a==="mic"){ if(c.st.listening||c.st.fb) return; if(!c.st.t0) c.st.t0=Date.now()+300; c.st.listening=true; render(); const r=await listenOnce();
         if(cur()!==c||c.st.fb==="timeout"||view!=="lesson") return; c.st.listening=false;
         if((r.err&&!speechOK)||micBusy){ render(); return; }
-        c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; ok=!!(r.alts&&matches(t.lines[mine].match||t.lines[mine].text,r.alts,true)); if(r.alts&&r.alts.length) logHeard(t.lines[mine].text,r.alts,ok);
+        c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; if(r.alts&&r.alts[0]){ c.st.raw=r.alts[0]; c.st.tgt=t.lines[mine].match||t.lines[mine].text; } ok=!!(r.alts&&matches(t.lines[mine].match||t.lines[mine].text,r.alts,true)); if(r.alts&&r.alts.length) logHeard(t.lines[mine].text,r.alts,ok);
         if(!ok){ if(r.alts&&r.alts.length){ c.st.tries++; buzz(); } render();
-          if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&(c.st.relis=(c.st.relis||0)+1)<=3) act(c,"mic"); },700);
+          if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&!document.hidden) act(c,"mic"); },700);
           return; } }
       c.st.fb= ok?"good":"giveup"; srs(S.talks,c.id,ok&&c.st.firstTry); ok?chime():null; render();
       const p = c.mode==="sayA" ? playLine(t,0).then(()=>playLine(t,1)) : playLine(t,1);
@@ -820,7 +853,7 @@ function advance(){
 function finishLesson(){
   const today=todayStr(), owned=new Set(S.stickers), choices=STICKERS.filter(s=>!owned.has(s));
   const opts=shuffle(choices.length>=3?choices:STICKERS).slice(0,3), pick=opts[0]; L.stkOpts=opts;
-  const wk=curWeek(); S.nextWeek = wk>=S.bookWeek ? 1 : wk+1; S.session=null; S.weekPass=S.weekPass||{}; S.weekPass[wk]=(S.weekPass[wk]||0)+1;
+  const wk=curWeek(); S.nextWeek = wk===0||wk>=S.bookWeek ? 1 : wk+1; S.session=null; S.weekPass=S.weekPass||{}; S.weekPass[wk]=(S.weekPass[wk]||0)+1;
   const secs=Math.round(elapsed()/1000);
   if(!S.days[today]){ S.days[today]={sticker:pick,n:L.total,wrong:L.wrong.size,week:wk,secs}; S.stickers.push(pick); }
   save(); view="finish"; render(); fanfare();
@@ -901,7 +934,7 @@ function renderParent(){
   <div class="panel"><details><summary>전체 문장 보기 (${avail.length}개)</summary><div class="list">${avail.map(row).join("")}</div></details></div>
   <div class="panel"><h3>설정</h3>
     <div class="field"><label for="bw">책 진도</label><select id="bw">${[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n===S.bookWeek?"selected":""}>${n}주차까지</option>`).join("")}</select></div>
-    <div class="field"><label for="nb">오늘(다음) 할 주차</label><select id="nb">${Array.from({length:S.bookWeek},(_,k)=>k+1).map(n=>`<option value="${n}" ${n===curWeek()?"selected":""}>${n}주차</option>`).join("")}</select>
+    <div class="field"><label for="nb">오늘(다음) 할 주차</label><select id="nb">${Array.from({length:S.bookWeek},(_,k)=>k+1).map(n=>`<option value="${n}" ${n===curWeek()?"selected":""}>${n}주차</option>`).join("")}<option value="0" ${curWeek()===0?"selected":""}>전체 복습</option></select>
       <label for="nx">누구일까</label><select id="nx">${[0,1,2,3,4,5].map(n=>`<option ${n===(S.whoCount??3)?"selected":""}>${n}</option>`).join("")}</select>
       <label for="rc">복습 최대</label><select id="rc">${[4,6,8,10,12].map(n=>`<option ${n===S.reviewCap?"selected":""}>${n}</option>`).join("")}</select></div>
     <div class="field"><label for="dep">출발일</label><input type="date" id="dep" value="${S.depart}"></div>
@@ -910,7 +943,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/13-3 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/16-1 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
@@ -935,6 +968,8 @@ function renderParent(){
   if($("reset2")) $("reset2").onclick=()=>{ const keep={depart:S.depart,bookWeek:S.bookWeek,newBook:S.newBook,whoCount:S.whoCount,reviewCap:S.reviewCap,pin:S.pin}; S=Object.assign(blank(),keep); confirmReset=false; save(); render(); };
   if($("nores")) $("nores").onclick=()=>{confirmReset=false;render();};
 }
+fixOffset();
+if(!S.rev1117){ S.rev1117=true; if(S.days["2026-11-16"]&&S.nextWeek===1&&todayStr()<="2026-11-17"){ S.nextWeek=0; S.session=null; } save(); } // dad: whole review on 11/17 after week 7
 render();
 window._dbg={matches,buildQueue,finishLesson,get S(){return S},get L(){return L},render:()=>render(),save:()=>save(),setView:v=>{view=v;render();},get view(){return view}};
 }
