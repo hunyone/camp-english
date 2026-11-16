@@ -628,10 +628,11 @@ function renderLesson(){
 function coachMsg(target,heard){
   const T=toks(target), H=sameWords(T,toks(heard||"")), Hs=new Set(H), Ts=new Set(T);
   const miss=T.filter(w=>!Hs.has(w)&&!SMALL.has(w)), extra=H.filter(w=>!Ts.has(w)&&!SMALL.has(w));
-  const blank=w=>w[0]+"_".repeat(Math.max(0,w.length-1));
-  if(!H.length) return "정답 듣기를 눌러서 한 번 들어 볼까?";
-  if(extra.length&&miss.length) return `"${extra[0]}" 말고 다른 단어로 말해 볼까? 힌트: ${blank(miss[0])}`;
-  if(miss.length) return `빠진 말이 있어요! ${target.split(" ").map(w=>{ const k=toks(w)[0]; return k&&miss.includes(k)?blank(w.replace(/[.?!,]/g,"")):w; }).join(" ")}`;
+    if(!H.length) return "정답 듣기를 눌러서 한 번 들어 볼까?";
+  // coach shows WHERE (gap), the 💡 hint shows first letters, 정답 듣기 gives the answer
+  const gapped=()=>target.split(" ").map(w=>{ const k=toks(w)[0]; return k&&miss.includes(k)?"( ? )"+(/[.?!]$/.test(w)?w.slice(-1):""):w; }).join(" ");
+  if(extra.length&&miss.length) return `"${extra[0]}" 말고 다른 단어를 넣어 볼까? ${gapped()}`;
+  if(miss.length) return `빠진 말이 있어요! ${gapped()}`;
   if(extra.length) return `"${extra[0]}"는 빼고 말해 볼까?`;
   return "순서를 바꿔서 말해 볼까? 💡 힌트를 눌러 봐요";
 }
@@ -943,7 +944,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/16-1 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/16-2 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
