@@ -2052,5 +2052,167 @@
    ],
    "url": "phone/1940c7da67ef.mp3"
   }
- ]
+ ],
+ "games": {
+  "grab": [
+   {
+    "id": "gk0",
+    "word": "pen",
+    "emoji": "🖊️",
+    "text": "Take a pen!",
+    "ko": "펜을 집어요",
+    "url": "phone/18be69f3dec0.mp3"
+   },
+   {
+    "id": "gk1",
+    "word": "book",
+    "emoji": "📚",
+    "text": "Take a book!",
+    "ko": "책을 집어요",
+    "url": "phone/cc2957a51716.mp3"
+   },
+   {
+    "id": "gk2",
+    "word": "bus",
+    "emoji": "🚌",
+    "text": "Take a bus!",
+    "ko": "버스를 타요",
+    "url": "phone/ad1c716b7571.mp3"
+   },
+   {
+    "id": "gk3",
+    "word": "picture",
+    "emoji": "📷",
+    "text": "Take a picture!",
+    "ko": "사진을 찍어요",
+    "url": "phone/c38cba769edd.mp3"
+   },
+   {
+    "id": "gk4",
+    "word": "cookie",
+    "emoji": "🍪",
+    "text": "Take a cookie!",
+    "ko": "쿠키를 집어요",
+    "url": "phone/838995cfed1e.mp3"
+   },
+   {
+    "id": "gk5",
+    "word": "umbrella",
+    "emoji": "☂️",
+    "text": "Take an umbrella!",
+    "ko": "우산을 가져가요",
+    "url": "phone/1f6164aaa963.mp3"
+   }
+  ],
+  "where": [
+   {
+    "id": "gw00",
+    "animal": "🐱",
+    "place": "on",
+    "obj": "table",
+    "text": "The cat is on the table.",
+    "ko": "고양이가 탁자 위에 있어요",
+    "url": "phone/66583161f4fe.mp3"
+   },
+   {
+    "id": "gw01",
+    "animal": "🐱",
+    "place": "under",
+    "obj": "table",
+    "text": "The cat is under the table.",
+    "ko": "고양이가 탁자 아래에 있어요",
+    "url": "phone/7d87619f6cca.mp3"
+   },
+   {
+    "id": "gw02",
+    "animal": "🐱",
+    "place": "in",
+    "obj": "box",
+    "text": "The cat is in the box.",
+    "ko": "고양이가 상자 안에 있어요",
+    "url": "phone/63a81ab04e5e.mp3"
+   },
+   {
+    "id": "gw03",
+    "animal": "🐱",
+    "place": "on",
+    "obj": "box",
+    "text": "The cat is on the box.",
+    "ko": "고양이가 상자 위에 있어요",
+    "url": "phone/69b29563304a.mp3"
+   },
+   {
+    "id": "gw10",
+    "animal": "🐶",
+    "place": "on",
+    "obj": "table",
+    "text": "The dog is on the table.",
+    "ko": "강아지가 탁자 위에 있어요",
+    "url": "phone/73f3cde49ff9.mp3"
+   },
+   {
+    "id": "gw11",
+    "animal": "🐶",
+    "place": "under",
+    "obj": "table",
+    "text": "The dog is under the table.",
+    "ko": "강아지가 탁자 아래에 있어요",
+    "url": "phone/46212b23b0de.mp3"
+   },
+   {
+    "id": "gw12",
+    "animal": "🐶",
+    "place": "in",
+    "obj": "box",
+    "text": "The dog is in the box.",
+    "ko": "강아지가 상자 안에 있어요",
+    "url": "phone/0d53ce8b42b1.mp3"
+   },
+   {
+    "id": "gw13",
+    "animal": "🐶",
+    "place": "on",
+    "obj": "box",
+    "text": "The dog is on the box.",
+    "ko": "강아지가 상자 위에 있어요",
+    "url": "phone/481a06e672dd.mp3"
+   },
+   {
+    "id": "gw20",
+    "animal": "🐰",
+    "place": "on",
+    "obj": "table",
+    "text": "The rabbit is on the table.",
+    "ko": "토끼가 탁자 위에 있어요",
+    "url": "phone/49fdd43df1ad.mp3"
+   },
+   {
+    "id": "gw21",
+    "animal": "🐰",
+    "place": "under",
+    "obj": "table",
+    "text": "The rabbit is under the table.",
+    "ko": "토끼가 탁자 아래에 있어요",
+    "url": "phone/e9261932e773.mp3"
+   },
+   {
+    "id": "gw22",
+    "animal": "🐰",
+    "place": "in",
+    "obj": "box",
+    "text": "The rabbit is in the box.",
+    "ko": "토끼가 상자 안에 있어요",
+    "url": "phone/45ac2d4c4f58.mp3"
+   },
+   {
+    "id": "gw23",
+    "animal": "🐰",
+    "place": "on",
+    "obj": "box",
+    "text": "The rabbit is on the box.",
+    "ko": "토끼가 상자 위에 있어요",
+    "url": "phone/012711dc31ce.mp3"
+   }
+  ]
+ }
 }

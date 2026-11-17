@@ -48,6 +48,7 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .prog{flex:1;height:18px;background:var(--line);border-radius:999px;overflow:hidden}
 .pnum{font-family:var(--f-en);font-weight:600;font-size:20px;color:var(--muted);min-width:76px;text-align:right}
 .prog i{display:block;height:100%;background:var(--pine);border-radius:999px;transition:width .3s}
+.blankline{color:#6B4FB8;margin:8px 0 4px}
 .steps{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;min-height:36px}
 .step{font-family:var(--f-disp);font-size:17px;padding:6px 14px;border-radius:999px;background:var(--card);border:2px solid var(--line);color:var(--muted)}
 .step.cur{background:var(--lake);border-color:var(--lake);color:#fff}
@@ -126,11 +127,25 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;text-wrap:balance}
 .tag.tz{font-size:22px;padding:6px 18px}
 .when.w-past{background:#FFE3EE;color:#C2457A}
 .when.w-now{background:#E3F4EA;color:#2E8B57}
-.feedback{width:100%;border-radius:22px;padding:16px;font-family:var(--f-disp);font-size:24px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.feedback{width:100%;border-radius:22px;padding:18px;font-family:var(--f-disp);font-size:30px;display:flex;flex-direction:column;align-items:center;gap:10px}
 .feedback.good{background:var(--pine-soft);color:var(--pine)}
 .feedback.bad{background:var(--maple-soft);color:var(--maple)}
-.feedback .en{font-size:32px;color:var(--ink)}
-.feedback small{font-family:var(--f-body);font-size:18px;color:var(--ink)}
+.feedback .en{font-size:clamp(38px,6.5vw,52px);color:var(--ink)}
+.feedback small{font-family:var(--f-body);font-size:26px;color:var(--ink);text-align:center}
+.when .vs{display:block;font-size:.8em;margin-top:6px}
+b.vk{color:#7B4FD6;font-size:1.25em;text-decoration:underline;text-underline-offset:6px}
+.opt.right b.vk{color:inherit}
+.gamebox{position:relative;width:300px;height:230px;margin:6px auto 0}
+.g-an{position:absolute;left:50%;transform:translateX(-50%);font-size:64px;line-height:1;z-index:1}
+.g-top{position:absolute;left:30px;right:30px;bottom:130px;height:16px;background:#B07A4F;border-radius:6px}
+.g-leg{position:absolute;bottom:0;width:14px;height:130px;background:#8B5A3C;border-radius:4px}
+.g-box{position:absolute;left:75px;width:150px;bottom:0;height:100px;background:#D9A066;border:4px solid #A86F3A;border-top:none;border-radius:0 0 10px 10px;z-index:2}
+.grabrow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;max-width:520px;margin:10px auto}
+.grabrow button{font-size:64px;background:#fff;border:3px solid var(--line,#E5DDF5);border-radius:22px;padding:14px 0;cursor:pointer}
+.grabrow button.ok{border-color:var(--pine);background:var(--pine-soft);animation:fly .8s ease forwards}
+.grabrow button.no{border-color:var(--maple);background:var(--maple-soft)}
+@keyframes fly{to{transform:translateY(-150px) scale(.5);opacity:.2}}
+.hand{font-size:80px;line-height:1}
 .opts{display:flex;flex-direction:column;gap:12px;width:100%;max-width:560px}
 .opt{font-family:var(--f-en);font-weight:600;font-size:26px;background:var(--card);border:3px solid var(--line);border-bottom-width:6px;border-radius:18px;padding:14px 18px;text-align:left}
 .opt.right{border-color:var(--pine);background:var(--pine-soft)}
@@ -267,13 +282,14 @@ PTALKS.forEach(t=>{ t.src="phone"; t.lines.forEach(l=>l.src_audio=l.url); talkBy
 const PHONE_UNITS=2, PHONE_SAY=10, PHONE_TALK=1, TENSE_N=2; // dad 2026-11-13: few sentences a day, each drilled as a pattern
 const TENSE=(DATA.phone&&DATA.phone.tense)||[];
 const PMATCH=(DATA.phone&&DATA.phone.match)||[]; const MZ=Object.fromEntries(PMATCH.map(m=>[m.id,m])); // 단어 맞추기 (dad 2026-11-17)
+const GAMES=(DATA.phone&&DATA.phone.games)||{grab:[],where:[]}; const GZ={}; GAMES.grab.forEach(g=>GZ[g.id]=g); GAMES.where.forEach(g=>GZ[g.id]=g);
 const isPhoneDay=()=>S.phoneOnly===todayStr(); // "전화영어만" day: no book cards (dad 2026-11-17)
 // Phone sentences repeat as patterns (dad 2026-11-13): base sentence, then stage 1 (swap the last word), stage 2 (swap who), stage 3 (question & answer).
 // Stage 1 comes right after the base sentence; the next stage opens once every card of the stage before was answered right (and not missed lately).
 const TZ=Object.fromEntries(TENSE.map(z=>[z.id,z]));
 const PBASE=PHONE.filter(i=>!i.base);
 const pDrills=(b,st)=>st===3?PTALKS.filter(t=>t.base===b.id):PHONE.filter(i=>i.base===b.id&&i.stage===st);
-const mastered=(arr,store)=>arr.every(x=>store[x.id]&&store[x.id].box>=1&&store[x.id].recentWrong===0);
+const mastered=(arr,store)=>arr.every(x=>store[x.id]&&store[x.id].box>=2&&store[x.id].recentWrong===0); // box 2 = passed the 빈칸 step too
 function openStage(b){ let st=1;
   for(;st<=2;st++){ const d=pDrills(b,st); if(d.length&&!mastered(d,S.items)) return st; } return 3; }
 function phoneCards(){ const today=todayStr(), big=isPhoneDay();
@@ -289,7 +305,8 @@ function phoneCards(){ const today=todayStr(), big=isPhoneDay();
     .sort((a,b)=>a.r-b.r||a.k-b.k).slice(0,NT).map(o=>o.t);
   const wm=PMATCH.map((m,k)=>{ const r=rank(S.items[m.id],{pri:true}); return r<9?{m,k,r}:null; }).filter(Boolean).sort((a,b)=>a.r-b.r||a.k-b.k).slice(0,NM).map(o=>o.m);
   const tz=shuffle(TENSE).sort((a,b)=>((S.items[b.id]||{}).recentWrong||0)-((S.items[a.id]||{}).recentWrong||0)).slice(0,TENSE_N);
-  return say.map(i=>({type:"say",id:i.id,fresh:true,phone:true})).concat(talks.map(t=>({type:"talk",id:t.id,phone:true})),tz.map(z=>({type:"pick",kind:"tense",id:z.id,phone:true})),shuffle(wm).map(m=>({type:"pick",kind:"wm",id:m.id,phone:true}))); }
+  return say.map(i=>({type:"say",id:i.id,fresh:true,phone:true})).concat(talks.map(t=>({type:"talk",id:t.id,phone:true})),tz.map(z=>({type:"pick",kind:"tense",id:z.id,phone:true})),shuffle(wm).map(m=>({type:"pick",kind:"wm",id:m.id,phone:true})),
+    shuffle(GAMES.where).slice(0,big?2:1).map(g=>({type:"pick",kind:"where",id:g.id,phone:true})),shuffle(GAMES.grab).slice(0,big?2:0).map(g=>({type:"pick",kind:"grab",id:g.id,phone:true}))); }
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -524,8 +541,8 @@ function renderHome(){
   else {
     const w=curWeek(), ss=S.session, resume=ss&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
     const phN=q.filter(c=>c.phone).length, sayN=q.filter(c=>c.type==="say").length, pickN=n(c=>c.type==="pick"), talkN=n(c=>c.type==="talk");
-    const whoN=n(c=>c.kind==="hs"), wmN=n(c=>c.kind==="wm");
-    mission=`<div class="mission"><h2>오늘의 미션 · ${w===-1?"📞 전화영어 데이":w?w+"주차":"전체 복습"}</h2><div class="plan">${w===-1?"오늘은 전화영어 수업 문장만 연습해요":w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${whoN?` · 누구일까 ${whoN}개`:""}${wmN?` · 단어 맞추기 ${wmN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${phN&&w!==-1?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
+    const whoN=n(c=>c.kind==="hs"), wmN=n(c=>c.kind==="wm"), gmN=n(c=>c.kind==="where"||c.kind==="grab");
+    mission=`<div class="mission"><h2>오늘의 미션 · ${w===-1?"📞 전화영어 데이":w?w+"주차":"전체 복습"}</h2><div class="plan">${w===-1?"오늘은 전화영어 수업 문장만 연습해요":w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${whoN?` · 누구일까 ${whoN}개`:""}${wmN?` · 단어 맞추기 ${wmN}개`:""}${gmN&&w===-1?` · 그림 게임 ${gmN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${phN&&w!==-1?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
   }
   const dn=["일","월","화","수","목","금","토"], wk=[];
   for(let i=6;i>=0;i--){ const d=addDays(today,-i); const [y,m,dd]=d.split("-").map(Number);
@@ -546,7 +563,7 @@ function startLesson(){
   if(!S.daySnap||S.daySnap.date!==todayStr()) S.daySnap={date:todayStr(),items:JSON.parse(JSON.stringify(S.items)),talks:JSON.parse(JSON.stringify(S.talks)),weekPass:JSON.parse(JSON.stringify(S.weekPass||{})),nextWeek:S.nextWeek};
   const queue=resume?ss.queue:buildQueue();
   if(resume){ // phone cards not reached yet are rebuilt, so a mission saved before an update still gets the newest phone sentences
-    const isPh=c=>c.phone||(byId[c.id]&&byId[c.id].src==="phone")||(c.type==="talk"&&talkById[c.id]&&talkById[c.id].src==="phone")||c.kind==="tense"||c.kind==="wm";
+    const isPh=c=>c.phone||(byId[c.id]&&byId[c.id].src==="phone")||(c.type==="talk"&&talkById[c.id]&&talkById[c.id].src==="phone")||c.kind==="tense"||c.kind==="wm"||c.kind==="where"||c.kind==="grab";
     const done=queue.slice(0,ss.i), rest=queue.slice(ss.i).filter(c=>!isPh(c)), fresh=phoneCards().filter(c=>!done.some(d=>d.id===c.id));
     queue.splice(0,queue.length,...done,...fresh,...rest); }
   L={queue,i:resume?ss.i:0,total:queue.length,wrong:new Set(),retried:new Set(),done:new Set(),base:resume?(ss.elapsed||0):0,tStart:Date.now()};
@@ -560,6 +577,8 @@ function enterCard(){
     const it=byId[c.id];
     c.steps = ["speak"];
     c.st.step=0; prepOrder(c,it);
+    // phone sentences climb 3 steps (dad 2026-11-17): 1 listen & repeat → 2 one blank → 3 Korean only
+    if(it.src==="phone"){ const s=S.items[c.id]; c.lv=!s?1:(s.box<2||s.recentWrong>0)?2:3; }
     if(it.q){ c.st.yes=Math.random()<.6; }
   }
   if(c.type==="talk"){
@@ -571,6 +590,8 @@ function enterCard(){
     }
   }
   if(c.type==="pick"&&c.kind==="tense"){ const z=TZ[c.id]; c.right=z.right; c.opts=shuffle([z.right,z.wrong]); return; }
+  if(c.type==="pick"&&c.kind==="where"){ const g=GZ[c.id]; c.right=g.place; c.opts=["in","on","under"]; return; }
+  if(c.type==="pick"&&c.kind==="grab"){ const g=GZ[c.id]; c.right=g.id; c.opts=shuffle([g.id,...shuffle(GAMES.grab.filter(x=>x.id!==g.id)).slice(0,3).map(x=>x.id)]); return; }
   if(c.type==="pick"&&c.kind==="wm"){ const m=MZ[c.id]; c.right=m.text;
     const others=shuffle(PMATCH.map(x=>x.text).filter(t=>t!==m.text&&!(m.near||[]).includes(t)));
     c.opts=shuffle([m.text,...[...(m.near||[]),...others].slice(0,2)]); return; }
@@ -654,8 +675,19 @@ function micBlock(c,label){
     <button class="linkbtn" data-act="selfsaid">키보드 음성이 안 되면: 아빠한테 말하고 누르기</button>`;
   return `<button class="mic ${c.st.listening?"on":""}" data-act="mic" aria-label="말하기">${POODLE}</button><div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>${micBusy&&!c.st.listening?`<div class="again">마이크를 다른 앱(줌 등)이 쓰고 있어요. 그 앱을 끄고 다시 눌러 주세요.</div>`:""}${!micBusy&&c.st.tries>=3&&!c.st.fb&&c.st.tgt?`<div class="coach">🐩 ${h(coachMsg(c.st.tgt,c.st.raw))}</div>`:!micBusy&&c.st.tries>0&&!c.st.fb&&!c.st.listening?`<div class="again">앗, 다시 한 번 말해 봐요!</div>`:""}`;
 }
+const wkey=w=>w.toLowerCase().replace(/[^a-z']/g,"");
+function blankOf(it){ // blank the word(s) the pattern swaps: compare with the base sentence (or its first drill)
+  const b=it.base?byId[it.base]:it, other=it.base?b:PHONE.find(d=>d.base===it.id&&d.stage===1)||PHONE.find(d=>d.base===it.id);
+  const W=it.text.split(" "); let idx=[];
+  if(other){ const O=new Set(other.text.split(" ").map(wkey)); idx=W.map((w,k)=>O.has(wkey(w))?-1:k).filter(k=>k>=0); }
+  if(!idx.length||idx.length>2){ const k=W.length-1; idx=idx.length?idx.slice(0,2):[k]; }
+  return W.map((w,k)=>idx.includes(k)?w.replace(/^[A-Za-z']+/,"( ? )"):w).join(" "); }
 function sayBody(c){
   const it=byId[c.id], step=c.steps[c.st.step];
+  if(step==="speak"&&c.lv===1&&!c.st.fb) return `<div class="tags"><span class="tag phone">📞 👂 듣고 따라 말하기</span></div><div class="en big">${h(it.text)}</div><div class="ko">${h(it.ko)}</div>
+      <div class="btns"><button class="big soft" data-act="play">🔊 다시 듣기</button></div>${micBlock(c,"듣고 똑같이 따라 말해 봐요!")}`;
+  if(step==="speak"&&c.lv===2&&!c.st.fb) return `<div class="tags"><span class="tag phone">📞 ✏️ 빈칸 채워 말하기</span></div><div class="ko big">${h(it.ko)}</div><div class="en blankline">${h(blankOf(it))}</div>${micBlock(c,"빈칸을 채워서 문장 전체를 말해 봐요!")}
+      ${helpRow(c,it.text)}`;
   if(step==="listen") return `${tagHTML(c,it)}${picHTML(it)}<div class="en">${h(it.text)}</div><div class="ko">${h(it.ko)}</div>
     <div class="btns"><button class="big play" data-act="play">🔊 듣기</button><button class="big next" data-act="next">다음 →</button></div>`;
   if(step==="speak"){
@@ -705,7 +737,7 @@ function talkBody(c){
       ${done?`<div class="bubble b"><div class="en">${h(B.text)}</div><div class="ko">${h(B.ko)}</div></div>`:""}</div>
       ${done?"":`<div class="hint">뭐라고 대답할까?</div>`}
       <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===B.text?"right":""} ${done&&c.st.chosen===k&&o!==B.text?"wrong":""}" data-opt="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
-      ${done?`<div class="btns"><button class="big play" data-act="replay">🔊 다시 듣기</button><button class="big next" data-act="next">계속 →</button></div>`:`<div class="btns"><button class="big soft" data-act="playA">🔊 듣기</button></div>`}`;
+      ${done?`${c.st.echoOk?`<div class="feedback good">따라 말하기 성공! 💖</div>`:micBlock(c,"이제 대답을 따라 말해 봐요!")}<div class="btns"><button class="big soft" data-act="replay">🔊 다시 듣기</button><button class="big skip" data-act="skip">다음 →</button></div>`:`<div class="btns"><button class="big soft" data-act="playA">🔊 듣기</button></div>`}`;
   }
   const meSay = c.mode==="sayB" ? B : A, other = c.mode==="sayB" ? A : B;
   const meFirst = c.mode==="sayA";
@@ -720,9 +752,23 @@ function talkBody(c){
 function pickBody(c){
   const done=c.st.fb;
   if(c.kind==="tense"){ const z=TZ[c.id];
-    return `<div class="tags"><span class="tag phone tz">📞 어제 일? 매일 일?</span></div><div class="when w-${z.when==="어제"?"past":"now"}">${z.when==="어제"?"📅 어제":z.when==="매일"?"🔁 매일":"⏰ 지금"}</div><div class="ko big">${h(z.ko)}</div>
-      <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
+    // dad 2026-11-17: show the two verbs to compare ("어제는 is? was?") and mark them in the choices
+    const rw=z.right.split(" "), ww=z.wrong.split(" "), di=rw.findIndex((w,k)=>w!==ww[k]), past=z.when==="어제";
+    const vr=(rw[di]||"").replace(/[.?!]/g,""), vw=(ww[di]||"").replace(/[.?!]/g,""), pair=past?[vw,vr]:[vr,vw];
+    const mark=o=>o.split(" ").map((w,k)=>k===di?`<b class="vk">${h(w)}</b>`:h(w)).join(" ");
+    return `<div class="tags"><span class="tag phone tz">📞 어제 일? 매일 일?</span></div><div class="when w-${past?"past":"now"}">${past?"📅 어제는":z.when==="매일"?"🔁 매일은":"⏰ 지금은"}<span class="vs">${h(pair[0])}? ${h(pair[1])}?</span></div><div class="ko big">${h(z.ko)}</div>
+      <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${mark(o)}</button>`).join("")}</div>
       ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! 💖":"앗!"}<small>${h(z.note)}</small><button class="big next" data-act="next">계속 →</button></div>`:""}`; }
+  if(c.kind==="where"){ const g=GZ[c.id]; const tb=g.obj==="table";
+    const an=`<span class="g-an" style="bottom:${tb?(g.place==="on"?146:8):(g.place==="on"?104:80)}px">${g.animal}</span>`;
+    const scene=tb?`<div class="g-top"></div><div class="g-leg" style="left:44px"></div><div class="g-leg" style="right:44px"></div>`:`<div class="g-box"></div>`;
+    return `<div class="tags"><span class="tag phone">📞 📦 어디 있을까?</span></div><div class="gamebox">${scene}${an}</div><div class="ko big">${done?h(g.ko):"어디에 있을까요?"}</div>
+      <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${o}</button>`).join("")}</div>
+      ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! 💖":"앗! 이렇게 말해요"}<div class="en">${h(g.text)}</div>${c.st.echoOk?"따라 말하기 성공! 💖":micBlock(c,"문장으로 따라 말해 봐요!")}<div class="btns"><button class="big soft" data-act="playg">🔊 다시 듣기</button><button class="big skip" data-act="skip">다음 →</button></div></div>`:""}`; }
+  if(c.kind==="grab"){ const g=GZ[c.id];
+    return `<div class="tags"><span class="tag phone">📞 ✋ 집어 봐요!</span></div><div class="hand">✋</div><div class="ko">잘 듣고 눌러 봐요!</div>
+      <div class="grabrow">${c.opts.map((o,k)=>`<button class="${c.st.fb==="good"&&o===c.right?"ok":""} ${c.st.miss&&c.st.miss.includes(k)?"no":""}" data-grab="${k}" ${done?"disabled":""}>${GZ[o].emoji}</button>`).join("")}</div>
+      ${done?`<div class="feedback good">딩동댕! 💖<div class="en">${h(g.text)}</div><small>${h(g.ko)}</small></div>`:`<div class="btns"><button class="big soft" data-act="playg">🔊 다시 듣기</button></div>`}`; }
   if(c.kind==="wm"){ const m=MZ[c.id];
     return `<div class="tags"><span class="tag phone">📞 단어 맞추기</span></div><div class="pic"><span>${m.emoji||""}</span></div><div class="ko big">${h(m.ko)}</div><div class="ko">영어로 뭘까요?</div>
       <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
@@ -754,11 +800,16 @@ function bindCard(c){
   if(inp){ inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); const btn=app.querySelector('[data-act="mic"]'); btn&&btn.click(); } }); }
   app.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{ c.st.picked.push(+b.dataset.p); checkOrder(c); });
   app.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{ c.st.picked.splice(+b.dataset.a,1); render(); });
-  app.querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>{ const t=talkById[c.id]; const k=+b.dataset.opt; c.st.chosen=k; const ok=c.opts[k]===t.lines[1].text; c.st.fb=ok?"good":"bad"; srs(S.talks,c.id,ok); ok?chime():buzz(); render(); autoNext(c,playLine(t,1),1000); });
+  app.querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>{ const t=talkById[c.id]; const k=+b.dataset.opt; c.st.chosen=k; const ok=c.opts[k]===t.lines[1].text; c.st.fb=ok?"good":"bad"; srs(S.talks,c.id,ok); ok?chime():buzz(); c.st.echo=true; render(); // dad 2026-11-17: time to say the answer aloud before moving on
+    playLine(t,1).then(()=>setTimeout(()=>{ if(cur()===c&&view==="lesson"&&speechOK&&!c.st.listening&&!c.st.echoOk) act(c,"mic"); },350)); });
   app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{ const k=+b.dataset.pick; c.st.chosen=k; const ok=c.opts[k]===c.right; c.st.fb=ok?"good":"bad"; ok?chime():buzz(); render();
-    if(c.kind==="tense"){ srs(S.items,c.id,ok); const z=TZ[c.id]; autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc(z.id,z.url,z.right)),ok?900:2600); return; }
-    if(c.kind==="wm"){ srs(S.items,c.id,ok); const m=MZ[c.id]; autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc(m.id,m.url,m.text)),ok?900:2200); return; }
-    autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc("pick",null,c.right)),ok?700:1300); });
+    if(c.kind==="tense"){ srs(S.items,c.id,ok); const z=TZ[c.id]; autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc(z.id,z.url,z.right)),ok?2500:3500); return; }
+    if(c.kind==="where"){ const g=GZ[c.id]; c.st.echo=true; new Promise(r=>setTimeout(r,300)).then(()=>playSrc(g.id,g.url,g.text)).then(()=>setTimeout(()=>{ if(cur()===c&&view==="lesson"&&speechOK&&!c.st.listening&&!c.st.echoOk) act(c,"mic"); },350)); return; }
+    if(c.kind==="wm"){ srs(S.items,c.id,ok); const m=MZ[c.id]; autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc(m.id,m.url,m.text)),ok?2200:3000); return; }
+    autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc("pick",null,c.right)),ok?1500:2200); });
+  app.querySelectorAll("[data-grab]").forEach(b=>b.onclick=()=>{ const k=+b.dataset.grab, g=GZ[c.id];
+    if(c.opts[k]===c.right){ c.st.fb="good"; chime(); render(); autoNext(c,new Promise(r=>setTimeout(r,500)).then(()=>playSrc(g.id,g.url,g.text)),2000); }
+    else { c.st.miss=(c.st.miss||[]).concat(k); c.st.firstTry=false; buzz(); render(); setTimeout(()=>playSrc(g.id,g.url,g.text),400); } });
   app.querySelectorAll("[data-ans]").forEach(b=>b.onclick=()=>{ const it=byId[c.id]; const ans=it.q[c.st.yes?0:1]; const ok=c.opts[+b.dataset.ans]===ans; finishStep(c,ok); playSrc("ans",null,ans); });
   app.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{ const e=TIPS[c.c].ex[+b.dataset.ex][1]; playSrc("tip",null,e.replace("→",". ")); });
   // automatic sound + automatic mic when a card opens
@@ -766,6 +817,8 @@ function bindCard(c){
     const wantsMic = speechOK && ((c.type==="say"&&c.steps[c.st.step]==="speak") || (c.type==="talk"&&c.mode!=="choose"));
     const go=()=>setTimeout(()=>{ if(cur()===c&&view==="lesson"&&!c.st.fb&&!c.st.listening) act(c,"mic"); },350);
     if(c.type==="talk" && c.mode!=="sayA"){ const p=playLine(talkById[c.id],0); if(wantsMic) p.then(go); }
+    else if(c.type==="pick"&&c.kind==="grab"){ const g=GZ[c.id]; setTimeout(()=>{ if(cur()===c) playSrc(g.id,g.url,g.text); },400); }
+    else if(c.type==="say"&&c.lv===1){ const p=playItem(byId[c.id]); if(wantsMic) Promise.resolve(p).then(go); }
     else if(wantsMic) go();
   }
 }
@@ -805,7 +858,7 @@ async function act(c,a){
       c.st.heard=(r.alts&&r.alts[0])||c.st.raw||"(잘 안 들렸어요)"; if(r.alts&&r.alts[0]){ c.st.raw=r.alts[0]; c.st.tgt=target; }
       const targets= step==="answer" ? [target].concat(it.qfull?[it.qfull[c.st.yes?0:1],(c.st.yes?"Yes, ":"No, ")+it.qfull[c.st.yes?0:1]]:[]) : [target];
       const okSay=!!(r.alts&&targets.some(tg=>matches(tg,r.alts,it.week===6))); if(r.alts&&r.alts.length) logHeard(it.text,r.alts,okSay);
-      if(okSay){ c.st.fb="good"; chime(); render(); autoNext(c,new Promise(r=>setTimeout(r,350)).then(()=>playItem(it))); return; }
+      if(okSay){ c.st.fb="good"; chime(); render(); autoNext(c,new Promise(r=>setTimeout(r,350)).then(()=>playItem(it)),2200); return; }
       if(r.alts&&r.alts.length){ c.st.tries++; buzz(); }
       render();
       if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&!document.hidden) act(c,"mic"); },700);
@@ -827,6 +880,13 @@ async function act(c,a){
     if(a==="skip"){ if(!c.st.fb) srs(S.talks,c.id,false); return advance(); }
     if(a==="showKo"){ c.st.showKo=true; return render(); }
     if(a==="hintTalk"){ c.st.firstTry=false; c.st.showAns=true; render(); return playLine(t,c.mode==="sayB"?1:0); }
+    if(a==="mic"&&c.st.echo){ if(c.st.listening||c.st.echoOk) return; c.st.listening=true; render(); const r=await listenOnce();
+      if(cur()!==c||view!=="lesson") return; c.st.listening=false; if((r.err&&!speechOK)||micBusy){ render(); return; }
+      c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; const ok=!!(r.alts&&matches(t.lines[1].match||t.lines[1].text,r.alts,true));
+      if(ok){ c.st.echoOk=true; chime(); render(); autoNext(c,null,1800); return; }
+      if(r.alts&&r.alts.length) buzz(); render();
+      if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.echoOk&&!c.st.listening&&!document.hidden) act(c,"mic"); },900);
+      return; }
     if(a==="selfsaid"||a==="mic"){
       const mine=c.mode==="sayB"?1:0;
       let ok=true;
@@ -839,11 +899,19 @@ async function act(c,a){
           return; } }
       c.st.fb= ok?"good":"giveup"; srs(S.talks,c.id,ok&&c.st.firstTry); ok?chime():null; render();
       const p = c.mode==="sayA" ? playLine(t,0).then(()=>playLine(t,1)) : playLine(t,1);
-      autoNext(c,p); return;
+      autoNext(c,p,2000); return;
     }
     if(a==="next") return advance();
   }
-  if(c.type==="pick" && a==="next") return advance();
+  if(c.type==="pick" && a==="playg"){ const g=GZ[c.id]; return playSrc(g.id,g.url,g.text); }
+  if(c.type==="pick" && a==="mic" && c.kind==="where" && c.st.echo){ if(c.st.listening||c.st.echoOk) return; const g=GZ[c.id]; c.st.listening=true; render(); const r=await listenOnce();
+    if(cur()!==c||view!=="lesson") return; c.st.listening=false; if((r.err&&!speechOK)||micBusy){ render(); return; }
+    c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; const ok=!!(r.alts&&matches(g.text,r.alts,true));
+    if(ok){ c.st.echoOk=true; chime(); render(); autoNext(c,null,1800); return; }
+    if(r.alts&&r.alts.length) buzz(); render();
+    if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.echoOk&&!c.st.listening&&!document.hidden) act(c,"mic"); },900);
+    return; }
+  if(c.type==="pick" && (a==="next"||a==="skip")) return advance();
 }
 function checkOrder(c){
   if(c.st.picked.length<c.target.length){ render(); return; }
@@ -959,7 +1027,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/17-1 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/17-3 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
@@ -984,7 +1052,7 @@ function renderParent(){
   if($("reset2")) $("reset2").onclick=()=>{ const keep={depart:S.depart,bookWeek:S.bookWeek,newBook:S.newBook,whoCount:S.whoCount,reviewCap:S.reviewCap,pin:S.pin}; S=Object.assign(blank(),keep); confirmReset=false; save(); render(); };
   if($("nores")) $("nores").onclick=()=>{confirmReset=false;render();};
 }
-window.__dbg=()=>({L,S,view,byId,talkById,buildQueue,matches,todayStr,curWeek}); // for tests
+window.__dbg=()=>({L,S,view,byId,talkById,buildQueue,matches,todayStr,curWeek,enterCard,render}); // for tests
 fixOffset();
 if(!S.rev1118){ S.rev1118=true; if(todayStr()<="2026-11-18") S.phoneOnly="2026-11-18"; save(); } // dad 2026-11-17: tomorrow = 11/17 phone lesson only, no 천일문
 if(!S.rev1117){ S.rev1117=true; if(S.days["2026-11-16"]&&S.nextWeek===1&&todayStr()<="2026-11-17"){ S.nextWeek=0; S.session=null; } save(); } // dad: whole review on 11/17 after week 7
