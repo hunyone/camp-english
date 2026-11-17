@@ -394,14 +394,16 @@ function fixPron(T,H){
   return H;
 }
 // same-meaning words and sound-alikes the recognizer writes differently (dad 2026-11-16)
-const SAME=[["restroom","toilet","washroom","bathroom"],["mom","mommy","mother","mum"],["dad","daddy","father"],["bee","b","be"],["okay","ok"],["cookie","cookies"],["candy","candies"]];
+const SAME=[["restroom","toilet","washroom","bathroom"],["mom","mommy","mother","mum"],["dad","daddy","father"],["bee","b","be"],["okay","ok"],["cookie","cookies"],["candy","candies"],["pen","pan","pin","penn","ben","pain"]];
 const SMALL=new Set(["a","an","the"]);
 function sameWords(T,H){ return H.map(w=>{ for(const g of SAME){ if(g.includes(w)){ const t=T.find(x=>g.includes(x)); if(t) return t; } } return w; }); }
 function matches(target,alts,allowIt){
   let T=toks(target);
   for(const alt0 of (alts||[]).slice(0,1)){ // only the recognizer's first guess (others made wrong answers pass)
     const alt=String(alt0).toLowerCase().replace(/\b(hair|head) ?band/g,"hairband");
-    let H=sameWords(T,fixPron(T,toks(alt)));
+    // short "pen is" gets written as one longer word (dad 2026-11-17: "panties")
+    const altP=T.includes("pen")?alt.replace(/\b(panties|pantie|pennies|penny's|penis|pen's|pens|penny)\b/g,"pen is"):alt;
+    let H=sameWords(T,fixPron(T,toks(altP)));
     // (2026-11-16) "It's great" no longer passes for "That's great": the coach bubble says "it 말고 다른 단어"
     const core=T.filter(w=>!SMALL.has(w)); // only a / an / the may be dropped
     if(lcs(core,H.filter(w=>!SMALL.has(w))) < core.length) continue;
@@ -1027,7 +1029,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/17-3 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/17-4 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
