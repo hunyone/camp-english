@@ -394,13 +394,29 @@ function fixPron(T,H){
   return H;
 }
 // same-meaning words and sound-alikes the recognizer writes differently (dad 2026-11-16)
-const SAME=[["restroom","toilet","washroom","bathroom"],["mom","mommy","mother","mum"],["dad","daddy","father"],["bee","b","be"],["okay","ok"],["cookie","cookies"],["candy","candies"],["pen","pan","pin","penn","ben","pain"]];
+const SAME=[["restroom","toilet","washroom","bathroom"],["mom","mommy","mother","mum"],["dad","daddy","father"],["bee","b","be"],["okay","ok"],["cookie","cookies"],["candy","candies"],["pen","pan","pin","penn","ben","pain"],
+ // sound-alikes for the phone-English words (dad 2026-11-17: "다른 것도 미리 잘 인식하게")
+ ["fridge","bridge","fridges","fritch","fridj"],["white","wait","wide","whyte"],["bus","boss","buzz","bath","buses"],["taxi","taxis","texi","texas"],
+ ["picture","pitcher","pictures"],["dog","dock","doug","dogs","dawg"],["bed","bad","bet","bid"],["box","bucks","boxes","fox","box's"],["under","onder","ender","and her"],
+ ["cat","cats","kat","kit"],["cute","cue","cuz","cut"],["silver","sylvia","silva"],["full","fool"],["yummy","yami","yummie","yum"],["noodles","noodle","needles"],
+ ["troll","trolls","trawl","trol","trail"],["table","tables","tabel"],["chair","share","cher","chairs"],["hug","hog","huck","hugs"],["late","laid","lade","lady"],
+ ["morning","mourning"],["too","to","two"],["fun","fan","phone","fund"],["kimchi","kimchee","kimchis"],["academy","academic","academie"],["minutes","minute","minets"],
+ ["hour","our","hours"],["classes","class","glasses"],["shoes","shoe","shows","shoos"],["dress","dresses","dres"],["bag","back","bags","beg"],["book","books","buk"],
+ ["desk","disk","desks","dusk"],["rabbit","rabbits","rabit","robert"],["present","presents","president"],["party","potty","parties"],["cake","cakes","kick"],
+ ["hairband","hairbands","headband","headbands"],["take","takes","tech","taken"],["wake","woke","weak","wait up"],["seven","sevens"],["ten","tin","tan","then"],
+ ["five","fight","fife"],["one","won","want"],["eight","ate","a"],["pe","pee","pea","p","phy","pe's"]];
 const SMALL=new Set(["a","an","the"]);
+const NUMW=["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty"];
 function sameWords(T,H){ return H.map(w=>{ for(const g of SAME){ if(g.includes(w)){ const t=T.find(x=>g.includes(x)); if(t) return t; } } return w; }); }
 function matches(target,alts,allowIt){
   let T=toks(target);
   for(const alt0 of (alts||[]).slice(0,1)){ // only the recognizer's first guess (others made wrong answers pass)
-    const alt=String(alt0).toLowerCase().replace(/\b(hair|head) ?band/g,"hairband");
+    let alt=String(alt0).toLowerCase().replace(/\b(hair|head) ?band/g,"hairband")
+      .replace(/\b(\d+)(:00)?\b/g,(m,d)=>NUMW[+d]||m) // the recognizer writes numbers as digits ("7", "10 minutes")
+      .replace(/\bkim chi\b/g,"kimchi").replace(/\bplay ground\b/g,"playground").replace(/\bi scream\b/g,"ice cream").replace(/\bwake ?up\b|\bweak up\b|\bwakeup\b/g,"wake up")
+      .replace(/\bp\.? ?e\.?(?=\s|$)/g,"pe");
+    // "dog's" / "fridge's" heard for "dog is" / "fridge is"
+    alt=alt.replace(/\b([a-z]+)'s\b/g,(m,w)=>T.includes(w)&&T[T.indexOf(w)+1]==="is"?w+" is":m);
     // short "pen is" gets written as one longer word (dad 2026-11-17: "panties")
     const altP=T.includes("pen")?alt.replace(/\b(panties|pantie|pennies|penny's|penis|pen's|pens|penny)\b/g,"pen is"):alt;
     let H=sameWords(T,fixPron(T,toks(altP)));
@@ -1029,7 +1045,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/17-4 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/17-5 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
