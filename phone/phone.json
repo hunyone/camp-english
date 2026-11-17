@@ -1686,12 +1686,12 @@
     {
      "text": "Who makes kimchi?",
      "ko": "김치는 누가 만들어?",
-     "url": "phone/76821e2557a9.mp3"
+     "url": null
     },
     {
      "text": "My mom makes kimchi.",
      "ko": "엄마가 김치를 만들어요",
-     "url": "phone/f81a3cdac368.mp3"
+     "url": null
     }
    ],
    "pri": true
@@ -1703,12 +1703,12 @@
     {
      "text": "What color is your kimchi fridge?",
      "ko": "김치냉장고는 무슨 색이야?",
-     "url": "phone/7e0fd2be8495.mp3"
+     "url": null
     },
     {
      "text": "It is white too.",
      "ko": "그것도 하얀색이에요",
-     "url": "phone/d3cc417cdc97.mp3"
+     "url": null
     }
    ],
    "pri": true
@@ -1720,12 +1720,12 @@
     {
      "text": "Is the troll scary?",
      "ko": "트롤 무서워?",
-     "url": "phone/d99ee3d9b51b.mp3"
+     "url": null
     },
     {
      "text": "No, it's cute!",
      "ko": "아니요, 귀여워요!",
-     "url": "phone/7ddd88b22626.mp3"
+     "url": null
     }
    ],
    "pri": true
@@ -1829,7 +1829,7 @@
    "right": "I saw my friend.",
    "wrong": "I see my friend.",
    "note": "어제 일이니까 saw! (see 봐요 → saw 봤어요)",
-   "url": "phone/30fba7fb20d1.mp3"
+   "url": null
   },
   {
    "id": "tz11",
@@ -1860,7 +1860,7 @@
    "near": [
     "kitchen"
    ],
-   "url": "phone/01a7ec9ab583.mp3"
+   "url": null
   },
   {
    "id": "pm1",
@@ -1871,7 +1871,7 @@
    "near": [
     "fridge"
    ],
-   "url": "phone/083823e70d44.mp3"
+   "url": null
   },
   {
    "id": "pm2",
@@ -1882,7 +1882,7 @@
    "near": [
     "white"
    ],
-   "url": "phone/c662abd5b352.mp3"
+   "url": null
   },
   {
    "id": "pm3",
@@ -1893,7 +1893,7 @@
    "near": [
     "see"
    ],
-   "url": "phone/dc3e00d411f0.mp3"
+   "url": null
   },
   {
    "id": "pm4",
@@ -1904,7 +1904,7 @@
    "near": [
     "take"
    ],
-   "url": "phone/06f1f8965d8f.mp3"
+   "url": null
   },
   {
    "id": "pm5",
@@ -1915,7 +1915,7 @@
    "near": [
     "talk"
    ],
-   "url": "phone/4a91a6f9b202.mp3"
+   "url": null
   },
   {
    "id": "pm6",
@@ -1926,7 +1926,7 @@
    "near": [
     "wake up"
    ],
-   "url": "phone/64c63f983206.mp3"
+   "url": null
   },
   {
    "id": "pm7",
@@ -1937,7 +1937,7 @@
    "near": [
     "walk"
    ],
-   "url": "phone/73db40beea67.mp3"
+   "url": null
   },
   {
    "id": "pm8",
@@ -1948,7 +1948,7 @@
    "near": [
     "grass"
    ],
-   "url": "phone/544ed320d04d.mp3"
+   "url": null
   },
   {
    "id": "pm9",
@@ -1959,7 +1959,7 @@
    "near": [
     "goat"
    ],
-   "url": "phone/1b20985f6258.mp3"
+   "url": null
   },
   {
    "id": "pm10",
@@ -1970,7 +1970,7 @@
    "near": [
     "scary"
    ],
-   "url": "phone/d701037c5640.mp3"
+   "url": null
   },
   {
    "id": "pm11",
@@ -1981,7 +1981,7 @@
    "near": [
     "bridge"
    ],
-   "url": "phone/fb8b0a633e85.mp3"
+   "url": null
   },
   {
    "id": "pm12",
@@ -1992,7 +1992,7 @@
    "near": [
     "river"
    ],
-   "url": "phone/804a530a6ad9.mp3"
+   "url": null
   },
   {
    "id": "pm13",
@@ -2003,7 +2003,7 @@
    "near": [
     "ugly"
    ],
-   "url": "phone/5bfa2c3d3bfa.mp3"
+   "url": null
   },
   {
    "id": "pm14",
@@ -2014,7 +2014,7 @@
    "near": [
     "scary"
    ],
-   "url": "phone/65d167d623ee.mp3"
+   "url": null
   },
   {
    "id": "pm15",
@@ -2026,7 +2026,7 @@
     "on",
     "under"
    ],
-   "url": "phone/bc8fdaa9308e.mp3"
+   "url": null
   },
   {
    "id": "pm16",
@@ -2038,7 +2038,7 @@
     "in",
     "under"
    ],
-   "url": "phone/1e231fd79aa3.mp3"
+   "url": null
   },
   {
    "id": "pm17",
@@ -2050,7 +2050,7 @@
     "in",
     "on"
    ],
-   "url": "phone/1940c7da67ef.mp3"
+   "url": null
   }
  ],
  "games": {
@@ -2061,7 +2061,7 @@
     "emoji": "🖊️",
     "text": "Take a pen!",
     "ko": "펜을 집어요",
-    "url": "phone/18be69f3dec0.mp3"
+    "url": null
    },
    {
     "id": "gk1",
@@ -2069,7 +2069,7 @@
     "emoji": "📚",
     "text": "Take a book!",
     "ko": "책을 집어요",
-    "url": "phone/cc2957a51716.mp3"
+    "url": null
    },
    {
     "id": "gk2",
@@ -2077,7 +2077,7 @@
     "emoji": "🚌",
     "text": "Take a bus!",
     "ko": "버스를 타요",
-    "url": "phone/ad1c716b7571.mp3"
+    "url": null
    },
    {
     "id": "gk3",
@@ -2085,7 +2085,7 @@
     "emoji": "📷",
     "text": "Take a picture!",
     "ko": "사진을 찍어요",
-    "url": "phone/c38cba769edd.mp3"
+    "url": null
    },
    {
     "id": "gk4",
@@ -2093,7 +2093,7 @@
     "emoji": "🍪",
     "text": "Take a cookie!",
     "ko": "쿠키를 집어요",
-    "url": "phone/838995cfed1e.mp3"
+    "url": null
    },
    {
     "id": "gk5",
@@ -2101,7 +2101,7 @@
     "emoji": "☂️",
     "text": "Take an umbrella!",
     "ko": "우산을 가져가요",
-    "url": "phone/1f6164aaa963.mp3"
+    "url": null
    }
   ],
   "where": [
@@ -2112,7 +2112,7 @@
     "obj": "table",
     "text": "The cat is on the table.",
     "ko": "고양이가 탁자 위에 있어요",
-    "url": "phone/66583161f4fe.mp3"
+    "url": null
    },
    {
     "id": "gw01",
@@ -2130,7 +2130,7 @@
     "obj": "box",
     "text": "The cat is in the box.",
     "ko": "고양이가 상자 안에 있어요",
-    "url": "phone/63a81ab04e5e.mp3"
+    "url": null
    },
    {
     "id": "gw03",
@@ -2139,7 +2139,7 @@
     "obj": "box",
     "text": "The cat is on the box.",
     "ko": "고양이가 상자 위에 있어요",
-    "url": "phone/69b29563304a.mp3"
+    "url": null
    },
    {
     "id": "gw10",
@@ -2148,7 +2148,7 @@
     "obj": "table",
     "text": "The dog is on the table.",
     "ko": "강아지가 탁자 위에 있어요",
-    "url": "phone/73f3cde49ff9.mp3"
+    "url": null
    },
    {
     "id": "gw11",
@@ -2175,7 +2175,7 @@
     "obj": "box",
     "text": "The dog is on the box.",
     "ko": "강아지가 상자 위에 있어요",
-    "url": "phone/481a06e672dd.mp3"
+    "url": null
    },
    {
     "id": "gw20",
@@ -2184,7 +2184,7 @@
     "obj": "table",
     "text": "The rabbit is on the table.",
     "ko": "토끼가 탁자 위에 있어요",
-    "url": "phone/49fdd43df1ad.mp3"
+    "url": null
    },
    {
     "id": "gw21",
@@ -2193,7 +2193,7 @@
     "obj": "table",
     "text": "The rabbit is under the table.",
     "ko": "토끼가 탁자 아래에 있어요",
-    "url": "phone/e9261932e773.mp3"
+    "url": null
    },
    {
     "id": "gw22",
@@ -2202,7 +2202,7 @@
     "obj": "box",
     "text": "The rabbit is in the box.",
     "ko": "토끼가 상자 안에 있어요",
-    "url": "phone/45ac2d4c4f58.mp3"
+    "url": null
    },
    {
     "id": "gw23",
@@ -2211,7 +2211,7 @@
     "obj": "box",
     "text": "The rabbit is on the box.",
     "ko": "토끼가 상자 위에 있어요",
-    "url": "phone/012711dc31ce.mp3"
+    "url": null
    }
   ]
  }

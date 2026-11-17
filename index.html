@@ -237,6 +237,36 @@ details summary{cursor:pointer;color:var(--pine);font-family:var(--f-disp);font-
 .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
 .confetti i{position:absolute;top:-24px;border-radius:3px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+/* dad 2026-11-17: one card = one screen, no scrolling by hand (tablet, often landscape) */
+@media (max-height:900px){
+ body{padding-block:6px 10px}
+ .lesson{gap:8px}
+ .card{padding:14px 18px;gap:10px;min-height:0}
+ .steps{min-height:0}
+ .pic{font-size:64px}
+ .en{font-size:clamp(28px,5.2vh,44px)}
+ .feedback .en{font-size:clamp(30px,5.6vh,44px)}
+ .ko{font-size:19px}
+ .ko.big{font-size:clamp(24px,4.4vh,34px)}
+ .opts{gap:8px}
+ .opt{font-size:22px;padding:8px 16px;border-bottom-width:4px}
+ .mic{width:104px;height:104px}
+ .heard{min-height:26px;font-size:18px}
+ .heard b{font-size:24px}
+ .big{min-height:52px;padding:10px 22px;font-size:21px}
+ .feedback{padding:10px 14px;gap:6px;font-size:24px}
+ .feedback small{font-size:22px}
+ .when{font-size:34px;padding:8px 30px;margin:0 0 4px}
+ .gamebox{transform:scale(.72);margin:-30px auto -34px}
+ .grabrow button{font-size:52px;padding:8px 0}
+ .hand{font-size:56px}
+ .bubble .en{font-size:clamp(24px,4.4vh,34px)}
+ .combo{font-size:20px;top:-16px}
+}
+@media (max-height:900px) and (min-width:1000px){
+ .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));width:100%;max-width:1000px}
+ .opts .opt{text-align:center}
+}
 </style>
 
 <div class="wrap" id="app"></div>
@@ -400,11 +430,11 @@ const SAME=[["restroom","toilet","washroom","bathroom"],["mom","mommy","mother",
  ["picture","pitcher","pictures"],["dog","dock","doug","dogs","dawg"],["bed","bad","bet","bid"],["box","bucks","boxes","fox","box's"],["under","onder","ender","and her"],
  ["cat","cats","kat","kit"],["cute","cue","cuz","cut"],["silver","sylvia","silva"],["full","fool"],["yummy","yami","yummie","yum"],["noodles","noodle","needles"],
  ["troll","trolls","trawl","trol","trail"],["table","tables","tabel"],["chair","share","cher","chairs"],["hug","hog","huck","hugs"],["late","laid","lade","lady"],
- ["morning","mourning"],["too","to","two"],["fun","fan","phone","fund"],["kimchi","kimchee","kimchis"],["academy","academic","academie"],["minutes","minute","minets"],
- ["hour","our","hours"],["classes","class","glasses"],["shoes","shoe","shows","shoos"],["dress","dresses","dres"],["bag","back","bags","beg"],["book","books","buk"],
+ ["morning","mourning"],["too","to","two"],["fun","fan","phone","fund"],["kimchi","kimchee","kimchis"],["academy","academic","academie"],["minutes","minute","minets","minits","mins","min"],
+ ["hour","our","hours","hower","how","or","ower"],["classes","class","glasses"],["shoes","shoe","shows","shoos"],["dress","dresses","dres"],["bag","back","bags","beg"],["book","books","buk"],
  ["desk","disk","desks","dusk"],["rabbit","rabbits","rabit","robert"],["present","presents","president"],["party","potty","parties"],["cake","cakes","kick"],
- ["hairband","hairbands","headband","headbands"],["take","takes","tech","taken"],["wake","woke","weak","wait up"],["seven","sevens"],["ten","tin","tan","then"],
- ["five","fight","fife"],["one","won","want"],["eight","ate","a"],["pe","pee","pea","p","phy","pe's"]];
+ ["hairband","hairbands","headband","headbands"],["take","takes","tech","taken","tax","text","tags","tick"],["wake","woke","weak","wait up"],["seven","sevens"],["ten","tin","tan","then","tim","10"],
+ ["five","fight","fife"],["one","won","want","an","a","1"],["eight","ate","a"],["pe","pee","pea","p","phy","pe's"]];
 const SMALL=new Set(["a","an","the"]);
 const NUMW=["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty"];
 function sameWords(T,H){ return H.map(w=>{ for(const g of SAME){ if(g.includes(w)){ const t=T.find(x=>g.includes(x)); if(t) return t; } } return w; }); }
@@ -413,7 +443,7 @@ function matches(target,alts,allowIt){
   for(const alt0 of (alts||[]).slice(0,1)){ // only the recognizer's first guess (others made wrong answers pass)
     let alt=String(alt0).toLowerCase().replace(/\b(hair|head) ?band/g,"hairband")
       .replace(/\b(\d+)(:00)?\b/g,(m,d)=>NUMW[+d]||m) // the recognizer writes numbers as digits ("7", "10 minutes")
-      .replace(/\bkim chi\b/g,"kimchi").replace(/\bplay ground\b/g,"playground").replace(/\bi scream\b/g,"ice cream").replace(/\bwake ?up\b|\bweak up\b|\bwakeup\b/g,"wake up")
+      .replace(/\b(attacks|it takes|its takes|it's takes|eat takes)\b/g,"it takes").replace(/\ban hour\b/g,"one hour").replace(/\b1 hour\b/g,"one hour").replace(/\bkim chi\b/g,"kimchi").replace(/\bplay ground\b/g,"playground").replace(/\bi scream\b/g,"ice cream").replace(/\bwake ?up\b|\bweak up\b|\bwakeup\b/g,"wake up")
       .replace(/\bp\.? ?e\.?(?=\s|$)/g,"pe");
     // "dog's" / "fridge's" heard for "dog is" / "fridge is"
     alt=alt.replace(/\b([a-z]+)'s\b/g,(m,w)=>T.includes(w)&&T[T.indexOf(w)+1]==="is"?w+" is":m);
@@ -536,6 +566,8 @@ const app=document.getElementById("app");
 function render(){
   ({home:renderHome,lesson:renderLesson,finish:renderFinish,gate:renderGate,parent:renderParent})[view]();
   if(render.last!==view){ window.scrollTo(0,0); render.last=view; }
+  // dad 2026-11-17: the answer box must be on screen without scrolling by hand
+  if(view==="lesson"){ const f=app.querySelector(".feedback"); if(f){ const r=f.getBoundingClientRect(); if(r.bottom>innerHeight||r.top<0) f.scrollIntoView({block:"center",behavior:"smooth"}); } }
 }
 function topBar(){
   return `<div class="top"><div class="brand" id="logo">💗 서현이 영어 비밀 연구소!</div>
@@ -754,7 +786,7 @@ function talkBody(c){
     return `${tag}<div class="chat"><div class="bubble a"><div class="en">${h(A.text)}</div>${koA(c,A)}</div>
       ${done?`<div class="bubble b"><div class="en">${h(B.text)}</div><div class="ko">${h(B.ko)}</div></div>`:""}</div>
       ${done?"":`<div class="hint">뭐라고 대답할까?</div>`}
-      <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===B.text?"right":""} ${done&&c.st.chosen===k&&o!==B.text?"wrong":""}" data-opt="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
+      ${done?"":`<div class="opts">${c.opts.map((o,k)=>`<button class="opt" data-opt="${k}">${h(o)}</button>`).join("")}</div>`}
       ${done?`${c.st.echoOk?`<div class="feedback good">따라 말하기 성공! 💖</div>`:micBlock(c,"이제 대답을 따라 말해 봐요!")}<div class="btns"><button class="big soft" data-act="replay">🔊 다시 듣기</button><button class="big skip" data-act="skip">다음 →</button></div>`:`<div class="btns"><button class="big soft" data-act="playA">🔊 듣기</button></div>`}`;
   }
   const meSay = c.mode==="sayB" ? B : A, other = c.mode==="sayB" ? A : B;
@@ -780,15 +812,15 @@ function pickBody(c){
   if(c.kind==="where"){ const g=GZ[c.id]; const tb=g.obj==="table";
     const an=`<span class="g-an" style="bottom:${tb?(g.place==="on"?146:8):(g.place==="on"?104:80)}px">${g.animal}</span>`;
     const scene=tb?`<div class="g-top"></div><div class="g-leg" style="left:44px"></div><div class="g-leg" style="right:44px"></div>`:`<div class="g-box"></div>`;
-    return `<div class="tags"><span class="tag phone">📞 📦 어디 있을까?</span></div><div class="gamebox">${scene}${an}</div><div class="ko big">${done?h(g.ko):"어디에 있을까요?"}</div>
-      <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${o}</button>`).join("")}</div>
+    return `<div class="tags"><span class="tag phone">📞 📦 어디 있을까?</span></div><div class="gamebox">${scene}${an}</div><div class="ko big">${done?h(g.ko):h(g.ko.split(" ")[0])+" 어디에 있을까요?"}</div>
+      ${done?"":`<div class="opts">${c.opts.map((o,k)=>`<button class="opt" data-pick="${k}">${o}</button>`).join("")}</div>`}
       ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! 💖":"앗! 이렇게 말해요"}<div class="en">${h(g.text)}</div>${c.st.echoOk?"따라 말하기 성공! 💖":micBlock(c,"문장으로 따라 말해 봐요!")}<div class="btns"><button class="big soft" data-act="playg">🔊 다시 듣기</button><button class="big skip" data-act="skip">다음 →</button></div></div>`:""}`; }
   if(c.kind==="grab"){ const g=GZ[c.id];
     return `<div class="tags"><span class="tag phone">📞 ✋ 집어 봐요!</span></div><div class="hand">✋</div><div class="ko">잘 듣고 눌러 봐요!</div>
       <div class="grabrow">${c.opts.map((o,k)=>`<button class="${c.st.fb==="good"&&o===c.right?"ok":""} ${c.st.miss&&c.st.miss.includes(k)?"no":""}" data-grab="${k}" ${done?"disabled":""}>${GZ[o].emoji}</button>`).join("")}</div>
       ${done?`<div class="feedback good">딩동댕! 💖<div class="en">${h(g.text)}</div><small>${h(g.ko)}</small></div>`:`<div class="btns"><button class="big soft" data-act="playg">🔊 다시 듣기</button></div>`}`; }
   if(c.kind==="wm"){ const m=MZ[c.id];
-    return `<div class="tags"><span class="tag phone">📞 단어 맞추기</span></div><div class="pic"><span>${m.emoji||""}</span></div><div class="ko big">${h(m.ko)}</div><div class="ko">영어로 뭘까요?</div>
+    return `<div class="tags"><span class="tag phone">📞 단어 맞추기</span></div>${done?"":`<div class="pic"><span>${m.emoji||""}</span></div>`}<div class="ko big">${done?(m.emoji||"")+" ":""}${h(m.ko)}</div>${done?"":`<div class="ko">영어로 뭘까요?</div>`}
       <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
       ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! 💖":"앗!"}<small>${h(m.ko)} = ${h(m.text)}</small><button class="big next" data-act="next">계속 →</button></div>`:""}`; }
   if(c.kind==="hs"){
@@ -1045,7 +1077,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/17-5 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/17-7 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
