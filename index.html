@@ -266,6 +266,8 @@ PHONE.forEach(i=>{ i.src="phone"; i.src_audio=i.url; byId[i.id]=i; });
 PTALKS.forEach(t=>{ t.src="phone"; t.lines.forEach(l=>l.src_audio=l.url); talkById[t.id]=t; });
 const PHONE_UNITS=2, PHONE_SAY=10, PHONE_TALK=1, TENSE_N=2; // dad 2026-11-13: few sentences a day, each drilled as a pattern
 const TENSE=(DATA.phone&&DATA.phone.tense)||[];
+const PMATCH=(DATA.phone&&DATA.phone.match)||[]; const MZ=Object.fromEntries(PMATCH.map(m=>[m.id,m])); // 단어 맞추기 (dad 2026-11-17)
+const isPhoneDay=()=>S.phoneOnly===todayStr(); // "전화영어만" day: no book cards (dad 2026-11-17)
 // Phone sentences repeat as patterns (dad 2026-11-13): base sentence, then stage 1 (swap the last word), stage 2 (swap who), stage 3 (question & answer).
 // Stage 1 comes right after the base sentence; the next stage opens once every card of the stage before was answered right (and not missed lately).
 const TZ=Object.fromEntries(TENSE.map(z=>[z.id,z]));
@@ -274,18 +276,20 @@ const pDrills=(b,st)=>st===3?PTALKS.filter(t=>t.base===b.id):PHONE.filter(i=>i.b
 const mastered=(arr,store)=>arr.every(x=>store[x.id]&&store[x.id].box>=1&&store[x.id].recentWrong===0);
 function openStage(b){ let st=1;
   for(;st<=2;st++){ const d=pDrills(b,st); if(d.length&&!mastered(d,S.items)) return st; } return 3; }
-function phoneCards(){ const today=todayStr();
+function phoneCards(){ const today=todayStr(), big=isPhoneDay();
+  const NU=big?4:PHONE_UNITS, NT=big?5:PHONE_TALK, NM=big?6:2;
   const rank=(s,x)=>!s?(x.pri?-1:1):(s.recentWrong>0?0:(s.due<=today?2:9));
   const units=PBASE.map((b,k)=>{ const st=openStage(b); const list=[];
     const rb=rank(S.items[b.id],b); if(rb<9) list.push({x:b,r:rb});
     if(st===1||st===2) pDrills(b,st).forEach(d=>{ const r=rank(S.items[d.id],{pri:b.pri}); if(r<9) list.push({x:d,r}); });
     return {b,k,list:list.slice(0,5),r:Math.min(...list.map(o=>o.r),9)}; }).filter(u=>u.list.length)
     .sort((a,b)=>a.r-b.r||(b.b.lesson>a.b.lesson?1:b.b.lesson<a.b.lesson?-1:a.k-b.k));
-  const say=[]; for(const u of units.slice(0,PHONE_UNITS)) say.push(...u.list.map(o=>o.x));
+  const say=[]; for(const u of units.slice(0,NU)) say.push(...u.list.map(o=>o.x));
   const talks=PTALKS.map((t,k)=>{ if(t.base){ const b=byId[t.base]; if(!b||openStage(b)<3) return null; } const r=rank(S.talks[t.id],t); return r<9?{t,k,r}:null; }).filter(Boolean)
-    .sort((a,b)=>a.r-b.r||a.k-b.k).slice(0,PHONE_TALK).map(o=>o.t);
+    .sort((a,b)=>a.r-b.r||a.k-b.k).slice(0,NT).map(o=>o.t);
+  const wm=PMATCH.map((m,k)=>{ const r=rank(S.items[m.id],{pri:true}); return r<9?{m,k,r}:null; }).filter(Boolean).sort((a,b)=>a.r-b.r||a.k-b.k).slice(0,NM).map(o=>o.m);
   const tz=shuffle(TENSE).sort((a,b)=>((S.items[b.id]||{}).recentWrong||0)-((S.items[a.id]||{}).recentWrong||0)).slice(0,TENSE_N);
-  return say.map(i=>({type:"say",id:i.id,fresh:true,phone:true})).concat(talks.map(t=>({type:"talk",id:t.id,phone:true})),tz.map(z=>({type:"pick",kind:"tense",id:z.id,phone:true}))); }
+  return say.map(i=>({type:"say",id:i.id,fresh:true,phone:true})).concat(talks.map(t=>({type:"talk",id:t.id,phone:true})),tz.map(z=>({type:"pick",kind:"tense",id:z.id,phone:true})),shuffle(wm).map(m=>({type:"pick",kind:"wm",id:m.id,phone:true}))); }
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -378,7 +382,8 @@ const SMALL=new Set(["a","an","the"]);
 function sameWords(T,H){ return H.map(w=>{ for(const g of SAME){ if(g.includes(w)){ const t=T.find(x=>g.includes(x)); if(t) return t; } } return w; }); }
 function matches(target,alts,allowIt){
   let T=toks(target);
-  for(const alt of (alts||[]).slice(0,1)){ // only the recognizer's first guess (others made wrong answers pass)
+  for(const alt0 of (alts||[]).slice(0,1)){ // only the recognizer's first guess (others made wrong answers pass)
+    const alt=String(alt0).toLowerCase().replace(/\b(hair|head) ?band/g,"hairband");
     let H=sameWords(T,fixPron(T,toks(alt)));
     // (2026-11-16) "It's great" no longer passes for "That's great": the coach bubble says "it 말고 다른 단어"
     const core=T.filter(w=>!SMALL.has(w)); // only a / an / the may be dropped
@@ -447,7 +452,7 @@ function conceptsOf(it){
 
 // ---------- daily mission ----------
 const unlocked=it=>it.week<=S.bookWeek;
-function curWeek(){ if(S.nextWeek===0) return 0; let w=S.nextWeek||1; if(w>S.bookWeek||w<1) w=1; return w; }
+function curWeek(){ if(isPhoneDay()) return -1; if(S.nextWeek===0) return 0; let w=S.nextWeek||1; if(w>S.bookWeek||w<1) w=1; return w; }
 function weekRange(w){ const b=ITEMS.filter(i=>i.src==="book"&&i.week===w&&i.day); if(!b.length) return ""; const lo=Math.min(...b.map(i=>i.day)), d0=b.find(i=>i.day===lo).date;
   const m=d0.match(/(\d+)월 (\d+)일/); let end=""; if(m){ const dt=new Date(2026,+m[1]-1,+m[2]+6); end=`${dt.getMonth()+1}월 ${dt.getDate()}일`; }
   return `책 Day ${lo} ~ Day ${lo+6} (${d0} ~ ${end})`; }
@@ -458,6 +463,7 @@ function reviewAllQueue(){ // "전체 복습": a few book sentences from every o
   ITEMS.filter(i=>S.items[i.id]&&S.items[i.id].recentWrong>0&&!q.some(c=>c.id===i.id)).slice(0,6).forEach(i=>q.push({type:"say",id:i.id,fresh:false}));
   return q; }
 function buildQueue(wArg){
+  if(!wArg&&curWeek()===-1) return phoneCards();
   if(!wArg&&curWeek()===0) return reviewAllQueue();
   const w=wArg||curWeek(), q=[];
   const ph=wArg?[]:phoneCards(); q.push(...ph);
@@ -518,7 +524,8 @@ function renderHome(){
   else {
     const w=curWeek(), ss=S.session, resume=ss&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
     const phN=q.filter(c=>c.phone).length, sayN=q.filter(c=>c.type==="say").length, pickN=n(c=>c.type==="pick"), talkN=n(c=>c.type==="talk");
-    mission=`<div class="mission"><h2>오늘의 미션 · ${w?w+"주차":"전체 복습"}</h2><div class="plan">${w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${pickN?` · 누구일까 ${pickN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${phN?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
+    const whoN=n(c=>c.kind==="hs"), wmN=n(c=>c.kind==="wm");
+    mission=`<div class="mission"><h2>오늘의 미션 · ${w===-1?"📞 전화영어 데이":w?w+"주차":"전체 복습"}</h2><div class="plan">${w===-1?"오늘은 전화영어 수업 문장만 연습해요":w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${whoN?` · 누구일까 ${whoN}개`:""}${wmN?` · 단어 맞추기 ${wmN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${phN&&w!==-1?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
   }
   const dn=["일","월","화","수","목","금","토"], wk=[];
   for(let i=6;i>=0;i--){ const d=addDays(today,-i); const [y,m,dd]=d.split("-").map(Number);
@@ -539,7 +546,7 @@ function startLesson(){
   if(!S.daySnap||S.daySnap.date!==todayStr()) S.daySnap={date:todayStr(),items:JSON.parse(JSON.stringify(S.items)),talks:JSON.parse(JSON.stringify(S.talks)),weekPass:JSON.parse(JSON.stringify(S.weekPass||{})),nextWeek:S.nextWeek};
   const queue=resume?ss.queue:buildQueue();
   if(resume){ // phone cards not reached yet are rebuilt, so a mission saved before an update still gets the newest phone sentences
-    const isPh=c=>c.phone||(byId[c.id]&&byId[c.id].src==="phone")||(c.type==="talk"&&talkById[c.id]&&talkById[c.id].src==="phone")||c.kind==="tense";
+    const isPh=c=>c.phone||(byId[c.id]&&byId[c.id].src==="phone")||(c.type==="talk"&&talkById[c.id]&&talkById[c.id].src==="phone")||c.kind==="tense"||c.kind==="wm";
     const done=queue.slice(0,ss.i), rest=queue.slice(ss.i).filter(c=>!isPh(c)), fresh=phoneCards().filter(c=>!done.some(d=>d.id===c.id));
     queue.splice(0,queue.length,...done,...fresh,...rest); }
   L={queue,i:resume?ss.i:0,total:queue.length,wrong:new Set(),retried:new Set(),done:new Set(),base:resume?(ss.elapsed||0):0,tStart:Date.now()};
@@ -564,6 +571,9 @@ function enterCard(){
     }
   }
   if(c.type==="pick"&&c.kind==="tense"){ const z=TZ[c.id]; c.right=z.right; c.opts=shuffle([z.right,z.wrong]); return; }
+  if(c.type==="pick"&&c.kind==="wm"){ const m=MZ[c.id]; c.right=m.text;
+    const others=shuffle(PMATCH.map(x=>x.text).filter(t=>t!==m.text&&!(m.near||[]).includes(t)));
+    c.opts=shuffle([m.text,...[...(m.near||[]),...others].slice(0,2)]); return; }
   if(c.type==="pick"){
     const it=byId[c.id];
     if(c.kind==="hs"){
@@ -713,6 +723,10 @@ function pickBody(c){
     return `<div class="tags"><span class="tag phone tz">📞 어제 일? 매일 일?</span></div><div class="when w-${z.when==="어제"?"past":"now"}">${z.when==="어제"?"📅 어제":z.when==="매일"?"🔁 매일":"⏰ 지금"}</div><div class="ko big">${h(z.ko)}</div>
       <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
       ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! 💖":"앗!"}<small>${h(z.note)}</small><button class="big next" data-act="next">계속 →</button></div>`:""}`; }
+  if(c.kind==="wm"){ const m=MZ[c.id];
+    return `<div class="tags"><span class="tag phone">📞 단어 맞추기</span></div><div class="pic"><span>${m.emoji||""}</span></div><div class="ko big">${h(m.ko)}</div><div class="ko">영어로 뭘까요?</div>
+      <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
+      ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! 💖":"앗!"}<small>${h(m.ko)} = ${h(m.text)}</small><button class="big next" data-act="next">계속 →</button></div>`:""}`; }
   if(c.kind==="hs"){
     return `<div class="tags"><span class="tag">누구일까?</span></div><div class="pic"><span class="who ${c.boy?"he":"she"}">${c.person[0]}</span></div>
       <div class="ko big">${h(c.ko)}</div><div class="ko">${h(c.person[1])}</div>
@@ -743,6 +757,7 @@ function bindCard(c){
   app.querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>{ const t=talkById[c.id]; const k=+b.dataset.opt; c.st.chosen=k; const ok=c.opts[k]===t.lines[1].text; c.st.fb=ok?"good":"bad"; srs(S.talks,c.id,ok); ok?chime():buzz(); render(); autoNext(c,playLine(t,1),1000); });
   app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{ const k=+b.dataset.pick; c.st.chosen=k; const ok=c.opts[k]===c.right; c.st.fb=ok?"good":"bad"; ok?chime():buzz(); render();
     if(c.kind==="tense"){ srs(S.items,c.id,ok); const z=TZ[c.id]; autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc(z.id,z.url,z.right)),ok?900:2600); return; }
+    if(c.kind==="wm"){ srs(S.items,c.id,ok); const m=MZ[c.id]; autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc(m.id,m.url,m.text)),ok?900:2200); return; }
     autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc("pick",null,c.right)),ok?700:1300); });
   app.querySelectorAll("[data-ans]").forEach(b=>b.onclick=()=>{ const it=byId[c.id]; const ans=it.q[c.st.yes?0:1]; const ok=c.opts[+b.dataset.ans]===ans; finishStep(c,ok); playSrc("ans",null,ans); });
   app.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{ const e=TIPS[c.c].ex[+b.dataset.ex][1]; playSrc("tip",null,e.replace("→",". ")); });
@@ -854,7 +869,7 @@ function advance(){
 function finishLesson(){
   const today=todayStr(), owned=new Set(S.stickers), choices=STICKERS.filter(s=>!owned.has(s));
   const opts=shuffle(choices.length>=3?choices:STICKERS).slice(0,3), pick=opts[0]; L.stkOpts=opts;
-  const wk=curWeek(); S.nextWeek = wk===0||wk>=S.bookWeek ? 1 : wk+1; S.session=null; S.weekPass=S.weekPass||{}; S.weekPass[wk]=(S.weekPass[wk]||0)+1;
+  const wk=curWeek(); if(wk!==-1){ S.nextWeek = wk===0||wk>=S.bookWeek ? 1 : wk+1; S.weekPass=S.weekPass||{}; S.weekPass[wk]=(S.weekPass[wk]||0)+1; } S.session=null;
   const secs=Math.round(elapsed()/1000);
   if(!S.days[today]){ S.days[today]={sticker:pick,n:L.total,wrong:L.wrong.size,week:wk,secs}; S.stickers.push(pick); }
   save(); view="finish"; render(); fanfare();
@@ -935,7 +950,7 @@ function renderParent(){
   <div class="panel"><details><summary>전체 문장 보기 (${avail.length}개)</summary><div class="list">${avail.map(row).join("")}</div></details></div>
   <div class="panel"><h3>설정</h3>
     <div class="field"><label for="bw">책 진도</label><select id="bw">${[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n===S.bookWeek?"selected":""}>${n}주차까지</option>`).join("")}</select></div>
-    <div class="field"><label for="nb">오늘(다음) 할 주차</label><select id="nb">${Array.from({length:S.bookWeek},(_,k)=>k+1).map(n=>`<option value="${n}" ${n===curWeek()?"selected":""}>${n}주차</option>`).join("")}<option value="0" ${curWeek()===0?"selected":""}>전체 복습</option></select>
+    <div class="field"><label for="nb">오늘(다음) 할 주차</label><select id="nb">${Array.from({length:S.bookWeek},(_,k)=>k+1).map(n=>`<option value="${n}" ${n===curWeek()?"selected":""}>${n}주차</option>`).join("")}<option value="0" ${curWeek()===0?"selected":""}>전체 복습</option><option value="-1" ${curWeek()===-1?"selected":""}>📞 전화영어만 (오늘)</option></select>
       <label for="nx">누구일까</label><select id="nx">${[0,1,2,3,4,5].map(n=>`<option ${n===(S.whoCount??3)?"selected":""}>${n}</option>`).join("")}</select>
       <label for="rc">복습 최대</label><select id="rc">${[4,6,8,10,12].map(n=>`<option ${n===S.reviewCap?"selected":""}>${n}</option>`).join("")}</select></div>
     <div class="field"><label for="dep">출발일</label><input type="date" id="dep" value="${S.depart}"></div>
@@ -944,19 +959,19 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/16-2 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/17-1 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
   app.querySelectorAll("[data-tip]").forEach(b=>b.onclick=()=>{ delete S.tips[b.dataset.tip]; save(); render(); });
   $("bw").onchange=e=>{S.bookWeek=+e.target.value;save();render();};
-  $("nb").onchange=e=>{S.nextWeek=+e.target.value;S.session=null;save();};
+  $("nb").onchange=e=>{ const v=+e.target.value; if(v===-1) S.phoneOnly=todayStr(); else { S.phoneOnly=null; S.nextWeek=v; } S.session=null; save(); };
   $("nx").onchange=e=>{S.whoCount=+e.target.value;save();};
   $("rc").onchange=e=>{S.reviewCap=+e.target.value;save();};
   $("dep").onchange=e=>{ if(e.target.value){S.depart=e.target.value;save();render();} };
   $("skip").onclick=()=>{S.offset++;save();render();};
   if($("markdone")) $("markdone").onclick=()=>{ const today=todayStr(), wk=curWeek(), owned=new Set(S.stickers), ch=STICKERS.filter(x=>!owned.has(x)), pk=pickOne(ch.length?ch:STICKERS);
-    S.days[today]={sticker:pk,n:0,wrong:0,week:wk,secs:0}; S.stickers.push(pk); S.weekPass=S.weekPass||{}; S.weekPass[wk]=(S.weekPass[wk]||0)+1; S.nextWeek=wk>=S.bookWeek?1:wk+1; S.session=null; save(); render(); };
+    S.days[today]={sticker:pk,n:0,wrong:0,week:wk,secs:0}; S.stickers.push(pk); if(wk!==-1){ S.weekPass=S.weekPass||{}; S.weekPass[wk]=(S.weekPass[wk]||0)+1; S.nextWeek=wk===0||wk>=S.bookWeek?1:wk+1; } S.session=null; save(); render(); };
   if($("today0ask")) $("today0ask").onclick=()=>{ confirmToday=true; render(); };
   if($("today0no")) $("today0no").onclick=()=>{ confirmToday=false; render(); };
   if($("today0")) $("today0").onclick=()=>{ confirmToday=false; const today=todayStr(), sn=S.daySnap; // undo everything done today: answers, timer, sticker
@@ -969,7 +984,9 @@ function renderParent(){
   if($("reset2")) $("reset2").onclick=()=>{ const keep={depart:S.depart,bookWeek:S.bookWeek,newBook:S.newBook,whoCount:S.whoCount,reviewCap:S.reviewCap,pin:S.pin}; S=Object.assign(blank(),keep); confirmReset=false; save(); render(); };
   if($("nores")) $("nores").onclick=()=>{confirmReset=false;render();};
 }
+window.__dbg=()=>({L,S,view,byId,talkById,buildQueue,matches,todayStr,curWeek}); // for tests
 fixOffset();
+if(!S.rev1118){ S.rev1118=true; if(todayStr()<="2026-11-18") S.phoneOnly="2026-11-18"; save(); } // dad 2026-11-17: tomorrow = 11/17 phone lesson only, no 천일문
 if(!S.rev1117){ S.rev1117=true; if(S.days["2026-11-16"]&&S.nextWeek===1&&todayStr()<="2026-11-17"){ S.nextWeek=0; S.session=null; } save(); } // dad: whole review on 11/17 after week 7
 render();
 window._dbg={matches,buildQueue,finishLesson,get S(){return S},get L(){return L},render:()=>render(),save:()=>save(),setView:v=>{view=v;render();},get view(){return view}};

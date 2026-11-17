@@ -683,6 +683,403 @@
    "ko": "사람들",
    "url": "phone/1b6948fd1d61.mp3",
    "pri": true
+  },
+  {
+   "id": "p1117s0",
+   "lesson": "2026-11-17",
+   "text": "My pen is on my book.",
+   "ko": "펜이 내 책 위에 있어요",
+   "url": "phone/ffe567613750.mp3",
+   "pri": true
+  },
+  {
+   "id": "p1117s0a0",
+   "lesson": "2026-11-17",
+   "base": "p1117s0",
+   "stage": 1,
+   "text": "My pen is under my book.",
+   "ko": "펜이 내 책 아래에 있어요",
+   "url": "phone/3f9a029d623c.mp3"
+  },
+  {
+   "id": "p1117s0a1",
+   "lesson": "2026-11-17",
+   "base": "p1117s0",
+   "stage": 1,
+   "text": "My pen is in my bag.",
+   "ko": "펜이 내 가방 안에 있어요",
+   "url": "phone/fd0a47aaa5eb.mp3"
+  },
+  {
+   "id": "p1117s0a2",
+   "lesson": "2026-11-17",
+   "base": "p1117s0",
+   "stage": 1,
+   "text": "My pen is on the desk.",
+   "ko": "펜이 책상 위에 있어요",
+   "url": "phone/fa26bbb92441.mp3"
+  },
+  {
+   "id": "p1117s0b0",
+   "lesson": "2026-11-17",
+   "base": "p1117s0",
+   "stage": 2,
+   "text": "My book is on the desk.",
+   "ko": "내 책이 책상 위에 있어요",
+   "url": "phone/5a5d870f5175.mp3"
+  },
+  {
+   "id": "p1117s0b1",
+   "lesson": "2026-11-17",
+   "base": "p1117s0",
+   "stage": 2,
+   "text": "The cat is on the chair.",
+   "ko": "고양이가 의자 위에 있어요",
+   "url": "phone/c2fe304f88a5.mp3"
+  },
+  {
+   "id": "p1117s1",
+   "lesson": "2026-11-17",
+   "text": "The dog is under the table.",
+   "ko": "강아지가 탁자 아래에 있어요",
+   "url": "phone/46212b23b0de.mp3",
+   "pri": true
+  },
+  {
+   "id": "p1117s1a0",
+   "lesson": "2026-11-17",
+   "base": "p1117s1",
+   "stage": 1,
+   "text": "The dog is under the bed.",
+   "ko": "강아지가 침대 아래에 있어요",
+   "url": "phone/080785925249.mp3"
+  },
+  {
+   "id": "p1117s1a1",
+   "lesson": "2026-11-17",
+   "base": "p1117s1",
+   "stage": 1,
+   "text": "The dog is on the bed.",
+   "ko": "강아지가 침대 위에 있어요",
+   "url": "phone/b5a300317f95.mp3"
+  },
+  {
+   "id": "p1117s1a2",
+   "lesson": "2026-11-17",
+   "base": "p1117s1",
+   "stage": 1,
+   "text": "The dog is in the box.",
+   "ko": "강아지가 상자 안에 있어요",
+   "url": "phone/0d53ce8b42b1.mp3"
+  },
+  {
+   "id": "p1117s1b0",
+   "lesson": "2026-11-17",
+   "base": "p1117s1",
+   "stage": 2,
+   "text": "The cat is under the table.",
+   "ko": "고양이가 탁자 아래에 있어요",
+   "url": "phone/7d87619f6cca.mp3"
+  },
+  {
+   "id": "p1117s1b1",
+   "lesson": "2026-11-17",
+   "base": "p1117s1",
+   "stage": 2,
+   "text": "My bag is under the table.",
+   "ko": "내 가방이 탁자 아래에 있어요",
+   "url": "phone/98c384d9387a.mp3"
+  },
+  {
+   "id": "p1117s2",
+   "lesson": "2026-11-17",
+   "text": "I take a bus.",
+   "ko": "나는 버스를 타요",
+   "url": "phone/579fc7091dd6.mp3",
+   "pri": true
+  },
+  {
+   "id": "p1117s2a0",
+   "lesson": "2026-11-17",
+   "base": "p1117s2",
+   "stage": 1,
+   "text": "I take a taxi.",
+   "ko": "나는 택시를 타요",
+   "url": "phone/30750d0935fc.mp3"
+  },
+  {
+   "id": "p1117s2a1",
+   "lesson": "2026-11-17",
+   "base": "p1117s2",
+   "stage": 1,
+   "text": "I take a pen.",
+   "ko": "나는 펜을 집어요",
+   "url": "phone/ee5e3b96e9ac.mp3"
+  },
+  {
+   "id": "p1117s2a2",
+   "lesson": "2026-11-17",
+   "base": "p1117s2",
+   "stage": 1,
+   "text": "I take a picture.",
+   "ko": "나는 사진을 찍어요",
+   "url": "phone/f678fc3ea85e.mp3"
+  },
+  {
+   "id": "p1117s2b0",
+   "lesson": "2026-11-17",
+   "base": "p1117s2",
+   "stage": 2,
+   "text": "We take a bus.",
+   "ko": "우리는 버스를 타요",
+   "url": "phone/e76e0d684e02.mp3"
+  },
+  {
+   "id": "p1117s2b1",
+   "lesson": "2026-11-17",
+   "base": "p1117s2",
+   "stage": 2,
+   "text": "My dad takes a bus.",
+   "ko": "아빠는 버스를 타요",
+   "url": "phone/98531b7c8f3f.mp3"
+  },
+  {
+   "id": "p1117s3",
+   "lesson": "2026-11-17",
+   "text": "It takes a long time.",
+   "ko": "시간이 오래 걸려요",
+   "url": "phone/6e861314d937.mp3",
+   "pri": true
+  },
+  {
+   "id": "p1117s3a0",
+   "lesson": "2026-11-17",
+   "base": "p1117s3",
+   "stage": 1,
+   "text": "It takes ten minutes.",
+   "ko": "10분 걸려요",
+   "url": "phone/c90fe72a0265.mp3"
+  },
+  {
+   "id": "p1117s3a1",
+   "lesson": "2026-11-17",
+   "base": "p1117s3",
+   "stage": 1,
+   "text": "It takes one hour.",
+   "ko": "1시간 걸려요",
+   "url": "phone/75d69d7e855d.mp3"
+  },
+  {
+   "id": "p1117s3a2",
+   "lesson": "2026-11-17",
+   "base": "p1117s3",
+   "stage": 1,
+   "text": "It takes five minutes.",
+   "ko": "5분 걸려요",
+   "url": "phone/8e2345a279e4.mp3"
+  },
+  {
+   "id": "p1117s4",
+   "lesson": "2026-11-17",
+   "text": "It was very fun!",
+   "ko": "정말 재미있었어요!",
+   "url": "phone/f87b282e66d5.mp3",
+   "pri": true
+  },
+  {
+   "id": "p1117s4a0",
+   "lesson": "2026-11-17",
+   "base": "p1117s4",
+   "stage": 1,
+   "text": "It was very good!",
+   "ko": "정말 좋았어요!",
+   "url": "phone/f2f1504f7236.mp3"
+  },
+  {
+   "id": "p1117s4a1",
+   "lesson": "2026-11-17",
+   "base": "p1117s4",
+   "stage": 1,
+   "text": "It was very easy!",
+   "ko": "정말 쉬웠어요!",
+   "url": "phone/4c5b6ff5b898.mp3"
+  },
+  {
+   "id": "p1117s4a2",
+   "lesson": "2026-11-17",
+   "base": "p1117s4",
+   "stage": 1,
+   "text": "It was very yummy!",
+   "ko": "정말 맛있었어요!",
+   "url": "phone/7bdcca3f4731.mp3"
+  },
+  {
+   "id": "p1117s4b0",
+   "lesson": "2026-11-17",
+   "base": "p1117s4",
+   "stage": 2,
+   "text": "School was very fun!",
+   "ko": "학교가 정말 재미있었어요!",
+   "url": "phone/6b6fcaec7429.mp3"
+  },
+  {
+   "id": "p1117s4b1",
+   "lesson": "2026-11-17",
+   "base": "p1117s4",
+   "stage": 2,
+   "text": "The party was very fun!",
+   "ko": "파티가 정말 재미있었어요!",
+   "url": "phone/4a80d1f5632b.mp3"
+  },
+  {
+   "id": "p1117s5",
+   "lesson": "2026-11-17",
+   "text": "My fridge is white.",
+   "ko": "우리 냉장고는 하얀색이에요",
+   "url": "phone/4f97f42b86a8.mp3",
+   "pri": true
+  },
+  {
+   "id": "p1117s5a0",
+   "lesson": "2026-11-17",
+   "base": "p1117s5",
+   "stage": 1,
+   "text": "My fridge is silver.",
+   "ko": "우리 냉장고는 은색이에요",
+   "url": "phone/537ca11ca1e8.mp3"
+  },
+  {
+   "id": "p1117s5a1",
+   "lesson": "2026-11-17",
+   "base": "p1117s5",
+   "stage": 1,
+   "text": "My fridge is big.",
+   "ko": "우리 냉장고는 커요",
+   "url": "phone/22fb57961ac8.mp3"
+  },
+  {
+   "id": "p1117s5a2",
+   "lesson": "2026-11-17",
+   "base": "p1117s5",
+   "stage": 1,
+   "text": "My fridge is full.",
+   "ko": "우리 냉장고는 꽉 찼어요",
+   "url": "phone/8be2e1a847e6.mp3"
+  },
+  {
+   "id": "p1117s5b0",
+   "lesson": "2026-11-17",
+   "base": "p1117s5",
+   "stage": 2,
+   "text": "My bag is white.",
+   "ko": "내 가방은 하얀색이에요",
+   "url": "phone/9ba124066bc3.mp3"
+  },
+  {
+   "id": "p1117s5b1",
+   "lesson": "2026-11-17",
+   "base": "p1117s5",
+   "stage": 2,
+   "text": "My hairband is brown.",
+   "ko": "내 머리띠는 갈색이에요",
+   "url": "phone/fb5b8998be53.mp3"
+  },
+  {
+   "id": "p1117s6",
+   "lesson": "2026-11-17",
+   "text": "I like your hairband.",
+   "ko": "네 머리띠 예쁘다",
+   "url": "phone/88c9e99af5b6.mp3",
+   "pri": true
+  },
+  {
+   "id": "p1117s6a0",
+   "lesson": "2026-11-17",
+   "base": "p1117s6",
+   "stage": 1,
+   "text": "I like your bag.",
+   "ko": "네 가방 예쁘다",
+   "url": "phone/a7ca8d423c26.mp3"
+  },
+  {
+   "id": "p1117s6a1",
+   "lesson": "2026-11-17",
+   "base": "p1117s6",
+   "stage": 1,
+   "text": "I like your shoes.",
+   "ko": "네 신발 예쁘다",
+   "url": "phone/bc7885389136.mp3"
+  },
+  {
+   "id": "p1117s6a2",
+   "lesson": "2026-11-17",
+   "base": "p1117s6",
+   "stage": 1,
+   "text": "I like your dress.",
+   "ko": "네 원피스 예쁘다",
+   "url": "phone/f269bdcfe40b.mp3"
+  },
+  {
+   "id": "p1117s6b0",
+   "lesson": "2026-11-17",
+   "base": "p1117s6",
+   "stage": 2,
+   "text": "We like your hairband.",
+   "ko": "우리는 네 머리띠가 좋아",
+   "url": "phone/119fdf0ffe5a.mp3"
+  },
+  {
+   "id": "p1117s6b1",
+   "lesson": "2026-11-17",
+   "base": "p1117s6",
+   "stage": 2,
+   "text": "My mom likes your hairband.",
+   "ko": "엄마가 네 머리띠 좋대",
+   "url": "phone/33832da7cc3f.mp3"
+  },
+  {
+   "id": "p1117s7",
+   "lesson": "2026-11-17",
+   "text": "It's morning. Wake up!",
+   "ko": "아침이야. 일어나!",
+   "url": "phone/4f8b889c9316.mp3",
+   "pri": true
+  },
+  {
+   "id": "p1117s7a0",
+   "lesson": "2026-11-17",
+   "base": "p1117s7",
+   "stage": 1,
+   "text": "It's late. Wake up!",
+   "ko": "늦었어. 일어나!",
+   "url": "phone/308882dc4e79.mp3"
+  },
+  {
+   "id": "p1117s7a1",
+   "lesson": "2026-11-17",
+   "base": "p1117s7",
+   "stage": 1,
+   "text": "It's seven. Wake up!",
+   "ko": "7시야. 일어나!",
+   "url": "phone/45fba39abb7d.mp3"
+  },
+  {
+   "id": "p1117s7b0",
+   "lesson": "2026-11-17",
+   "base": "p1117s7",
+   "stage": 2,
+   "text": "Mom, wake up!",
+   "ko": "엄마, 일어나!",
+   "url": "phone/15436a2c3eff.mp3"
+  },
+  {
+   "id": "p1117s7b1",
+   "lesson": "2026-11-17",
+   "base": "p1117s7",
+   "stage": 2,
+   "text": "Dad, wake up!",
+   "ko": "아빠, 일어나!",
+   "url": "phone/3bc9a15aa240.mp3"
   }
  ],
  "talks": [
@@ -1018,6 +1415,320 @@
     }
    ],
    "pri": true
+  },
+  {
+   "id": "p1117s0q",
+   "lesson": "2026-11-17",
+   "base": "p1117s0",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "Where is your pen?",
+     "ko": "네 펜 어디 있어?",
+     "url": "phone/7652c0a703db.mp3"
+    },
+    {
+     "text": "It is on my book.",
+     "ko": "내 책 위에 있어요",
+     "url": "phone/141713661a05.mp3"
+    }
+   ]
+  },
+  {
+   "id": "p1117s1q",
+   "lesson": "2026-11-17",
+   "base": "p1117s1",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "Where is the dog?",
+     "ko": "강아지 어디 있어?",
+     "url": "phone/dc3193ce7859.mp3"
+    },
+    {
+     "text": "It is under the table.",
+     "ko": "탁자 아래에 있어요",
+     "url": "phone/be9c14234510.mp3"
+    }
+   ]
+  },
+  {
+   "id": "p1117s2q",
+   "lesson": "2026-11-17",
+   "base": "p1117s2",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "Do you take a bus?",
+     "ko": "너 버스 타?",
+     "url": "phone/a0eb5af1fde5.mp3"
+    },
+    {
+     "text": "Yes, I take a bus.",
+     "ko": "네, 버스를 타요",
+     "url": "phone/cb5382235253.mp3"
+    }
+   ]
+  },
+  {
+   "id": "p1117s3q",
+   "lesson": "2026-11-17",
+   "base": "p1117s3",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "How long does it take?",
+     "ko": "얼마나 걸려?",
+     "url": "phone/2aaad0ea0262.mp3"
+    },
+    {
+     "text": "It takes ten minutes.",
+     "ko": "10분 걸려요",
+     "url": "phone/c90fe72a0265.mp3"
+    }
+   ]
+  },
+  {
+   "id": "p1117s4q",
+   "lesson": "2026-11-17",
+   "base": "p1117s4",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "How was the party?",
+     "ko": "파티 어땠어?",
+     "url": "phone/5c53654626cf.mp3"
+    },
+    {
+     "text": "It was very fun!",
+     "ko": "정말 재미있었어요!",
+     "url": "phone/f87b282e66d5.mp3"
+    }
+   ]
+  },
+  {
+   "id": "p1117s5q",
+   "lesson": "2026-11-17",
+   "base": "p1117s5",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "What color is your bag?",
+     "ko": "네 가방은 무슨 색이야?",
+     "url": "phone/e29663b83616.mp3"
+    },
+    {
+     "text": "It is pink.",
+     "ko": "분홍색이에요",
+     "url": "phone/b3d1f9215f11.mp3"
+    }
+   ]
+  },
+  {
+   "id": "p1117s6q",
+   "lesson": "2026-11-17",
+   "base": "p1117s6",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "Do you like my hairband?",
+     "ko": "내 머리띠 마음에 들어?",
+     "url": "phone/6e41ff9ab20a.mp3"
+    },
+    {
+     "text": "Yes, I like your hairband.",
+     "ko": "응, 네 머리띠 예뻐",
+     "url": "phone/9e329387e51f.mp3"
+    }
+   ]
+  },
+  {
+   "id": "p1117s7q",
+   "lesson": "2026-11-17",
+   "base": "p1117s7",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "What time do you wake up?",
+     "ko": "너 몇 시에 일어나?",
+     "url": "phone/361312f0fb93.mp3"
+    },
+    {
+     "text": "I wake up at seven.",
+     "ko": "나는 7시에 일어나요",
+     "url": "phone/0058613a9af0.mp3"
+    }
+   ]
+  },
+  {
+   "id": "p1117t0",
+   "lesson": "2026-11-17",
+   "lines": [
+    {
+     "text": "How was school today?",
+     "ko": "오늘 학교 어땠어?",
+     "url": "phone/a492953b1d3c.mp3"
+    },
+    {
+     "text": "It was very fun!",
+     "ko": "정말 재미있었어요!",
+     "url": "phone/f87b282e66d5.mp3"
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1117t1",
+   "lesson": "2026-11-17",
+   "lines": [
+    {
+     "text": "Did you have fun?",
+     "ko": "재미있었어?",
+     "url": "phone/60d2331aa0ad.mp3"
+    },
+    {
+     "text": "Yes, I had fun!",
+     "ko": "응, 재미있었어요!",
+     "url": "phone/f9f655fa0806.mp3"
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1117t2",
+   "lesson": "2026-11-17",
+   "lines": [
+    {
+     "text": "After school, did you go to the academy?",
+     "ko": "학교 끝나고 학원 갔어?",
+     "url": "phone/6e52b6fecc6c.mp3"
+    },
+    {
+     "text": "No, I went to the playground.",
+     "ko": "아니요, 두근두근 갔어요",
+     "url": "phone/2e7f5a789d95.mp3"
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1117t3",
+   "lesson": "2026-11-17",
+   "lines": [
+    {
+     "text": "What did you have for dinner?",
+     "ko": "저녁에 뭐 먹었어?",
+     "url": "phone/d48e6c446ccb.mp3"
+    },
+    {
+     "text": "I had noodles for dinner.",
+     "ko": "저녁으로 국수를 먹었어요",
+     "url": "phone/9b1fb1221089.mp3"
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1117t4",
+   "lesson": "2026-11-17",
+   "lines": [
+    {
+     "text": "What color is your fridge?",
+     "ko": "너희 냉장고는 무슨 색이야?",
+     "url": "phone/ac689998c4a8.mp3"
+    },
+    {
+     "text": "My fridge is white.",
+     "ko": "우리 냉장고는 하얀색이에요",
+     "url": "phone/4f97f42b86a8.mp3"
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1117t5",
+   "lesson": "2026-11-17",
+   "lines": [
+    {
+     "text": "What class did you have today?",
+     "ko": "오늘 무슨 수업 했어?",
+     "url": "phone/1849de01c410.mp3"
+    },
+    {
+     "text": "I had PE today.",
+     "ko": "오늘 체육 했어요",
+     "url": "phone/d89688932929.mp3"
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1117t6",
+   "lesson": "2026-11-17",
+   "lines": [
+    {
+     "text": "Do you have a kimchi fridge?",
+     "ko": "김치냉장고 있어?",
+     "url": "phone/5b1f5e1faa09.mp3"
+    },
+    {
+     "text": "Yes, we have two fridges.",
+     "ko": "네, 냉장고가 두 개 있어요",
+     "url": "phone/fa9acd89136c.mp3"
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1117t7",
+   "lesson": "2026-11-17",
+   "lines": [
+    {
+     "text": "Who makes kimchi?",
+     "ko": "김치는 누가 만들어?",
+     "url": "phone/76821e2557a9.mp3"
+    },
+    {
+     "text": "My mom makes kimchi.",
+     "ko": "엄마가 김치를 만들어요",
+     "url": "phone/f81a3cdac368.mp3"
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1117t8",
+   "lesson": "2026-11-17",
+   "lines": [
+    {
+     "text": "What color is your kimchi fridge?",
+     "ko": "김치냉장고는 무슨 색이야?",
+     "url": "phone/7e0fd2be8495.mp3"
+    },
+    {
+     "text": "It is white too.",
+     "ko": "그것도 하얀색이에요",
+     "url": "phone/d3cc417cdc97.mp3"
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1117t9",
+   "lesson": "2026-11-17",
+   "lines": [
+    {
+     "text": "Is the troll scary?",
+     "ko": "트롤 무서워?",
+     "url": "phone/d99ee3d9b51b.mp3"
+    },
+    {
+     "text": "No, it's cute!",
+     "ko": "아니요, 귀여워요!",
+     "url": "phone/7ddd88b22626.mp3"
+    }
+   ],
+   "pri": true
   }
  ],
  "tense": [
@@ -1110,6 +1821,236 @@
    "wrong": "It was cold today.",
    "note": "지금 일이니까 is! (was는 어제 일)",
    "url": "phone/bcd2ce5e8c93.mp3"
+  },
+  {
+   "id": "tz10",
+   "when": "어제",
+   "ko": "나는 친구를 봤어요",
+   "right": "I saw my friend.",
+   "wrong": "I see my friend.",
+   "note": "어제 일이니까 saw! (see 봐요 → saw 봤어요)",
+   "url": "phone/30fba7fb20d1.mp3"
+  },
+  {
+   "id": "tz11",
+   "when": "매일",
+   "ko": "나는 버스를 타요",
+   "right": "I take a bus.",
+   "wrong": "I took a bus.",
+   "note": "매일 하는 일이니까 take! (took은 어제 일)",
+   "url": "phone/579fc7091dd6.mp3"
+  },
+  {
+   "id": "tz12",
+   "when": "어제",
+   "ko": "나는 국수를 먹었어요",
+   "right": "I had noodles.",
+   "wrong": "I have noodles.",
+   "note": "어제 일이니까 had! (have → had)",
+   "url": "phone/cd7795d608c7.mp3"
+  }
+ ],
+ "match": [
+  {
+   "id": "pm0",
+   "lesson": "2026-11-17",
+   "text": "fridge",
+   "ko": "냉장고",
+   "emoji": "🧊",
+   "near": [
+    "kitchen"
+   ],
+   "url": "phone/01a7ec9ab583.mp3"
+  },
+  {
+   "id": "pm1",
+   "lesson": "2026-11-17",
+   "text": "kitchen",
+   "ko": "부엌",
+   "emoji": "🍳",
+   "near": [
+    "fridge"
+   ],
+   "url": "phone/083823e70d44.mp3"
+  },
+  {
+   "id": "pm2",
+   "lesson": "2026-11-17",
+   "text": "silver",
+   "ko": "은색",
+   "emoji": "🥈",
+   "near": [
+    "white"
+   ],
+   "url": "phone/c662abd5b352.mp3"
+  },
+  {
+   "id": "pm3",
+   "lesson": "2026-11-17",
+   "text": "saw",
+   "ko": "봤어요 (see의 어제 말)",
+   "emoji": "👀",
+   "near": [
+    "see"
+   ],
+   "url": "phone/dc3e00d411f0.mp3"
+  },
+  {
+   "id": "pm4",
+   "lesson": "2026-11-17",
+   "text": "talk",
+   "ko": "말하다",
+   "emoji": "🗣️",
+   "near": [
+    "take"
+   ],
+   "url": "phone/06f1f8965d8f.mp3"
+  },
+  {
+   "id": "pm5",
+   "lesson": "2026-11-17",
+   "text": "take",
+   "ko": "타다 · 가져가다",
+   "emoji": "🚌",
+   "near": [
+    "talk"
+   ],
+   "url": "phone/4a91a6f9b202.mp3"
+  },
+  {
+   "id": "pm6",
+   "lesson": "2026-11-17",
+   "text": "walk",
+   "ko": "걷다",
+   "emoji": "🚶",
+   "near": [
+    "wake up"
+   ],
+   "url": "phone/64c63f983206.mp3"
+  },
+  {
+   "id": "pm7",
+   "lesson": "2026-11-17",
+   "text": "wake up",
+   "ko": "일어나다",
+   "emoji": "⏰",
+   "near": [
+    "walk"
+   ],
+   "url": "phone/73db40beea67.mp3"
+  },
+  {
+   "id": "pm8",
+   "lesson": "2026-11-17",
+   "text": "goat",
+   "ko": "염소",
+   "emoji": "🐐",
+   "near": [
+    "grass"
+   ],
+   "url": "phone/544ed320d04d.mp3"
+  },
+  {
+   "id": "pm9",
+   "lesson": "2026-11-17",
+   "text": "grass",
+   "ko": "풀",
+   "emoji": "🌿",
+   "near": [
+    "goat"
+   ],
+   "url": "phone/1b20985f6258.mp3"
+  },
+  {
+   "id": "pm10",
+   "lesson": "2026-11-17",
+   "text": "hungry",
+   "ko": "배고픈",
+   "emoji": "😋",
+   "near": [
+    "scary"
+   ],
+   "url": "phone/d701037c5640.mp3"
+  },
+  {
+   "id": "pm11",
+   "lesson": "2026-11-17",
+   "text": "river",
+   "ko": "강",
+   "emoji": "🏞️",
+   "near": [
+    "bridge"
+   ],
+   "url": "phone/fb8b0a633e85.mp3"
+  },
+  {
+   "id": "pm12",
+   "lesson": "2026-11-17",
+   "text": "bridge",
+   "ko": "다리",
+   "emoji": "🌉",
+   "near": [
+    "river"
+   ],
+   "url": "phone/804a530a6ad9.mp3"
+  },
+  {
+   "id": "pm13",
+   "lesson": "2026-11-17",
+   "text": "scary",
+   "ko": "무서운",
+   "emoji": "😱",
+   "near": [
+    "ugly"
+   ],
+   "url": "phone/5bfa2c3d3bfa.mp3"
+  },
+  {
+   "id": "pm14",
+   "lesson": "2026-11-17",
+   "text": "ugly",
+   "ko": "못생긴",
+   "emoji": "👹",
+   "near": [
+    "scary"
+   ],
+   "url": "phone/65d167d623ee.mp3"
+  },
+  {
+   "id": "pm15",
+   "lesson": "2026-11-17",
+   "text": "in",
+   "ko": "안에",
+   "emoji": "📦",
+   "near": [
+    "on",
+    "under"
+   ],
+   "url": "phone/bc8fdaa9308e.mp3"
+  },
+  {
+   "id": "pm16",
+   "lesson": "2026-11-17",
+   "text": "on",
+   "ko": "위에",
+   "emoji": "⬆️",
+   "near": [
+    "in",
+    "under"
+   ],
+   "url": "phone/1e231fd79aa3.mp3"
+  },
+  {
+   "id": "pm17",
+   "lesson": "2026-11-17",
+   "text": "under",
+   "ko": "아래에",
+   "emoji": "⬇️",
+   "near": [
+    "in",
+    "on"
+   ],
+   "url": "phone/1940c7da67ef.mp3"
   }
  ]
 }
