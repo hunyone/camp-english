@@ -146,6 +146,7 @@ b.vk{color:#7B4FD6;font-size:1.25em;text-decoration:underline;text-underline-off
 .grabrow button.no{border-color:var(--maple);background:var(--maple-soft)}
 @keyframes fly{to{transform:translateY(-150px) scale(.5);opacity:.2}}
 .hand{font-size:80px;line-height:1}
+.bagin{font-size:.6em;margin-left:-.35em;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both;display:inline-block}
 .opts{display:flex;flex-direction:column;gap:12px;width:100%;max-width:560px}
 .opt{font-family:var(--f-en);font-weight:600;font-size:26px;background:var(--card);border:3px solid var(--line);border-bottom-width:6px;border-radius:18px;padding:14px 18px;text-align:left}
 .opt.right{border-color:var(--pine);background:var(--pine-soft)}
@@ -313,6 +314,17 @@ const PHONE_UNITS=2, PHONE_SAY=10, PHONE_TALK=1, TENSE_N=2; // dad 2026-11-13: f
 const TENSE=(DATA.phone&&DATA.phone.tense)||[];
 const PMATCH=(DATA.phone&&DATA.phone.match)||[]; const MZ=Object.fromEntries(PMATCH.map(m=>[m.id,m])); // 단어 맞추기 (dad 2026-11-17)
 const GAMES=(DATA.phone&&DATA.phone.games)||{grab:[],where:[]}; const GZ={}; GAMES.grab.forEach(g=>GZ[g.id]=g); GAMES.where.forEach(g=>GZ[g.id]=g);
+const TAKE=[ // [id, emoji, teacher line, Korean, what she says after, Korean]
+ ["tk0","☂️","It's raining. Take an umbrella!","비가 와요. 우산을 챙겨 가요!","I took an umbrella.","나는 우산을 챙겼어요"],
+ ["tk1","🧢","It's sunny. Take your hat!","해가 쨍쨍해요. 모자를 챙겨 가요!","I took my hat.","나는 모자를 챙겼어요"],
+ ["tk2","🧥","It's cold. Take your coat!","추워요. 외투를 챙겨 가요!","I took my coat.","나는 외투를 챙겼어요"],
+ ["tk3","🥛","Take the milk from the fridge.","냉장고에서 우유를 꺼내 가요.","I took the milk.","나는 우유를 꺼냈어요"],
+ ["tk4","🍱","It's lunch time. Take your lunch box!","점심시간이에요. 도시락을 챙겨 가요!","I took my lunch box.","나는 도시락을 챙겼어요"],
+ ["tk5","🩱","We're going swimming. Take your swimsuit!","수영하러 가요. 수영복을 챙겨 가요!","I took my swimsuit.","나는 수영복을 챙겼어요"],
+ ["tk6","🖊️","Take a pen and write your name.","펜을 집어서 이름을 써요.","I took a pen.","나는 펜을 집었어요"],
+ ["tk7","🍪","You can take one cookie.","쿠키 하나 가져가도 돼요.","I took a cookie.","나는 쿠키를 하나 가져갔어요"]
+].map(([id,emoji,line,lineKo,say,sayKo])=>({id,emoji,line,lineKo,say,sayKo}));
+const TK=Object.fromEntries(TAKE.map(t=>[t.id,t]));
 const isPhoneDay=()=>S.phoneOnly===todayStr(); // "전화영어만" day: no book cards (dad 2026-11-17)
 // Phone sentences repeat as patterns (dad 2026-11-13): base sentence, then stage 1 (swap the last word), stage 2 (swap who), stage 3 (question & answer).
 // Stage 1 comes right after the base sentence; the next stage opens once every card of the stage before was answered right (and not missed lately).
@@ -336,7 +348,7 @@ function phoneCards(){ const today=todayStr(), big=isPhoneDay();
   const wm=PMATCH.map((m,k)=>{ const r=rank(S.items[m.id],{pri:true}); return r<9?{m,k,r}:null; }).filter(Boolean).sort((a,b)=>a.r-b.r||a.k-b.k).slice(0,NM).map(o=>o.m);
   const tz=shuffle(TENSE).sort((a,b)=>((S.items[b.id]||{}).recentWrong||0)-((S.items[a.id]||{}).recentWrong||0)).slice(0,TENSE_N);
   return say.map(i=>({type:"say",id:i.id,fresh:true,phone:true})).concat(talks.map(t=>({type:"talk",id:t.id,phone:true})),tz.map(z=>({type:"pick",kind:"tense",id:z.id,phone:true})),shuffle(wm).map(m=>({type:"pick",kind:"wm",id:m.id,phone:true})),
-    shuffle(GAMES.where).slice(0,big?2:1).map(g=>({type:"pick",kind:"where",id:g.id,phone:true})),shuffle(GAMES.grab).slice(0,big?2:0).map(g=>({type:"pick",kind:"grab",id:g.id,phone:true}))); }
+    shuffle(GAMES.where).slice(0,big?2:1).map(g=>({type:"pick",kind:"where",id:g.id,phone:true})),TAKE.map((t,k)=>({t,k,r:rank(S.items[t.id],{pri:true})})).filter(o=>o.r<9).sort((a,b)=>a.r-b.r||a.k-b.k).slice(0,big?2:1).map(o=>({type:"pick",kind:"grab",id:o.t.id,phone:true}))); }
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -433,7 +445,7 @@ const SAME=[["restroom","toilet","washroom","bathroom"],["mom","mommy","mother",
  ["morning","mourning"],["too","to","two"],["fun","fan","phone","fund"],["kimchi","kimchee","kimchis"],["academy","academic","academie"],["minutes","minute","minets","minits","mins","min"],
  ["hour","our","hours","hower","how","or","ower"],["classes","class","glasses"],["shoes","shoe","shows","shoos"],["dress","dresses","dres"],["bag","back","bags","beg"],["book","books","buk"],
  ["desk","disk","desks","dusk"],["rabbit","rabbits","rabit","robert"],["present","presents","president"],["party","potty","parties"],["cake","cakes","kick"],
- ["hairband","hairbands","headband","headbands"],["take","takes","tech","taken","tax","text","tags","tick"],["wake","woke","weak","wait up"],["seven","sevens"],["ten","tin","tan","then","tim","10"],
+ ["hairband","hairbands","headband","headbands"],["take","takes","tech","taken","tax","text","tags","tick"],["took","tuck","tuk","toke","talk","took"],["wake","woke","weak","wait up"],["seven","sevens"],["ten","tin","tan","then","tim","10"],
  ["five","fight","fife"],["one","won","want","an","a","1"],["eight","ate","a"],["pe","pee","pea","p","phy","pe's"]];
 const SMALL=new Set(["a","an","the"]);
 const NUMW=["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty"];
@@ -641,7 +653,7 @@ function enterCard(){
   }
   if(c.type==="pick"&&c.kind==="tense"){ const z=TZ[c.id]; c.right=z.right; c.opts=shuffle([z.right,z.wrong]); return; }
   if(c.type==="pick"&&c.kind==="where"){ const g=GZ[c.id]; c.right=g.place; c.opts=["in","on","under"]; return; }
-  if(c.type==="pick"&&c.kind==="grab"){ const g=GZ[c.id]; c.right=g.id; c.opts=shuffle([g.id,...shuffle(GAMES.grab.filter(x=>x.id!==g.id)).slice(0,3).map(x=>x.id)]); return; }
+  if(c.type==="pick"&&c.kind==="grab"){ c.st.phase=0; c.opts=shuffle([c.id,...shuffle(TAKE.filter(x=>x.id!==c.id)).slice(0,2).map(x=>x.id)]); return; }
   if(c.type==="pick"&&c.kind==="wm"){ const m=MZ[c.id]; c.right=m.text;
     const others=shuffle(PMATCH.map(x=>x.text).filter(t=>t!==m.text&&!(m.near||[]).includes(t)));
     c.opts=shuffle([m.text,...[...(m.near||[]),...others].slice(0,2)]); return; }
@@ -815,13 +827,13 @@ function pickBody(c){
     return `<div class="tags"><span class="tag phone">📞 📦 어디 있을까?</span></div><div class="gamebox">${scene}${an}</div><div class="ko big">${done?h(g.ko):h(g.ko.split(" ")[0])+" 어디에 있을까요?"}</div>
       ${done?"":`<div class="opts">${c.opts.map((o,k)=>`<button class="opt" data-pick="${k}">${o}</button>`).join("")}</div>`}
       ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! 💖":"앗! 이렇게 말해요"}<div class="en">${h(g.text)}</div>${c.st.echoOk?"따라 말하기 성공! 💖":micBlock(c,"문장으로 따라 말해 봐요!")}<div class="btns"><button class="big soft" data-act="playg">🔊 다시 듣기</button><button class="big skip" data-act="skip">다음 →</button></div></div>`:""}`; }
-  if(c.kind==="grab"){ // dad 2026-11-17: she has to SAY "Take a ___!" to get it (tapping alone skipped "take")
-    if(!c.st.sel) return `<div class="tags"><span class="tag phone">📞 ✋ 집어 봐요!</span></div><div class="hand">✋</div><div class="ko big">갖고 싶은 걸 하나 골라요!</div>
-      <div class="grabrow">${c.opts.map((o,k)=>`<button data-grab="${k}">${GZ[o].emoji}</button>`).join("")}</div>`;
-    const g=GZ[c.st.sel], frame=g.text.replace(/\b(a|an) [a-z]+!$/i,(m,a)=>a+" ( ? )!");
-    return `<div class="tags"><span class="tag phone">📞 ✋ 집어 봐요!</span></div><div class="hand">${done?"✋"+g.emoji:"✋"}</div>
-      <div class="grabrow" style="grid-template-columns:1fr;max-width:140px"><button class="${done?"ok":""}" disabled>${g.emoji}</button></div>
-      ${done?`<div class="feedback good">쏙! 가져왔어요 💖<div class="en">${h(g.text)}</div><small>${h(g.ko)}</small></div>`:`<div class="ko big">주문을 외쳐요: <b>${h(frame)}</b></div>${micBlock(c,"Take a ...! 하고 말해 봐요")}<div class="btns"><button class="big soft" data-act="playg">🔊 정답 듣기</button><button class="big skip" data-act="skip">다음 →</button></div>`}`; }
+  if(c.kind==="grab"){ // dad 2026-11-18: take = 집어서 가져가요. Hear a real-life line, move the right thing into the bag, then say "I took ___."
+    const g=TK[c.id], inBag=c.st.phase>=1;
+    const head=`<div class="tags"><span class="tag phone">📞 ✋ take = 집어서 가져가요</span></div><div class="en" style="font-size:clamp(26px,4.6vh,40px)">${h(g.line)}</div><div class="ko">${h(g.lineKo)}</div>`;
+    const bag=`<div class="hand">🎒${inBag?`<span class="bagin">${g.emoji}</span>`:""}</div>`;
+    if(!inBag) return head+bag+`<div class="grabrow" style="grid-template-columns:repeat(3,1fr);max-width:420px">${c.opts.map((o,k)=>`<button class="${c.st.miss&&c.st.miss.includes(k)?"no":""}" data-grab="${k}">${TK[o].emoji}</button>`).join("")}</div><div class="btns"><button class="big soft" data-act="playg">🔊 다시 듣기</button></div>`;
+    if(c.st.fb==="good") return head+bag+`<div class="feedback good">딩동댕! 💖<div class="en">${h(g.say)}</div><small>${h(g.sayKo)}</small></div>`;
+    return head+bag+`<div class="ko big">이제 말해 봐요: <b>${h(g.say.replace(/(took )(.*)\.$/,"$1( ? )."))}</b></div><div class="ko">take 가져가요 → <b>took</b> 가져갔어요</div>${micBlock(c,"I took ...")}<div class="btns"><button class="big soft" data-act="playg">🔊 정답 듣기</button><button class="big skip" data-act="skip">다음 →</button></div>`; }
   if(c.kind==="wm"){ const m=MZ[c.id];
     return `<div class="tags"><span class="tag phone">📞 단어 맞추기</span></div>${done?"":`<div class="pic"><span>${m.emoji||""}</span></div>`}<div class="ko big">${done?(m.emoji||"")+" ":""}${h(m.ko)}</div>${done?"":`<div class="ko">영어로 뭘까요?</div>`}
       <div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${h(o)}</button>`).join("")}</div>
@@ -860,8 +872,9 @@ function bindCard(c){
     if(c.kind==="where"){ const g=GZ[c.id]; c.st.echo=true; new Promise(r=>setTimeout(r,300)).then(()=>playSrc(g.id,g.url,g.text)).then(()=>setTimeout(()=>{ if(cur()===c&&view==="lesson"&&speechOK&&!c.st.listening&&!c.st.echoOk) act(c,"mic"); },350)); return; }
     if(c.kind==="wm"){ srs(S.items,c.id,ok); const m=MZ[c.id]; autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc(m.id,m.url,m.text)),ok?2200:3000); return; }
     autoNext(c,new Promise(r=>setTimeout(r,300)).then(()=>playSrc("pick",null,c.right)),ok?1500:2200); });
-  app.querySelectorAll("[data-grab]").forEach(b=>b.onclick=()=>{ c.st.sel=c.opts[+b.dataset.grab]; render();
-    setTimeout(()=>{ if(cur()===c&&view==="lesson"&&speechOK&&!c.st.listening&&!c.st.fb) act(c,"mic"); },350); });
+  app.querySelectorAll("[data-grab]").forEach(b=>b.onclick=()=>{ const k=+b.dataset.grab, g=TK[c.id];
+    if(c.opts[k]===c.id){ c.st.phase=1; chime(); render(); setTimeout(()=>{ if(cur()===c&&view==="lesson"&&speechOK&&!c.st.listening&&!c.st.fb) act(c,"mic"); },500); }
+    else { c.st.miss=(c.st.miss||[]).concat(k); c.st.firstTry=false; buzz(); render(); setTimeout(()=>playSrc(g.id+"l",null,g.line),300); } });
   app.querySelectorAll("[data-ans]").forEach(b=>b.onclick=()=>{ const it=byId[c.id]; const ans=it.q[c.st.yes?0:1]; const ok=c.opts[+b.dataset.ans]===ans; finishStep(c,ok); playSrc("ans",null,ans); });
   app.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{ const e=TIPS[c.c].ex[+b.dataset.ex][1]; playSrc("tip",null,e.replace("→",". ")); });
   // automatic sound + automatic mic when a card opens
@@ -869,6 +882,7 @@ function bindCard(c){
     const wantsMic = speechOK && ((c.type==="say"&&c.steps[c.st.step]==="speak") || (c.type==="talk"&&c.mode!=="choose"));
     const go=()=>setTimeout(()=>{ if(cur()===c&&view==="lesson"&&!c.st.fb&&!c.st.listening) act(c,"mic"); },350);
     if(c.type==="talk" && c.mode!=="sayA"){ const p=playLine(talkById[c.id],0); if(wantsMic) p.then(go); }
+    else if(c.type==="pick"&&c.kind==="grab"){ const g=TK[c.id]; setTimeout(()=>{ if(cur()===c) playSrc(g.id+"l",null,g.line); },400); }
     else if(c.type==="say"&&c.lv===1){ const p=playItem(byId[c.id]); if(wantsMic) Promise.resolve(p).then(go); }
     else if(wantsMic) go();
   }
@@ -954,12 +968,13 @@ async function act(c,a){
     }
     if(a==="next") return advance();
   }
-  if(c.type==="pick" && a==="playg"){ const g=GZ[c.kind==="grab"?c.st.sel:c.id]; if(g) return playSrc(g.id,g.url,g.text); return; }
-  if(c.type==="pick" && a==="mic" && c.kind==="grab" && c.st.sel){ if(c.st.listening||c.st.fb) return; const g=GZ[c.st.sel]; c.st.listening=true; render(); const r=await listenOnce();
+  if(c.type==="pick" && a==="playg"){ if(c.kind==="grab"){ const g=TK[c.id]; return c.st.phase>=1?playSrc(g.id+"s",null,g.say):playSrc(g.id+"l",null,g.line); } const g=GZ[c.id]; if(g) return playSrc(g.id,g.url,g.text); return; }
+  if(c.type==="pick" && a==="mic" && c.kind==="grab" && c.st.phase>=1){ if(c.st.listening||c.st.fb) return; const g=TK[c.id]; c.st.listening=true; render(); const r=await listenOnce();
     if(cur()!==c||view!=="lesson") return; c.st.listening=false; if((r.err&&!speechOK)||micBusy){ render(); return; }
-    c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; if(r.alts&&r.alts[0]){ c.st.raw=r.alts[0]; c.st.tgt=g.text; }
-    if(r.alts&&matches(g.text,r.alts,true)){ c.st.fb="good"; chime(); render(); autoNext(c,new Promise(res=>setTimeout(res,400)).then(()=>playSrc(g.id,g.url,g.text)),1800); return; }
-    if(r.alts&&r.alts.length){ c.st.tries++; c.st.firstTry=false; buzz(); if(c.st.tries===3) setTimeout(()=>playSrc(g.id,g.url,g.text),300); }
+    const tgt=g.say.replace(/\b(my|your|the|an|a)\s/gi,""); // "I took a hat" / "my hat" both fine
+    c.st.heard=(r.alts&&r.alts[0])||"(잘 안 들렸어요)"; if(r.alts&&r.alts[0]){ c.st.raw=r.alts[0]; c.st.tgt=g.say; }
+    if(r.alts&&matches(tgt,r.alts,true)){ c.st.fb="good"; srs(S.items,c.id,c.st.firstTry); chime(); render(); autoNext(c,new Promise(res=>setTimeout(res,300)).then(()=>playSrc(g.id+"s",null,g.say)),2000); return; }
+    if(r.alts&&r.alts.length){ c.st.tries++; c.st.firstTry=false; buzz(); if(c.st.tries===3) setTimeout(()=>playSrc(g.id+"s",null,g.say),300); }
     render(); if(speechOK&&!r.aborted) setTimeout(()=>{ if(cur()===c&&!c.st.fb&&!c.st.listening&&!document.hidden) act(c,"mic"); },c.st.tries===3?2600:900);
     return; }
   if(c.type==="pick" && a==="mic" && c.kind==="where" && c.st.echo){ if(c.st.listening||c.st.echoOk) return; const g=GZ[c.id]; c.st.listening=true; render(); const r=await listenOnce();
@@ -1085,7 +1100,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/17-9 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/18-1 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
@@ -1110,7 +1125,7 @@ function renderParent(){
   if($("reset2")) $("reset2").onclick=()=>{ const keep={depart:S.depart,bookWeek:S.bookWeek,newBook:S.newBook,whoCount:S.whoCount,reviewCap:S.reviewCap,pin:S.pin}; S=Object.assign(blank(),keep); confirmReset=false; save(); render(); };
   if($("nores")) $("nores").onclick=()=>{confirmReset=false;render();};
 }
-window.__dbg=()=>({L,S,view,byId,talkById,buildQueue,matches,todayStr,curWeek,enterCard,render}); // for tests
+window.__dbg=()=>({L,S,view,byId,talkById,buildQueue,matches,todayStr,curWeek,enterCard,render,TK}); // for tests
 fixOffset();
 if(!S.rev1118){ S.rev1118=true; if(todayStr()<="2026-11-18") S.phoneOnly="2026-11-18"; save(); } // dad 2026-11-17: tomorrow = 11/17 phone lesson only, no 천일문
 if(!S.rev1117){ S.rev1117=true; if(S.days["2026-11-16"]&&S.nextWeek===1&&todayStr()<="2026-11-17"){ S.nextWeek=0; S.session=null; } save(); } // dad: whole review on 11/17 after week 7
