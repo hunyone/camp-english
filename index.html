@@ -1242,6 +1242,7 @@ function renderParent(){
 }
 window.__dbg=()=>({L,S,view,byId,talkById,buildQueue,matches,todayStr,curWeek,enterCard,render,TK}); // for tests
 fixOffset();
+if(!S.rev1120){ S.rev1120=true; if(S.session&&S.session.date>="2026-11-20"&&!S.session.queue.some(c=>c.fmt)) S.session=null; save(); } // a 11/20 mission previewed before the new mixing must be rebuilt
 if(S.rev1119&&!S.rev1119b&&MAXW>8){ S.rev1119b=true; if(S.bookWeek>=8&&S.bookWeek<MAXW) S.bookWeek=MAXW; save(); } // new pack with weeks 9-16: let the new-sentence path keep going past week 8
 if(!S.rev1119){ S.rev1119=true; if(S.bookWeek<8) S.bookWeek=8; if(MAXW>8){ S.bookWeek=MAXW; S.rev1119b=true; } if(!ITEMS.some(i=>i.week===8&&i.src==="book"&&S.items[i.id])){ S.nextWeek=8; } S.phoneOnly=null; if(S.session&&S.session.date===todayStr()&&S.session.i===0) S.session=null; save(); } // dad 2026-11-19: from today 천일문 = new sentences (week 8 on)
 if(!S.rev1118){ S.rev1118=true; if(todayStr()<="2026-11-18") S.phoneOnly="2026-11-18"; save(); } // dad 2026-11-17: tomorrow = 11/17 phone lesson only, no 천일문
