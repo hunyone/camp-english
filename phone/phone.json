@@ -1080,6 +1080,367 @@
    "text": "Dad, wake up!",
    "ko": "아빠, 일어나!",
    "url": "phone/3bc9a15aa240.mp3"
+  },
+  {
+   "id": "p1118s0",
+   "lesson": "2026-11-18",
+   "text": "There is a troll under the bridge.",
+   "ko": "다리 아래에 트롤이 있어요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1118s0a0",
+   "lesson": "2026-11-18",
+   "base": "p1118s0",
+   "stage": 1,
+   "text": "There is a cat under the table.",
+   "ko": "탁자 아래에 고양이가 있어요",
+   "url": null
+  },
+  {
+   "id": "p1118s0a1",
+   "lesson": "2026-11-18",
+   "base": "p1118s0",
+   "stage": 1,
+   "text": "There is a dog under the bed.",
+   "ko": "침대 아래에 강아지가 있어요",
+   "url": null
+  },
+  {
+   "id": "p1118s0a2",
+   "lesson": "2026-11-18",
+   "base": "p1118s0",
+   "stage": 1,
+   "text": "There is a fish in the river.",
+   "ko": "강에 물고기가 있어요",
+   "url": null
+  },
+  {
+   "id": "p1118s0b0",
+   "lesson": "2026-11-18",
+   "base": "p1118s0",
+   "stage": 2,
+   "text": "There is a goat on the bridge.",
+   "ko": "다리 위에 염소가 있어요",
+   "url": null
+  },
+  {
+   "id": "p1118s0b1",
+   "lesson": "2026-11-18",
+   "base": "p1118s0",
+   "stage": 2,
+   "text": "There is a book on the desk.",
+   "ko": "책상 위에 책이 있어요",
+   "url": null
+  },
+  {
+   "id": "p1118s1",
+   "lesson": "2026-11-18",
+   "text": "The goats are very hungry.",
+   "ko": "염소들은 정말 배고파요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1118s1a0",
+   "lesson": "2026-11-18",
+   "base": "p1118s1",
+   "stage": 1,
+   "text": "The goats are very happy.",
+   "ko": "염소들은 정말 행복해요",
+   "url": null
+  },
+  {
+   "id": "p1118s1a1",
+   "lesson": "2026-11-18",
+   "base": "p1118s1",
+   "stage": 1,
+   "text": "The goats are very big.",
+   "ko": "염소들은 정말 커요",
+   "url": null
+  },
+  {
+   "id": "p1118s1a2",
+   "lesson": "2026-11-18",
+   "base": "p1118s1",
+   "stage": 1,
+   "text": "The goats are very angry.",
+   "ko": "염소들은 정말 화났어요",
+   "url": null
+  },
+  {
+   "id": "p1118s1b0",
+   "lesson": "2026-11-18",
+   "base": "p1118s1",
+   "stage": 2,
+   "text": "The troll is very hungry.",
+   "ko": "트롤은 정말 배고파요",
+   "url": null
+  },
+  {
+   "id": "p1118s1b1",
+   "lesson": "2026-11-18",
+   "base": "p1118s1",
+   "stage": 2,
+   "text": "I am very hungry.",
+   "ko": "나는 정말 배고파요",
+   "url": null
+  },
+  {
+   "id": "p1118s2",
+   "lesson": "2026-11-18",
+   "text": "They want to eat the grass.",
+   "ko": "염소들은 풀을 먹고 싶어 해요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1118s2a0",
+   "lesson": "2026-11-18",
+   "base": "p1118s2",
+   "stage": 1,
+   "text": "They want to eat cake.",
+   "ko": "그들은 케이크를 먹고 싶어 해요",
+   "url": null
+  },
+  {
+   "id": "p1118s2a1",
+   "lesson": "2026-11-18",
+   "base": "p1118s2",
+   "stage": 1,
+   "text": "They want to play.",
+   "ko": "그들은 놀고 싶어 해요",
+   "url": null
+  },
+  {
+   "id": "p1118s2a2",
+   "lesson": "2026-11-18",
+   "base": "p1118s2",
+   "stage": 1,
+   "text": "They want to go home.",
+   "ko": "그들은 집에 가고 싶어 해요",
+   "url": null
+  },
+  {
+   "id": "p1118s2b0",
+   "lesson": "2026-11-18",
+   "base": "p1118s2",
+   "stage": 2,
+   "text": "I want to eat pizza.",
+   "ko": "나는 피자를 먹고 싶어요",
+   "url": null
+  },
+  {
+   "id": "p1118s2b1",
+   "lesson": "2026-11-18",
+   "base": "p1118s2",
+   "stage": 2,
+   "text": "The troll wants to eat the goats.",
+   "ko": "트롤은 염소들을 먹고 싶어 해요",
+   "url": null
+  },
+  {
+   "id": "p1118s3",
+   "lesson": "2026-11-18",
+   "text": "Please don't eat me!",
+   "ko": "제발 나를 먹지 마세요!",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1118s3a0",
+   "lesson": "2026-11-18",
+   "base": "p1118s3",
+   "stage": 1,
+   "text": "Please don't hit me!",
+   "ko": "제발 나를 때리지 마세요!",
+   "url": null
+  },
+  {
+   "id": "p1118s3a1",
+   "lesson": "2026-11-18",
+   "base": "p1118s3",
+   "stage": 1,
+   "text": "Please don't go!",
+   "ko": "제발 가지 마세요!",
+   "url": null
+  },
+  {
+   "id": "p1118s3a2",
+   "lesson": "2026-11-18",
+   "base": "p1118s3",
+   "stage": 1,
+   "text": "Please don't cry!",
+   "ko": "제발 울지 마세요!",
+   "url": null
+  },
+  {
+   "id": "p1118s4",
+   "lesson": "2026-11-18",
+   "text": "I had an AI class today.",
+   "ko": "오늘 AI 수업을 했어요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1118s4a0",
+   "lesson": "2026-11-18",
+   "base": "p1118s4",
+   "stage": 1,
+   "text": "I had a math class today.",
+   "ko": "오늘 수학 수업을 했어요",
+   "url": null
+  },
+  {
+   "id": "p1118s4a1",
+   "lesson": "2026-11-18",
+   "base": "p1118s4",
+   "stage": 1,
+   "text": "I had an art class today.",
+   "ko": "오늘 미술 수업을 했어요",
+   "url": null
+  },
+  {
+   "id": "p1118s4a2",
+   "lesson": "2026-11-18",
+   "base": "p1118s4",
+   "stage": 1,
+   "text": "I had a music class today.",
+   "ko": "오늘 음악 수업을 했어요",
+   "url": null
+  },
+  {
+   "id": "p1118s4b0",
+   "lesson": "2026-11-18",
+   "base": "p1118s4",
+   "stage": 2,
+   "text": "We had an AI class today.",
+   "ko": "우리는 오늘 AI 수업을 했어요",
+   "url": null
+  },
+  {
+   "id": "p1118s5",
+   "lesson": "2026-11-18",
+   "text": "Free time is very short.",
+   "ko": "쉬는 시간은 정말 짧아요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1118s5a0",
+   "lesson": "2026-11-18",
+   "base": "p1118s5",
+   "stage": 1,
+   "text": "Free time is very fun.",
+   "ko": "쉬는 시간은 정말 재미있어요",
+   "url": null
+  },
+  {
+   "id": "p1118s5a1",
+   "lesson": "2026-11-18",
+   "base": "p1118s5",
+   "stage": 1,
+   "text": "Free time is very long.",
+   "ko": "쉬는 시간은 정말 길어요",
+   "url": null
+  },
+  {
+   "id": "p1118s5b0",
+   "lesson": "2026-11-18",
+   "base": "p1118s5",
+   "stage": 2,
+   "text": "Lunch time is very short.",
+   "ko": "점심시간은 정말 짧아요",
+   "url": null
+  },
+  {
+   "id": "p1118s5b1",
+   "lesson": "2026-11-18",
+   "base": "p1118s5",
+   "stage": 2,
+   "text": "The class is very long.",
+   "ko": "수업은 정말 길어요",
+   "url": null
+  },
+  {
+   "id": "p1118s6",
+   "lesson": "2026-11-18",
+   "text": "The troll can't swim.",
+   "ko": "트롤은 수영을 못해요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1118s6a0",
+   "lesson": "2026-11-18",
+   "base": "p1118s6",
+   "stage": 1,
+   "text": "The troll can't fly.",
+   "ko": "트롤은 날 수 없어요",
+   "url": null
+  },
+  {
+   "id": "p1118s6a1",
+   "lesson": "2026-11-18",
+   "base": "p1118s6",
+   "stage": 1,
+   "text": "The troll can't run.",
+   "ko": "트롤은 달릴 수 없어요",
+   "url": null
+  },
+  {
+   "id": "p1118s6b0",
+   "lesson": "2026-11-18",
+   "base": "p1118s6",
+   "stage": 2,
+   "text": "I can't swim.",
+   "ko": "나는 수영을 못해요",
+   "url": null
+  },
+  {
+   "id": "p1118s6b1",
+   "lesson": "2026-11-18",
+   "base": "p1118s6",
+   "stage": 2,
+   "text": "My dog can't swim.",
+   "ko": "우리 강아지는 수영을 못해요",
+   "url": null
+  },
+  {
+   "id": "p1118s7",
+   "lesson": "2026-11-18",
+   "text": "I like story books.",
+   "ko": "나는 이야기책이 좋아요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1118s7a0",
+   "lesson": "2026-11-18",
+   "base": "p1118s7",
+   "stage": 1,
+   "text": "I like picture books.",
+   "ko": "나는 그림책이 좋아요",
+   "url": null
+  },
+  {
+   "id": "p1118s7a1",
+   "lesson": "2026-11-18",
+   "base": "p1118s7",
+   "stage": 1,
+   "text": "I like comic books.",
+   "ko": "나는 만화책이 좋아요",
+   "url": null
+  },
+  {
+   "id": "p1118s7b0",
+   "lesson": "2026-11-18",
+   "base": "p1118s7",
+   "stage": 2,
+   "text": "My mom likes story books.",
+   "ko": "엄마는 이야기책을 좋아해요",
+   "url": null
   }
  ],
  "talks": [
@@ -1729,6 +2090,235 @@
     }
    ],
    "pri": true
+  },
+  {
+   "id": "p1118s0q",
+   "lesson": "2026-11-18",
+   "base": "p1118s0",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "What is under the bridge?",
+     "ko": "다리 아래에 뭐가 있어?",
+     "url": null
+    },
+    {
+     "text": "There is a troll.",
+     "ko": "트롤이 있어요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1118s1q",
+   "lesson": "2026-11-18",
+   "base": "p1118s1",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "Are the goats hungry?",
+     "ko": "염소들 배고파?",
+     "url": null
+    },
+    {
+     "text": "Yes, they are very hungry.",
+     "ko": "네, 정말 배고파요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1118s2q",
+   "lesson": "2026-11-18",
+   "base": "p1118s2",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "What do the goats want?",
+     "ko": "염소들은 뭘 원해?",
+     "url": null
+    },
+    {
+     "text": "They want to eat the grass.",
+     "ko": "풀을 먹고 싶어 해요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1118s3q",
+   "lesson": "2026-11-18",
+   "base": "p1118s3",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "What does the little goat say?",
+     "ko": "작은 염소가 뭐라고 해?",
+     "url": null
+    },
+    {
+     "text": "Please don't eat me!",
+     "ko": "제발 나를 먹지 마세요!",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1118s4q",
+   "lesson": "2026-11-18",
+   "base": "p1118s4",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "What class did you have today?",
+     "ko": "오늘 무슨 수업 했어?",
+     "url": "phone/1849de01c410.mp3"
+    },
+    {
+     "text": "I had an AI class.",
+     "ko": "AI 수업을 했어요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1118s5q",
+   "lesson": "2026-11-18",
+   "base": "p1118s5",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "Is free time long?",
+     "ko": "쉬는 시간 길어?",
+     "url": null
+    },
+    {
+     "text": "No, it is very short.",
+     "ko": "아니요, 정말 짧아요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1118s6q",
+   "lesson": "2026-11-18",
+   "base": "p1118s6",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "Can the troll swim?",
+     "ko": "트롤은 수영할 수 있어?",
+     "url": null
+    },
+    {
+     "text": "No, he can't swim.",
+     "ko": "아니요, 수영 못해요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1118s7q",
+   "lesson": "2026-11-18",
+   "base": "p1118s7",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "What books do you like?",
+     "ko": "어떤 책 좋아해?",
+     "url": null
+    },
+    {
+     "text": "I like story books.",
+     "ko": "나는 이야기책이 좋아요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1118t0",
+   "lesson": "2026-11-18",
+   "lines": [
+    {
+     "text": "How was school today?",
+     "ko": "오늘 학교 어땠어?",
+     "url": "phone/a492953b1d3c.mp3"
+    },
+    {
+     "text": "It was good. I had an AI class.",
+     "ko": "좋았어요. AI 수업을 했어요",
+     "url": null
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1118t1",
+   "lesson": "2026-11-18",
+   "lines": [
+    {
+     "text": "Where is the troll?",
+     "ko": "트롤은 어디 있어?",
+     "url": null
+    },
+    {
+     "text": "He is under the bridge.",
+     "ko": "다리 아래에 있어요",
+     "url": null
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1118t2",
+   "lesson": "2026-11-18",
+   "lines": [
+    {
+     "text": "Did you like the story?",
+     "ko": "이야기 재미있었어?",
+     "url": null
+    },
+    {
+     "text": "Yes, I liked the story.",
+     "ko": "네, 이야기가 좋았어요",
+     "url": null
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1118t3",
+   "lesson": "2026-11-18",
+   "lines": [
+    {
+     "text": "What does the troll want?",
+     "ko": "트롤은 뭘 원해?",
+     "url": null
+    },
+    {
+     "text": "He wants to eat the goats.",
+     "ko": "염소들을 먹고 싶어 해요",
+     "url": null
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1118t4",
+   "lesson": "2026-11-18",
+   "lines": [
+    {
+     "text": "Who hits the troll?",
+     "ko": "누가 트롤을 쳐?",
+     "url": null
+    },
+    {
+     "text": "The very big goat hits the troll.",
+     "ko": "아주 큰 염소가 트롤을 쳐요",
+     "url": null
+    }
+   ],
+   "pri": true
   }
  ],
  "tense": [
@@ -2049,6 +2639,94 @@
    "near": [
     "in",
     "on"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm18",
+   "lesson": "2026-11-18",
+   "text": "troll",
+   "ko": "트롤 (못생긴 괴물)",
+   "emoji": "👹",
+   "near": [
+    "goat"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm19",
+   "lesson": "2026-11-18",
+   "text": "feet",
+   "ko": "발 (두 개)",
+   "emoji": "🦶",
+   "near": [
+    "foot"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm20",
+   "lesson": "2026-11-18",
+   "text": "listen",
+   "ko": "듣다",
+   "emoji": "👂",
+   "near": [
+    "look"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm21",
+   "lesson": "2026-11-18",
+   "text": "hit",
+   "ko": "치다 · 때리다",
+   "emoji": "👊",
+   "near": [
+    "hat"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm22",
+   "lesson": "2026-11-18",
+   "text": "horns",
+   "ko": "뿔",
+   "emoji": "🐐",
+   "near": [
+    "horse"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm23",
+   "lesson": "2026-11-18",
+   "text": "knife",
+   "ko": "칼",
+   "emoji": "🔪",
+   "near": [
+    "fork"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm24",
+   "lesson": "2026-11-18",
+   "text": "fork",
+   "ko": "포크",
+   "emoji": "🍴",
+   "near": [
+    "knife"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm25",
+   "lesson": "2026-11-18",
+   "text": "swim",
+   "ko": "수영하다",
+   "emoji": "🏊",
+   "near": [
+    "swing"
    ],
    "url": null
   }
