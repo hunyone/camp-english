@@ -346,9 +346,12 @@ function phoneCards(){ const today=todayStr(), big=isPhoneDay();
   const units=PBASE.map((b,k)=>{ const st=openStage(b); const list=[];
     const rb=rank(S.items[b.id],b); if(rb<9) list.push({x:b,r:rb});
     if(st===1||st===2) pDrills(b,st).forEach(d=>{ const r=rank(S.items[d.id],{pri:b.pri}); if(r<9) list.push({x:d,r}); });
-    return {b,k,list:list.slice(0,5),r:Math.min(...list.map(o=>o.r),9)}; }).filter(u=>u.list.length)
+    return {b,k,list:list.slice(0,rb>=1.5&&!big?3:5),r:Math.min(...list.map(o=>o.r),9)}; }).filter(u=>u.list.length)
     .sort((a,b)=>a.r-b.r||(b.b.lesson>a.b.lesson?1:b.b.lesson<a.b.lesson?-1:a.k-b.k));
-  if(!big){ return phoneBudget(units,today,rank); }
+  if(!big){ // newest lesson first, then alternate with yesterday's sentences coming back for review (dad 2026-11-19)
+    const nw=units.filter(u=>u.r>=1.5).sort((a,b)=>(b.b.lesson>a.b.lesson?1:b.b.lesson<a.b.lesson?-1:a.k-b.k)), rv=units.filter(u=>u.r<1.5), mix=[];
+    for(let k=0;k<Math.max(nw.length,rv.length);k++){ if(nw[k]) mix.push(nw[k]); if(rv[k]) mix.push(rv[k]); }
+    return phoneBudget(mix,today,rank); }
   const say=[]; for(const u of units.slice(0,NU)) say.push(...u.list.map(o=>o.x));
   const talks=PTALKS.map((t,k)=>{ if(t.base){ const b=byId[t.base]; if(!b||openStage(b)<3) return null; } const r=rank(S.talks[t.id],t); return r<9?{t,k,r}:null; }).filter(Boolean)
     .sort((a,b)=>a.r-b.r||a.k-b.k).slice(0,NT).map(o=>o.t);
@@ -1165,7 +1168,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/19-2 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/19-3 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
