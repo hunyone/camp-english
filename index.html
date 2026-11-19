@@ -302,6 +302,7 @@ const INTERVALS = [0,1,2,4,7,14,30];
 const LS_KEY = "cheonilmun-camp-v3";
 const SKIP = new Set(["He doesn't have a bike.", "He doesn't have a dream.", "He doesn't have a plan.", "He doesn't have a sister.", "He's not angry.", "He's not busy.", "He's not hurt.", "He's not kind.", "He's not late.", "He's not nervous.", "He's not popular.", "He's not sleepy.", "He's not sure.", "He's not tired.", "He's not worried.", "Is he brave?", "Is he busy?", "Is he in the bathroom?", "Is he in the classroom?", "Is he in the kitchen?", "Is he kind?", "Is he late?", "Is he popular?", "Is he sleepy?", "Is he sure?", "Is she cute?", "Is she funny?", "Is she hungry?", "Is she in the playground?", "Is she in the room?", "Is she okay?", "Is she ready?", "Is she smart?", "Is she tall?", "Is she thirsty?", "She doesn't have a brother.", "She doesn't have a pet.", "She doesn't have a question.", "She doesn't have a test.", "She doesn't have homework.", "She's not angry.", "She's not funny.", "She's not hungry.", "She's not hurt.", "She's not nervous.", "She's not okay.", "She's not ready.", "She's not smart.", "She's not tall.", "She's not thirsty.", "She's not tired.", "She's not worried."]); // drills dad asked to drop (2026-11-03): one he + one she per sentence
 const ITEMS = DATA.items.filter(i=>!SKIP.has(i.text)), TALKS = DATA.talks;
+const MAXW = Math.max(...DATA.items.map(i=>i.week));
 const byId = Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const talkById = Object.fromEntries(TALKS.map(t=>[t.id,t]));
 ITEMS.forEach(it=>{ it.src_audio = it.b64 ? "data:audio/mpeg;base64,"+it.b64 : null; delete it.b64; });
@@ -575,7 +576,7 @@ function buildQueue(wArg){
   if(!wArg&&book.some(i=>!S.items[i.id])) return ph.concat(newBookQueue(w,book));
   const pass=(S.weekPass||{})[w]||0;
   // group book sentences by word (He is shy / She is shy = one topic); ~3 items per topic, he/she only once per topic
-  const topicKey=t=>t.toLowerCase().replace(/[.?!]/g,"").replace(/^(i am|i'm|you are|you're|he is|he's|she is|she's|this is|that is|that's|there is|i have|are you|is he|is she|am i|is this|is that|is there|do you have)\s+(not\s+)?/,"").trim();
+  const topicKey=t=>t.toLowerCase().replace(/[.?!]/g,"").replace(/^(i am|i'm|you are|you're|he is|he's|she is|she's|this is|that is|that's|there is|i have|are you|is he|is she|am i|is this|is that|is there|do you have|it is|it's|i like|i don't like|i want|i need|i don't|i hate|do you|he has|she has|i want some|i need some)\s+(not\s+)?/,"").replace(/^some\s+/,"").trim();
   const topics=[]; const tmap={};
   book.forEach(it=>{ const k=topicKey(it.text); if(!tmap[k]){ tmap[k]=[]; topics.push(tmap[k]); } tmap[k].push(it); });
   const HS=/\b(he|she)\b/i;
@@ -1157,8 +1158,9 @@ function renderParent(){
   ${PHONE.length?`<div class="panel"><h3>📞 전화영어 (수업 문장 ${PBASE.length}개 · 바꿔 말하기 포함 ${PHONE.length}개)</h3><div class="note">매일 미션 맨 앞에 수업 문장 ${PHONE_UNITS}개와 각 문장의 패턴 연습(문장마다 최대 5장), 선생님 질문 ${PHONE_TALK}개, 어제/매일 고르기 ${TENSE_N}개가 나와요. 각 문장은 ① 뒤 단어 바꾸기 → ② 앞 사람 바꾸기 → ③ 질문하고 대답하기 순서로, 앞 단계 문장을 다 맞히면 다음 단계가 열려요.</div><div class="list">${PBASE.map(i=>{ const s=S.items[i.id], k=status(s), st=openStage(i), stl=[1,2,3].some(n=>pDrills(i,n).length)?" · 지금 "+["","① 뒤 단어 바꾸기","② 앞 사람 바꾸기","③ 질문·대답"][st]:""; return `<div class="row" style="grid-template-columns:1fr auto auto"><div class="t">${h(i.text)}<small>${h(i.ko)} · ${i.lesson.slice(5).replace("-","/")} 수업${stl}${s?` · 틀림 ${s.wrong}번`:""}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span><button class="mini" data-play="${i.id}" aria-label="듣기">🔊</button></div>`; }).join("")}${PTALKS.filter(t=>!t.base).map(t=>{ const s=S.talks[t.id], k=status(s); return `<div class="row" style="grid-template-columns:1fr auto"><div class="t">${h(t.lines[0].text)} → ${h(t.lines[1].text)}<small>선생님 질문 · ${t.lines[1].ko}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span></div>`; }).join("")}</div></div>`:""}
   <div class="panel"><h3>최근 4주</h3><div class="cal">${cells.join("")}</div></div>
   <div class="panel"><details><summary>전체 문장 보기 (${avail.length}개)</summary><div class="list">${avail.map(row).join("")}</div></details></div>
+  <div class="panel"><h3>📦 천일문 파일</h3><div class="note">지금 파일: ${MAXW}주차까지 들어 있어요. 새 파일을 받으면 여기서 골라 주세요 (공부 기록은 그대로예요).</div><label class="tbtn" style="cursor:pointer;display:inline-block">새 천일문 파일 고르기<input id="packin2" type="file" hidden></label><span id="packmsg" class="note"></span></div>
   <div class="panel"><h3>설정</h3>
-    <div class="field"><label for="bw">책 진도</label><select id="bw">${[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n===S.bookWeek?"selected":""}>${n}주차까지</option>`).join("")}</select></div>
+    <div class="field"><label for="bw">책 진도</label><select id="bw">${Array.from({length:MAXW},(_,k)=>k+1).map(n=>`<option value="${n}" ${n===S.bookWeek?"selected":""}>${n}주차까지</option>`).join("")}</select></div>
     <div class="field"><label for="nb">오늘(다음) 할 주차</label><select id="nb">${Array.from({length:S.bookWeek},(_,k)=>k+1).map(n=>`<option value="${n}" ${n===curWeek()?"selected":""}>${n}주차</option>`).join("")}<option value="0" ${curWeek()===0?"selected":""}>전체 복습</option><option value="-1" ${curWeek()===-1?"selected":""}>📞 전화영어만 (오늘)</option></select>
       <label for="nx">누구일까</label><select id="nx">${[0,1,2,3,4,5].map(n=>`<option ${n===(S.whoCount??3)?"selected":""}>${n}</option>`).join("")}</select>
       <label for="rc">복습 최대</label><select id="rc">${[4,6,8,10,12].map(n=>`<option ${n===S.reviewCap?"selected":""}>${n}</option>`).join("")}</select></div>
@@ -1168,7 +1170,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/19-3 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/19-4 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
@@ -1176,6 +1178,9 @@ function renderParent(){
   $("bw").onchange=e=>{S.bookWeek=+e.target.value;save();render();};
   $("nb").onchange=e=>{ const v=+e.target.value; if(v===-1) S.phoneOnly=todayStr(); else { S.phoneOnly=null; S.nextWeek=v; } S.session=null; save(); };
   $("nx").onchange=e=>{S.whoCount=+e.target.value;save();};
+  if($("packin2")) $("packin2").onchange=async e=>{ const f=e.target.files[0]; if(!f) return; const m=$("packmsg");
+    try{ const txt=await f.text(); const d=JSON.parse(txt); if(!d.items||!d.talks||(d.v||0)<7) throw 0; await idbSet("pack",txt); m.textContent=" ✓ 넣었어요! 다시 시작할게요"; setTimeout(()=>location.reload(),900); }
+    catch(_){ m.textContent=" 이 파일이 아니에요. cheonilmun-pack.json 파일을 골라 주세요."; } };
   $("rc").onchange=e=>{S.reviewCap=+e.target.value;save();};
   $("dep").onchange=e=>{ if(e.target.value){S.depart=e.target.value;save();render();} };
   $("skip").onclick=()=>{S.offset++;save();render();};
@@ -1195,7 +1200,8 @@ function renderParent(){
 }
 window.__dbg=()=>({L,S,view,byId,talkById,buildQueue,matches,todayStr,curWeek,enterCard,render,TK}); // for tests
 fixOffset();
-if(!S.rev1119){ S.rev1119=true; if(S.bookWeek<8) S.bookWeek=8; if(!ITEMS.some(i=>i.week===8&&i.src==="book"&&S.items[i.id])){ S.nextWeek=8; } S.phoneOnly=null; if(S.session&&S.session.date===todayStr()&&S.session.i===0) S.session=null; save(); } // dad 2026-11-19: from today 천일문 = new sentences (week 8 on)
+if(S.rev1119&&!S.rev1119b&&MAXW>8){ S.rev1119b=true; if(S.bookWeek>=8&&S.bookWeek<MAXW) S.bookWeek=MAXW; save(); } // new pack with weeks 9-16: let the new-sentence path keep going past week 8
+if(!S.rev1119){ S.rev1119=true; if(S.bookWeek<8) S.bookWeek=8; if(MAXW>8){ S.bookWeek=MAXW; S.rev1119b=true; } if(!ITEMS.some(i=>i.week===8&&i.src==="book"&&S.items[i.id])){ S.nextWeek=8; } S.phoneOnly=null; if(S.session&&S.session.date===todayStr()&&S.session.i===0) S.session=null; save(); } // dad 2026-11-19: from today 천일문 = new sentences (week 8 on)
 if(!S.rev1118){ S.rev1118=true; if(todayStr()<="2026-11-18") S.phoneOnly="2026-11-18"; save(); } // dad 2026-11-17: tomorrow = 11/17 phone lesson only, no 천일문
 if(!S.rev1117){ S.rev1117=true; if(S.days["2026-11-16"]&&S.nextWeek===1&&todayStr()<="2026-11-17"){ S.nextWeek=0; S.session=null; } save(); } // dad: whole review on 11/17 after week 7
 render();
