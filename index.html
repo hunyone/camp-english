@@ -529,6 +529,10 @@ function conceptsOf(it){
 
 // ---------- daily mission ----------
 const unlocked=it=>it.week<=S.bookWeek;
+function weekRound(w){ // which pass through weeks 1..bookWeek (dad 2026-11-19: show "2바퀴째" so week 1 after week 7 isn't mistaken for a reset)
+  if(w<1) return 0; const wp=S.weekPass||{}, dc={}; Object.values(S.days||{}).forEach(d=>{ if(d&&d.week>0) dc[d.week]=(dc[d.week]||0)+1; });
+  let m=Infinity; for(let k=1;k<=S.bookWeek;k++) m=Math.min(m,Math.max(wp[k]||0,dc[k]||0));
+  let r=(m===Infinity?0:m)+1; if(r<2&&w===1&&(wp[S.bookWeek]||dc[S.bookWeek])) r=2; return r; }
 function curWeek(){ if(isPhoneDay()) return -1; if(S.nextWeek===0) return 0; let w=S.nextWeek||1; if(w>S.bookWeek||w<1) w=1; return w; }
 function weekRange(w){ const b=ITEMS.filter(i=>i.src==="book"&&i.week===w&&i.day); if(!b.length) return ""; const lo=Math.min(...b.map(i=>i.day)), d0=b.find(i=>i.day===lo).date;
   const m=d0.match(/(\d+)월 (\d+)일/); let end=""; if(m){ const dt=new Date(2026,+m[1]-1,+m[2]+6); end=`${dt.getMonth()+1}월 ${dt.getDate()}일`; }
@@ -604,7 +608,7 @@ function renderHome(){
     const w=curWeek(), ss=S.session, resume=ss&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
     const phN=q.filter(c=>c.phone).length, sayN=q.filter(c=>c.type==="say").length, pickN=n(c=>c.type==="pick"), talkN=n(c=>c.type==="talk");
     const whoN=n(c=>c.kind==="hs"), wmN=n(c=>c.kind==="wm"), gmN=n(c=>c.kind==="where"||c.kind==="grab");
-    mission=`<div class="mission"><h2>오늘의 미션 · ${w===-1?"📞 전화영어 데이":w?w+"주차":"전체 복습"}</h2><div class="plan">${w===-1?"오늘은 전화영어 수업 문장만 연습해요":w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${whoN?` · 누구일까 ${whoN}개`:""}${wmN?` · 단어 맞추기 ${wmN}개`:""}${gmN&&w===-1?` · 그림 게임 ${gmN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${phN&&w!==-1?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
+    mission=`<div class="mission"><h2>오늘의 미션 · ${w===-1?"📞 전화영어 데이":w?w+"주차"+(weekRound(w)>1?` <span style="font-size:.75em">🔁 ${weekRound(w)}바퀴째</span>`:""):"전체 복습"}</h2><div class="plan">${w===-1?"오늘은 전화영어 수업 문장만 연습해요":w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${whoN?` · 누구일까 ${whoN}개`:""}${wmN?` · 단어 맞추기 ${wmN}개`:""}${gmN&&w===-1?` · 그림 게임 ${gmN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${phN&&w!==-1?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
   }
   const dn=["일","월","화","수","목","금","토"], wk=[];
   for(let i=6;i>=0;i--){ const d=addDays(today,-i); const [y,m,dd]=d.split("-").map(Number);
@@ -1100,7 +1104,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/18-1 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/19-1 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
