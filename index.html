@@ -245,7 +245,9 @@ details summary{cursor:pointer;color:var(--pine);font-family:var(--f-disp);font-
 .sl.on{opacity:1;background:var(--sun-soft);border:2px solid #F5C451}.sl.ok{opacity:.85}
 .wr .mic{width:120px;height:120px}
 .storybox .mic{width:96px;height:96px}
-.storybox .sl b{font-size:clamp(22px,3.8vh,32px)}
+.storybox .sl b{font-size:clamp(26px,4.6vh,40px)}
+.sl .wd{border-radius:8px;padding:0 3px;transition:background .15s}.sl .wd.lit{background:#FFD95A;color:var(--ink)}.sl .wd.g{color:#2E9E5B}.sl .wd.x{color:#A9A3B5;text-decoration:underline dotted;cursor:pointer}
+.rl{display:flex;flex-direction:column;gap:6px;width:100%}.rl .sl b{font-size:clamp(28px,5vh,44px)}.rlmsg{font-size:22px!important}.sightw{font-size:clamp(80px,15vh,130px)!important}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .card [data-act="next"]{display:none!important}
 .mission.done{text-align:center;justify-items:center}
@@ -463,7 +465,10 @@ function status(s){ if(!s) return "new"; if(s.box>=3&&s.recentWrong===0) return 
 const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
 let speechOK = !!SR, micBusy = false;
 let curRec=null;
-function listenOnce(onStart){
+async function listenOnce(onStart){ // dad 2026-11-20: the poodle must never stop by itself → a busy/blocked mic is retried quietly before giving up
+  for(let k=0;k<4;k++){ const r=await listenRaw(onStart); if(!(r.err&&(r.err==="audio-capture"||r.err==="start"||r.err==="aborted"&&!r.aborted))) return r; micBusy=false; await new Promise(z=>setTimeout(z,700)); }
+  return listenRaw(onStart); }
+function listenRaw(onStart){
   return new Promise((res)=>{
     if(!speechOK){ const t=(window._typed||"").trim(); res({alts:t?[t]:[]}); return; }
     let done=false; const r=new SR(); r.lang="en-US"; r.interimResults=false; r.maxAlternatives=5;
@@ -473,7 +478,7 @@ function listenOnce(onStart){
     r.onerror=e=>{ if(e.error==="not-allowed"||e.error==="service-not-allowed"){ speechOK=false; } micBusy = e.error==="audio-capture"; fin({err:e.error}); };
     r.onend=()=>fin({alts:[]});
     setTimeout(()=>fin({alts:[]}),8000);
-    try{ r.start(); }catch(e){ speechOK=false; fin({err:"start"}); }
+    try{ r.start(); }catch(e){ fin({err:"start"}); } // a restart while the last one is still closing throws: retried by listenOnce, never switches the poodle off
   });
 }
 const EXP=[[/\bi'm\b/g,"i am"],[/\byou're\b/g,"you are"],[/\bhe's\b/g,"he is"],[/\bshe's\b/g,"she is"],[/\bthat's\b/g,"that is"],[/\bit's\b/g,"it is"],[/\bthere's\b/g,"there is"],[/\bisn't\b/g,"is not"],[/\baren't\b/g,"are not"],[/\bdon't\b/g,"do not"],[/\bdoesn't\b/g,"does not"],[/\blet's\b/g,"let us"],[/\bim\b/g,"i am"],[/\b(see|sea|shi|shee)\b/g,"she"],[/\b(hi|hee)\b/g,"he"],[/\bhis\b/g,"he is"],[/\bshes\b/g,"she is"],[/\bhes\b/g,"he is"],[/\bokay\b|\bok\b/g,"okay"]];
@@ -545,7 +550,7 @@ function playSrc(key,src,text,role){
     return new Promise(res=>{ a.onended=res; a.play().catch(res); setTimeout(res,6000); }); }
   return new Promise(res=>{
     if(!("speechSynthesis" in window)){ res(); return; }
-    const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=0.85; u.pitch = role==="b"?0.85:(role==="a"?1.15:1);
+    const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=0.75; u.pitch = role==="b"?0.85:(role==="a"?1.15:1);
     const en=voices.filter(v=>/^en[-_]US/i.test(v.lang)); const v= role==="b" ? (en[1]||en[0]) : en[0]; if(v) u.voice=v;
     u.onend=res; u.onerror=res; speechSynthesis.speak(u); setTimeout(res,5000);
   });
@@ -723,18 +728,44 @@ const SIGHT=Object.fromEntries([["walk","Let's walk."],["hill","I see a hill."],
 const BOOK_NW=[[4,"walk","hill"],[6,"by","where"],[8,"now","them"],[10,"pigs","of"],[12,"talk","about"],[14,"top","eat"],[16,"sun","going"],[18,"sit","afternoon"],[20,"said","so"],[22,"run","after"],[24,"pull","out"],[26,"must","but"],
  [28,"chair","asks"],[30,"had","our"],[32,"from","street"],[34,"soon","as"],[36,"window","more"],[38,"who","other"],[40,"which","bag"],[42,"again","takes"],[44,"brother","men"],[46,"sister","know"],[48,"how","saw"],[50]];
 // one-word answers: the recognizer often hears a near word, so accept close ones (the sound of the day stays strict)
-const WR_OK={hat:["hat","hats","had","hut","hot","head"],cup:["cup","cups","cop","cap","cub"],map:["map","maps","mop","nap"],ship:["ship","ships","sheep"],shoe:["shoe","shoes","shoo","show","shu"],
+const WR_OK={hat:["hat","hats","had","hut","hot","head"],cup:["cup","cups","cop","cap","cub","cut","kup","copp","cop's"],map:["map","maps","mop","nap"],ship:["ship","ships","sheep"],shoe:["shoe","shoes","shoo","show","shu"],
   chick:["chick","chicks","chic","check"],cheese:["cheese","cheeses","chees"],bee:["bee","be","b","bea","bees"],duck:["duck","ducks","dock"],sock:["sock","socks","sak"],
   three:["three","3"],five:["five","5"],rose:["rose","roses","rows"],cow:["cow","cows"],owl:["owl","owls","al","all"],whale:["whale","whales","wail","wales","well"],wheel:["wheel","wheels","we'll"],
   car:["car","cars","ca"],boat:["boat","boats"],coat:["coat","coats"],goat:["goat","goats"],tent:["tent","tents","10"],bus:["bus","buses","boss"],pig:["pig","pigs","big"],sea:["sea","see","c"],tea:["tea","tee","t"],sun:["sun","son","sunday"],
-  bag:["bag","bags","back","beg","bug"],bug:["bug","bugs","bag"],bed:["bed","beds","bad"],hot:["hot","hat"],cold:["cold","called","coal"],sick:["sick","seek","six"],hill:["hill","hills","heal","hil"],cat:["cat","cats","kat"],
+  bag:["bag","bags","back","beg","bug"],bug:["bug","bugs","bag"],bed:["bed","beds","bad"],hot:["hot","hat"],cold:["cold","called","coal"],sick:["sick","seek","six"],hill:["hill","hills","heal","hil","he'll","hilly","hail","hell","heel"],dog:["dog","dogs","doug","dock","dug","dawg"],juice:["juice","juices","jus","use","deuce","juicy"],cat:["cat","cats","kat"],
   cereal:["cereal","serial"],flower:["flower","flowers","flour"],farm:["farm","farms","firm"],toy:["toy","toys"],boy:["boy","boys"],girl:["girl","girls"],swim:["swim","swimming","swims"],rain:["rain","raining","reign","rains"]};
 const NUMWD={"3":"three","5":"five","10":"ten"};
 function ed1(a,b){ if(Math.abs(a.length-b.length)>1) return false; let i=0,j=0,d=0; while(i<a.length&&j<b.length){ if(a[i]===b[j]){i++;j++;continue;} if(++d>1) return false; if(a.length>b.length) i++; else if(b.length>a.length) j++; else {i++;j++;} } return d+(a.length-i)+(b.length-j)<=1; }
-const wrHit=(w,alts)=>(alts||[]).some(a=>String(a).toLowerCase().replace(/\b\d+\b/g,m=>NUMWD[m]||m).split(/[^a-z']+/).some(x=>x&&((WR_OK[w]||[w,w+"s",w+"es"]).includes(x)||(w.length>=4&&x.slice(0,2)===w.slice(0,2)&&ed1(x,w)))));
+function lev(a,b){ const d=[...Array(b.length+1).keys()]; for(let i=1;i<=a.length;i++){ let p=d[0]; d[0]=i; for(let j=1;j<=b.length;j++){ const t=d[j]; d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1)); p=t; } } return d[b.length]; }
+// dad 2026-11-20: one-word answers (cup, hill) were too hard for the recognizer → very lenient: any of the 5 guesses, any word in it, same first letter and close spelling
+const wrHit=(w,alts)=>{ const ok=WR_OK[w]||[w,w+"s",w+"es"], far=w.length>=4?2:1, w2=w.replace(/\s/g,"");
+  return (alts||[]).some(a=>{ const t=String(a).toLowerCase().replace(/\b\d+\b/g,m=>NUMWD[m]||m); if(t.replace(/[^a-z]/g,"").includes(w2)) return true;
+    return t.split(/[^a-z']+/).some(x=>x&&(ok.includes(x)||(x[0]===w[0]&&lev(x,w)<=far))); }); };
 const wrOn=()=>S.wrOn!==false;
 function wrRec(){ return S.wr||(S.wr={n:0,words:{},sight:{},last:null}); }
-const wrPage=r=>Math.min(Math.floor((r.n*2)/7),BOOK_NW.length-1); // 2 book pages a week of 7 days that were actually done
+// dad 2026-11-20 (book text felt hard): reading = read it yourself first + sight words. Each book page gets 2 easy lines of our own full of sight words;
+// a page lasts 2 done days. The page's picture comes from picture-book.json (tablet only); the easy lines below are ours.
+const EASY={4:[["We go up the hill.","우리는 언덕에 올라가요."],["Pat can come with us.","팻도 우리랑 같이 갈 수 있어요."]],6:[["They see a bus.","버스가 보여요."],["Where do you want to go?","너는 어디 가고 싶어?"]],
+ 8:[["Look at the water.","물을 봐요."],["I can see them now.","이제 보여요."]],10:[["Here are the pigs.","돼지들이 여기 있어요."],["Jane likes the little pigs.","제인은 작은 돼지들이 좋아요."]],
+ 12:[["Here is some milk.","우유 여기 있어요."],["The man likes his work.","아저씨는 자기 일을 좋아해요."]],14:[["We can see the top.","꼭대기가 보여요."],["We want to eat.","우리는 먹고 싶어요."]],
+ 16:[["Look at the sun.","해를 봐요."],["I can see the sea.","바다가 보여요."]],18:[["We sit by the tree.","우리는 나무 옆에 앉아요."],["It is the afternoon.","오후예요."]],
+ 20:[["Let us play with the ball.","공 가지고 놀자."],["Daddy said so.","아빠가 그렇게 말했어요."]],22:[["Pat can see a rabbit.","팻이 토끼를 봤어요."],["He runs after it.","팻이 토끼를 쫓아가요."]],
+ 24:[["Pull him out, Peter.","피터, 팻을 끌어내."],["Now Pat is out.","이제 팻이 나왔어요."]],26:[["Here is a tea shop.","찻집이 여기 있어요."],["You must be good, Pat.","팻, 착하게 있어야 해."]],
+ 28:[["Peter sits on a chair.","피터가 의자에 앉아요."],["Daddy asks for tea.","아빠가 차를 달라고 해요."]],30:[["We had our tea.","우리는 간식을 먹었어요."],["They go to our school.","그 애들은 우리 학교에 다녀요."]],
+ 32:[["We go down the street.","우리는 길을 따라 내려가요."],["We will go by train.","우리는 기차 타고 갈 거예요."]],34:[["Here is the train.","기차가 왔어요."],["We will soon be home.","곧 집에 도착할 거예요."]],
+ 36:[["Look out of the window.","창밖을 봐요."],["I can see more cows.","소가 더 보여요."]],38:[["Who is that man?","저 아저씨는 누구예요?"],["He is from the farm.","농장에서 온 아저씨예요."]],
+ 40:[["Which bag is ours?","어느 게 우리 가방이에요?"],["Get the bags.","가방 챙겨요."]],42:[["Here is our bus.","우리 버스가 왔어요."],["Pat will not get on.","팻이 안 타려고 해요."]],
+ 44:[["I can see a fire.","불이 보여요."],["The men are here.","소방관 아저씨들이 왔어요."]],46:[["I like to read.","나는 읽는 게 좋아요."],["We know him.","우리 저 아저씨 알아요."]],
+ 48:[["What is this?","이게 뭐야?"],["We saw the firemen.","우리는 소방관 아저씨들을 봤어요."]],50:[["We are at home.","우리는 집에 왔어요."],["Up we go to bed.","자, 자러 올라가자."]]};
+const SW=new Set("a the is are am we go up can with us they see where do you want to look at i them now here little some his likes like he she it by said so let play him out must be on for asks had our down will soon of more who that from which get not what this saw know read and my in was have has come run runs ours".split(" "));
+const SWOK={the:["the","duh","da","thee","de","they","that"],a:["a","uh","ah","eh","hey","ay"],is:["is","his","ease","ez","it's"],we:["we","wee","whee","oui","v"],to:["to","too","two","2","tu"],of:["of","off","above","love","oof"],by:["by","buy","bye","bi","hi"],
+ so:["so","sew","sow","soap","show"],at:["at","add","ad","hat","that"],it:["it","eat","hit","if"],up:["up","op","app","yup","pup"],go:["go","goal","gold","ko","goes"],do:["do","due","dew","doo","2"],he:["he","hee","hi","hey"],my:["my","mi","mine","mai"],
+ on:["on","own","an","um"],in:["in","inn","and","end","n"],us:["us","ass","as","bus"],out:["out","odd","ought","outs"],now:["now","no","know","nah"],see:["see","sea","c","si","say"],can:["can","cam","ken","con","cane"],you:["you","u","yu","ewe","your"],
+ are:["are","r","our","art"],here:["here","hear","hair","hero"],said:["said","sad","set","says","sed"],look:["look","luke","luck","looks","lock"],want:["want","won't","wand","wants","what"],where:["where","wear","were","ware","wh"],they:["they","day","the","thay"],
+ them:["them","then","dem","than"],this:["this","these","dis","thesis"],that:["that","dat","the","than"],what:["what","whut","what's","watt"],with:["with","wif","whiz","wit"],will:["will","well","we'll","wheel"],some:["some","sum","sam","son"],come:["come","calm","cum","comes"],
+ our:["our","hour","are","hours","ours"],had:["had","hat","head","hand","have"],saw:["saw","so","sow","sauce","song"],know:["know","no","now"],from:["from","form","front","farm"],which:["which","witch","rich","wish"],who:["who","whom","hoo","whose"],get:["get","gate","got","gets"],
+ not:["not","knot","nut","nod"],more:["more","moore","mor","mall"],must:["must","mast","mussed","most"],let:["let","lit","late","lead"],play:["play","plays","pray","plate"],soon:["soon","sun","son"],little:["little","litter","liddle"],him:["him","hem","hymn","them"],be:["be","bee","b"],for:["for","four","4","far"],am:["am","um","m","em"]};
+const wrPage=r=>Math.min(Math.floor(r.n/2),BOOK_NW.length-1); // a page every 2 days she actually did (≈ 7 weeks for the book)
 function wrPlan(){ const r=wrRec(), today=todayStr(), pk=wrPage(r), page=BOOK_NW[pk][0], seen=w=>!!r.words[w], seed=r.n;
   const book=BOOKW.filter(x=>x.p<=page&&!seen(x.w)).concat(BOOKW.filter(x=>x.p>page&&!seen(x.w))).slice(0,2);
   const life=LIFE.filter(x=>!seen(x.w)&&!book.some(b=>b.w===x.w)).slice(0,2);
@@ -742,52 +773,77 @@ function wrPlan(){ const r=wrRec(), today=todayStr(), pk=wrPage(r), page=BOOK_NW
   const all=Object.fromEntries(BOOKW.concat(LIFE).map(x=>[x.w,x]));
   const rev=Object.entries(r.words).filter(([w,o])=>all[w]&&[1,3,7].includes(diffDays(o.d,today))).sort((a,b)=>diffDays(a[1].d,today)-diffDays(b[1].d,today)).slice(0,3).map(([w])=>all[w]);
   const snd=SOUNDS[r.n%SOUNDS.length];
-  const nw=BOOK_NW[pk].slice(1), old=Object.keys(r.sight).filter(w=>!nw.includes(w)&&SIGHT[w]);
-  const sight=nw.concat(shuffle(old)).slice(0,nw.length?3:3).map(w=>({w,s:SIGHT[w]}));
+  const lines=(EASY[page]||[]).map(([t,ko])=>({t,ko}));
+  const inLines=[...new Set(lines.flatMap(l=>l.t.toLowerCase().replace(/[^a-z' ]/g,"").split(" ")).filter(w=>SW.has(w)))];
+  const fresh=inLines.filter(w=>!r.sight[w]), old=inLines.filter(w=>r.sight[w]);
+  const sight=fresh.concat(shuffle(old)).slice(0,3).map(w=>({w,line:lines.find(l=>new RegExp("\\b"+w+"\\b","i").test(l.t))}));
   const pool=ITEMS.filter(i=>i.src==="book"&&i.src_audio&&i.week<=Math.max(7,S.bookWeek-1)&&S.items[i.id]&&S.items[i.id].box>=1);
   const cold=pool.length?pool[(seed*7)%pool.length]:null;
-  return {page,pk,words,rev,snd,sight,cold}; }
+  return {page,pk,words,rev,snd,sight,cold,lines}; }
 let W=null;
 function wrStart(daily){ const P=wrPlan();
   const q=[{k:"intro"}, ...shuffle(P.words).map(x=>({k:"listen",x})), ...shuffle(P.words).map(x=>({k:"say",x})), ...P.rev.map(x=>({k:"say",x,rev:true})),
-    {k:"sound"}, ...P.snd.words.map(x=>({k:"read",x})), ...shuffle(P.sight).map(x=>({k:"sight",x})), ...(P.cold?[{k:"cold",it:P.cold}]:[]), ...(BOOK&&BOOK.pages&&BOOK.pages[P.pk]?[{k:"story"}]:[])];
+    ...P.sight.map(x=>({k:"sight",x})), {k:"sound"}, ...P.snd.words.map(x=>({k:"read",x})), ...(P.cold?[{k:"cold",it:P.cold}]:[]), ...(P.lines.length?[{k:"story"}]:[])];
   W={q,i:0,t0:Date.now(),tRead:0,wordSecs:0,daily:!!daily,P,base:daily&&S.spk&&S.spk.date===todayStr()?S.spk.secs*1000:0}; view="wr"; wrEnter(); render();
 }
 const wrCur=()=>W.q[W.i];
-const wrStory=()=>BOOK.pages[W.P.pk].lines;
-function wrEnter(){ const c=wrCur(); if(!c) return; c.st={tries:0,heard:"",fb:null,listening:false,phase:0,line:0,miss:[],empty:0};
+const isRL=c=>c.k==="cold"||c.k==="story"; // read-a-line cards: she reads first, then each word turns green or stays grey
+const wtok=w=>w.toLowerCase().replace(/[^a-z']/g,"");
+function wrEnter(){ const c=wrCur(); if(!c) return; c.st={tries:0,heard:"",fb:null,listening:false,phase:0,line:0,miss:[],empty:0,li:0,round:0};
   if(c.k==="listen"){ c.opts=shuffle(W.P.words); }
-  if(c.k==="sight"){ const others=shuffle(Object.keys(SIGHT).filter(w=>w!==c.x.w&&!W.P.sight.some(s=>s.w===w))); c.opts=shuffle([c.x.w,...W.P.sight.filter(s=>s.w!==c.x.w).map(s=>s.w),...others].slice(0,4)); }
-  if(c.k==="sound"&&!W.tRead){ W.tRead=Date.now(); W.wordSecs=Math.round((W.tRead-W.t0)/1000); }
+  if(isRL(c)){ c.lines=c.k==="cold"?[{t:c.it.text,ko:c.it.ko||""}]:W.P.lines; c.st.green=c.lines.map(l=>l.t.split(" ").map(()=>false)); }
+  if(c.k==="sight"&&!W.tRead){ W.tRead=Date.now(); W.wordSecs=Math.round((W.tRead-W.t0)/1000); }
   setTimeout(()=>wrAuto(c),350); }
 const wrSay=(t,key)=>playSrc(key||("wr:"+t),null,t);
+function wrSlow(text,onWord){ stopAll(); const ws=text.split(" ");
+  return new Promise(res=>{ if(!("speechSynthesis" in window)){ res(); return; }
+    const u=new SpeechSynthesisUtterance(text.replace(/["“”]/g,"")); u.lang="en-US"; u.rate=0.62; const en=voices.filter(v=>/^en[-_]US/i.test(v.lang)); if(en[0]) u.voice=en[0];
+    let gotB=false, k=-1, tm=null, ended=false; const starts=[]; let pos=0; ws.forEach(w=>{ starts.push(pos); pos+=w.replace(/["“”]/g,"").length+1; });
+    const fin=()=>{ if(ended) return; ended=true; clearInterval(tm); onWord(-1); res(); };
+    u.onboundary=e=>{ if(e.name&&e.name!=="word") return; gotB=true; let i=0; while(i+1<starts.length&&starts[i+1]<=e.charIndex) i++; onWord(i); };
+    u.onstart=()=>{ onWord(0); k=0; tm=setInterval(()=>{ if(gotB) return; k++; if(k<ws.length) onWord(k); },560); };
+    u.onend=fin; u.onerror=fin; speechSynthesis.speak(u); setTimeout(fin,ws.length*900+3000); }); }
+function wrLit(li,i){ app.querySelectorAll(".rl .wd").forEach(e=>e.classList.toggle("lit",+e.dataset.l===li&&+e.dataset.i===i)); }
 async function wrAuto(c){ if(view!=="wr"||wrCur()!==c) return;
   if(c.k==="intro"){ for(let k=0;k<W.P.words.length;k++){ if(view!=="wr"||wrCur()!==c) return; c.st.lit=k; render(); await wrSay(W.P.words[k].w); await new Promise(r=>setTimeout(r,350)); } c.st.lit=-1; render(); return; }
   if(c.k==="listen") return wrSay(c.x.w);
-  if(c.k==="sight") return wrSay(c.x.w);
-  if(c.k==="say"||c.k==="read"||c.k==="cold"||c.k==="story") return wrMic(c);
+  if(c.k==="say"||c.k==="read"||c.k==="sight"||isRL(c)) return wrMic(c); // reading cards: no sound first, she reads it herself
   if(c.k==="sound"){ for(const x of W.P.snd.words){ if(view!=="wr"||wrCur()!==c) return; await wrSay(x.w); await new Promise(r=>setTimeout(r,300)); } }
 }
-function wrTarget(c){ if(c.k==="say") return c.st.phase?c.x.s:c.x.w; if(c.k==="read") return c.x.w; if(c.k==="cold") return c.it.text; if(c.k==="story") return wrStory()[c.st.line].t;
-  if(c.k==="listen") return c.x.w; if(c.k==="sight") return c.x.s; return ""; }
-async function wrMic(c){ if(c.st.listening||(c.st.fb&&!c.st.echo)) return; if(c.st.echo&&c.st.echoOk) return;
+function wrTarget(c){ if(c.k==="say") return c.st.phase?c.x.s:c.x.w; if(c.k==="read"||c.k==="sight") return c.x.w; if(isRL(c)) return c.lines[c.st.li].t;
+  if(c.k==="listen") return c.x.w; return ""; }
+// word-by-word check of a read line against all 5 recognizer guesses
+function gradeLine(line,alts){ const H=new Set(); (alts||[]).forEach(a=>toks(String(a).replace(/\b(\d+)\b/g,(m,d)=>NUMW[+d]||m)).forEach(x=>H.add(x)));
+  const near=(t)=>{ if(H.has(t)) return true; const v=SWOK[t]||WR_OK[t]; if(v&&v.some(x=>H.has(x))) return true; if(t.length>=4) for(const x of H) if(x[0]===t[0]&&lev(x,t)<=(t.length>=6?2:1)) return true; return false; };
+  return line.split(" ").map(w=>{ const ts=toks(w); return ts.length?ts.every(near):true; }); }
+async function wrMic(c){ if(c.st.listening||(c.st.fb&&!c.st.echo)||c.st.okLine) return; if(c.st.echo&&c.st.echoOk) return;
   const inp=document.getElementById("sayin"); if(!speechOK){ window._typed=inp?inp.value:""; if(!window._typed.trim()){ inp&&inp.focus(); return; } }
   c.st.listening=true; render(); const r=await listenOnce(); if(view!=="wr"||wrCur()!==c) return; c.st.listening=false;
-  if((r.err&&!speechOK)||micBusy){ render(); return; }
+  if((r.err&&!speechOK)||micBusy){ render(); if(speechOK) setTimeout(()=>{ if(wrCur()===c&&!c.st.listening&&!document.hidden) wrMic(c); },1500); return; }
   const tg=wrTarget(c), alts=r.alts||[]; c.st.heard=alts[0]||c.st.heard||""; if(alts[0]){ c.st.raw=alts[0]; c.st.tgt=tg; }
-  const one=!/\s/.test(tg.trim()), ok=!!(alts.length&&(one?wrHit(tg.replace(/[^A-Za-z']/g,"").toLowerCase(),alts):matches(tg,alts,true)));
+  if(isRL(c)&&alts.length){ const g=gradeLine(tg,alts), G=c.st.green[c.st.li]; g.forEach((v,i)=>{ if(v) G[i]=true; }); if(W.daily) logHeard(tg,alts,G.every(Boolean));
+    if(G.every(Boolean)){ chime(); return wrLineDone(c,false); }
+    c.st.round++; if(c.st.round>=2) { chime(); return wrLineDone(c,true); } // dad: never let her get stuck → 2nd try: praise, read it to her, move on
+    render(); await wrGrey(c); if(wrCur()===c&&!c.st.listening) wrMic(c); return; }
+  const one=!/\s/.test(tg.trim()), ok=!!(alts.length&&(one?(wrHit(wtok(tg),alts)||(SWOK[wtok(tg)]||[]).some(v=>alts.some(a=>toks(a).includes(v)))):matches(tg,alts,true)));
   if(W.daily&&alts.length) logHeard(tg,alts,ok);
   if(ok){ chime(); return wrGood(c); }
-  if(alts.length){ c.st.tries++; c.st.empty=0; buzz(); } else c.st.empty++;
+  if(alts.length){ c.st.tries++; c.st.empty=0;
+    if(c.st.tries>=2){ c.st.helped=true; chime(); return wrGood(c); } // dad 2026-11-20: she tires when it keeps failing → 2nd near-miss: praise, play the answer, move on (no wrong sound here)
+  } else c.st.empty++;
   render(); if(speechOK&&!r.aborted) setTimeout(()=>{ if(wrCur()===c&&!c.st.listening&&!document.hidden) wrMic(c); },700); }
+async function wrGrey(c){ const li=c.st.li, ws=c.lines[li].t.split(" "), G=c.st.green[li]; // read only the grey words to her, slowly, each one lit
+  for(let i=0;i<ws.length;i++){ if(G[i]) continue; if(view!=="wr"||wrCur()!==c) return; wrLit(li,i); await wrSlow(ws[i].replace(/[^A-Za-z']/g,""),()=>wrLit(li,i)); await new Promise(r=>setTimeout(r,250)); } wrLit(li,-1); }
+async function wrLineDone(c,helped){ const st=c.st; st.okLine=true; st.helped=helped; st.heard=""; render();
+  const li=st.li; if(c.k==="cold"&&!helped) await playItem(c.it); else await wrSlow(c.lines[li].t,i=>wrLit(li,i)); if(view!=="wr"||wrCur()!==c) return;
+  await new Promise(r=>setTimeout(r,400)); st.okLine=false; st.helped=false; st.round=0; st.tries=0;
+  if(st.li<c.lines.length-1){ st.li++; render(); return wrMic(c); }
+  st.fb="good"; render(); if(c.k==="cold") wrNext(c,900); }
 async function wrGood(c){ const st=c.st; st.tries=0; st.heard=""; st.empty=0;
   if(st.echo){ st.echoOk=true; render(); await wrSay(wrTarget(c)); return wrNext(c,600); }
-  if(c.k==="say"&&!st.phase){ st.fb="good"; render(); await wrSay(c.x.w); await new Promise(r=>setTimeout(r,400)); if(wrCur()!==c) return; st.phase=1; st.fb=null; render(); await wrSay(c.x.s); return wrMic(c); }
-  if(c.k==="story"){ render(); await wrSay(wrStory()[st.line].t); if(wrCur()!==c) return;
-    if(st.line<wrStory().length-1){ st.line++; st.tries=0; render(); return wrMic(c); } st.fb="good"; render(); return; }
+  if(c.k==="say"&&!st.phase){ st.fb="good"; render(); await wrSay(c.x.w); await new Promise(r=>setTimeout(r,400)); if(wrCur()!==c) return; st.phase=1; st.fb=null; st.helped=false; render(); await wrSay(c.x.s); return wrMic(c); }
   st.fb="good"; render();
-  if(c.k==="read"){ await wrSay(c.x.w); return wrNext(c,900); }
-  if(c.k==="cold"){ await playItem(c.it); return wrNext(c,900); }
+  if(c.k==="read"||c.k==="sight"){ await wrSay(c.x.w); return wrNext(c,c.k==="sight"?1400:900); }
   wrNext(c,900); }
 function wrNext(c,wait){ setTimeout(()=>{ if(view==="wr"&&wrCur()===c) wrAdvance(); },wait||0); }
 function wrAdvance(){ stopAll(); W.i++; if(W.i>=W.q.length) return wrFinish(); wrEnter(); render(); }
@@ -798,12 +854,15 @@ function wrFinish(){ W.end=Date.now();
   const ws=Math.round((W.end-W.t0)/1000), dd=S.days[today];
   if(dd&&!(S.spk&&S.spk.date===today)){ dd.n=(dd.n||0)+W.q.length; dd.secs=(dd.secs||0)+ws; save(); W=null; L=null; view="finish"; render(); fanfare(); return; } // mission was already done before 단어·읽기 existed: add to today's record
   const sp=S.spk&&S.spk.date===today?S.spk:{n:0,wrong:0,week:curWeek(),secs:0};
-  finalizeDay(sp.n+W.q.length,sp.wrong,sp.week,sp.secs+Math.round((W.end-W.t0)/1000)); }
-async function wrPick(c,k){ if(c.st.fb) return; const o=c.opts[k], right=c.x.w, val=c.k==="listen"?o.w:o;
+  finalizeDay(sp.n+W.q.length,sp.wrong,sp.week,sp.secs+ws); }
+async function wrPick(c,k){ if(c.st.fb) return; const o=c.opts[k], right=c.x.w, val=o.w;
   if(val!==right){ if(!c.st.miss.includes(k)) c.st.miss.push(k); buzz(); render(); setTimeout(()=>wrSay(right),500); return; }
-  c.st.fb="good"; c.st.echo=true; chime(); render(); await wrSay(c.k==="listen"?c.x.w:c.x.s); if(wrCur()===c) wrMic(c); } // standing rule: every pick ends with it said aloud once
+  c.st.fb="good"; c.st.echo=true; chime(); render(); await wrSay(c.x.w); if(wrCur()===c) wrMic(c); } // standing rule: every pick ends with it said aloud once
 function wrMicHTML(c,label){ return micBlock({st:c.st},label); }
 const ul=(w,snd)=>{ const parts=snd.split("_"); if(parts.length===2){ const re=new RegExp(`(${parts[0]})([a-z])(e)$`); return w.replace(re,"<u>$1</u>$2<u>$3</u>"); } return w.replace(snd,`<u>${snd}</u>`); };
+const goodMsg=st=>st.helped?"잘했어요! 같이 들어 봐요 🔊":"딩동댕! 💖";
+function rlHTML(c){ const st=c.st; return `<div class="rl">${c.lines.map((l,li)=>{ const cur=!st.fb&&li===st.li, past=st.fb||li<st.li, G=st.green[li];
+  return `<div class="sl ${cur?"on":past?"ok":""}" ${!past&&!cur?'style="opacity:.25"':""}><b>${l.t.split(" ").map((w,i)=>`<span class="wd ${(cur&&(st.round>0||st.okLine))||past?(G[i]?"g":"x"):""}" data-l="${li}" data-i="${i}">${h(w)}</span>`).join(" ")}</b>${past?"<i>✔</i>":""}</div>`; }).join("")}</div>`; }
 function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes(c.k)?`<span class="tag">🔤 단어</span>`:`<span class="tag talk">📖 읽기</span>`;
   const nav=(extra)=>`<div class="btns">${extra||""}<button class="big skip" data-w="skip">다음 →</button></div>`;
   if(c.k==="intro") return `<div class="tags">${W.daily?`<span class="tag bonus">말하기 끝! 이제 단어랑 읽기 🎉</span>`:""}${part}<span class="tag rev">오늘의 새 단어 ${P.words.length}개</span></div><div class="ko big">그림을 보고 잘 들어 봐요!</div>
@@ -814,22 +873,20 @@ function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes
     <div class="wgrid">${c.opts.map((o,k)=>`<button class="wtile ${st.miss.includes(k)?"no":""}" data-pick="${k}"><span class="we">${o.e}</span></button>`).join("")}</div>${nav(`<button class="big soft" data-w="hear">🔊 다시 듣기</button>`)}`; }
   if(c.k==="say"){ const ph=st.phase;
     return `<div class="tags">${part}<span class="tag rev">${c.rev?"🔁 복습 · ":""}🗣️ 그림 보고 말하기</span></div><div class="pic"><span>${c.x.e}</span></div>
-    ${ph?`<div class="en">${h(c.x.s)}</div><div class="ko">${h(c.x.sko)} · 문장으로 따라 말해 봐요!</div>`:st.fb?`<div class="feedback good">딩동댕! 💖<div class="en">${h(c.x.w)}</div></div>`:`<div class="ko big">이건 영어로 뭘까요?</div>${st.showAns?`<div class="en">${h(c.x.w)}</div>`:""}`}
+    ${ph?`<div class="en">${h(c.x.s)}</div><div class="ko">${h(c.x.sko)} · 문장으로 따라 말해 봐요!</div>`:st.fb?`<div class="feedback good">${goodMsg(st)}<div class="en">${h(c.x.w)}</div></div>`:`<div class="ko big">이건 영어로 뭘까요?</div>${st.showAns?`<div class="en">${h(c.x.w)}</div>`:""}`}
     ${st.fb&&!ph?"":wrMicHTML(c,"영어로 말해요")}${nav(`<button class="big soft" data-w="ans">🔊 정답 듣기</button>`)}`; }
-  if(c.k==="sound") return `<div class="tags">${part}<span class="tag rev">오늘의 소리</span></div><div class="snd">${h(P.snd.snd.replace("_","_"))}</div><div class="ko big">${h(P.snd.tip)}</div>
+  if(c.k==="sight"){ const ln=c.x.line;
+    return `<div class="tags">${part}<span class="tag rev">👀 보자마자 읽기 · 자주 나오는 단어</span></div><div class="ko big">${st.fb?goodMsg(st):"이 단어 읽어 봐요!"}</div><div class="en wbig sightw">${h(c.x.w)}</div>
+    ${st.fb&&ln?`<div class="en" style="font-size:clamp(26px,4.4vh,36px)">${h(ln.t).replace(new RegExp("\\b"+c.x.w+"\\b","i"),m=>`<u>${m}</u>`)}</div><div class="ko">오늘 그림책에 나와요</div>`:""}${st.fb?"":wrMicHTML(c,"")}${nav(`<button class="big soft" data-w="ans">🔊 정답 듣기</button>`)}`; }
+  if(c.k==="sound") return `<div class="tags">${part}<span class="tag rev">오늘의 소리</span></div><div class="snd">${h(P.snd.snd)}</div><div class="ko big">${h(P.snd.tip)}</div>
     <div class="wrow">${P.snd.words.map((x,k)=>`<button class="wtile" data-sw="${k}"><b>${ul(x.w,P.snd.snd)}</b></button>`).join("")}</div><div class="ko">단어를 누르면 들려요. 이제 혼자 읽어 볼 거예요!</div>${nav()}`;
   if(c.k==="read") return `<div class="tags">${part}<span class="tag rev">🔎 ${h(P.snd.snd)} 단어 읽기</span></div>${st.fb?`<div class="pic"><span>${c.x.e}</span></div>`:`<div class="ko big">소리 내서 읽어 봐요!</div>`}
-    <div class="en wbig">${ul(c.x.w,P.snd.snd)}</div>${st.fb?`<div class="feedback good">딩동댕! 💖<small>${h(c.x.ko)}</small></div>`:wrMicHTML(c,"읽어 봐요")}${nav(`<button class="big soft" data-w="ans">🔊 정답 듣기</button>`)}`;
-  if(c.k==="sight"){ if(st.fb) return `<div class="tags">${part}<span class="tag rev">👀 한눈에 읽는 단어</span></div><div class="en wbig">${h(c.x.w)}</div><div class="feedback good">맞아요! 💖<div class="en">${h(c.x.s).replace(new RegExp("\\b"+c.x.w+"\\b","i"),m=>`<u>${m}</u>`)}</div>${st.echoOk?"따라 말하기 성공! 💖":wrMicHTML(c,"문장으로 따라 말해 봐요!")}</div>${nav(`<button class="big soft" data-w="hearS">🔊 다시 듣기</button>`)}`;
-    return `<div class="tags">${part}<span class="tag rev">👀 한눈에 읽는 단어</span></div><div class="ko big">잘 듣고 맞는 단어를 눌러요</div>
-    <div class="wgrid words">${c.opts.map((o,k)=>`<button class="wtile ${st.miss.includes(k)?"no":""}" data-pick="${k}"><b>${h(o)}</b></button>`).join("")}</div>${nav(`<button class="big soft" data-w="hear">🔊 다시 듣기</button>`)}`; }
-  if(c.k==="cold") return `<div class="tags">${part}<span class="tag rev">🤫 소리 없이 먼저 읽기</span></div><div class="ko big">${st.fb?"원어민 소리로 확인해요! 🔊":"아는 문장이에요. 듣기 전에 먼저 읽어 봐요!"}</div>
-    <div class="en">${h(c.it.text)}</div>${st.fb?`<div class="feedback good">딩동댕! 💖<small>${h(c.it.ko||"")}</small></div>`:wrMicHTML(c,"읽어 봐요")}${nav(`<button class="big soft" data-w="ans">🔊 원어민 소리 듣기</button>`)}`;
-  if(c.k==="story"){ const pg=BOOK.pages[P.pk], L2=pg.lines;
-    return `<div class="tags">${part}<span class="tag rev">📚 그림책 ${pg.p}쪽</span></div>
-    <div class="storybox"><img src="${pg.img}" alt=""><div class="story">${L2.map((x,k)=>`<div class="sl ${k===st.line&&!st.fb?"on":k<st.line||st.fb?"ok":""}"><b>${h(x.t)}</b>${k<st.line||st.fb?"<i>✔</i>":""}</div>`).join("")}
-    ${st.fb?`<div class="feedback good">다 읽었어요! 🎉</div>`:`<div class="ko">${h(L2[st.line].ko)}</div>${wrMicHTML(c,"한 줄씩 읽어 봐요")}`}
-    <div class="btns">${st.fb?"":`<button class="big soft" data-w="ans">🔊 이 줄 듣기</button>`}<button class="big ${st.fb?"next":"skip"}" data-w="${st.fb?"skip":"line"}">${st.fb?"끝! ✨":"다음 줄 →"}</button></div></div></div>`; }
+    <div class="en wbig">${ul(c.x.w,P.snd.snd)}</div>${st.fb?`<div class="feedback good">${goodMsg(st)}<small>${h(c.x.ko)}</small></div>`:wrMicHTML(c,"읽어 봐요")}${nav(`<button class="big soft" data-w="ans">🔊 정답 듣기</button>`)}`;
+  if(isRL(c)){ const li=Math.min(st.li,c.lines.length-1), story=c.k==="story", pg=story&&BOOK&&BOOK.pages&&BOOK.pages[P.pk];
+    const msg=st.fb?"다 읽었어요! 🎉":st.okLine?goodMsg(st):st.round>0?"초록은 잘 읽었어요! 회색 단어만 듣고 다시 읽어 봐요":"🤫 듣기 전에 먼저 혼자 읽어 봐요!";
+    const inner=`<div class="ko big rlmsg">${msg}</div>${rlHTML(c)}<div class="ko">${h(c.lines[li].ko||"")}</div>${st.fb||st.okLine?"":wrMicHTML(c,"")}
+      <div class="btns">${st.fb?"":`<button class="big soft" data-w="grey">🐢 ${st.round>0?"회색 단어 듣기":"천천히 듣기"}</button>`}<button class="big ${st.fb?"next":"skip"}" data-w="${st.fb?"skip":"line"}">${st.fb?"끝! ✨":"다음 →"}</button></div>`;
+    return `<div class="tags">${part}<span class="tag rev">${story?`📚 그림책 ${P.page}쪽`:"🤫 아는 문장 먼저 읽기"}</span></div>${pg?`<div class="storybox"><img src="${pg.img}" alt=""><div class="story">${inner}</div></div>`:inner}`; }
   return ""; }
 function renderWR(){ const c=wrCur(), pct=Math.round(W.i/W.q.length*100);
   app.innerHTML=`<div class="lesson wr"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${W.i+1} / ${W.q.length}</div><div class="clock">⏱ ${mmss(W.base+Date.now()-W.t0)}</div></div>
@@ -839,12 +896,13 @@ function renderWR(){ const c=wrCur(), pct=Math.round(W.i/W.q.length*100);
   app.querySelectorAll("[data-say]").forEach(b=>b.onclick=()=>wrSay(W.P.words[+b.dataset.say].w));
   app.querySelectorAll("[data-sw]").forEach(b=>b.onclick=()=>wrSay(W.P.snd.words[+b.dataset.sw].w));
   app.querySelectorAll('[data-act="mic"]').forEach(b=>b.onclick=()=>wrMic(c));
+  app.querySelectorAll(".rl .wd.x").forEach(b=>b.onclick=()=>{ if(curRec) curRec.stop(); wrSlow(b.textContent.replace(/[^A-Za-z']/g,""),()=>{}); });
   app.querySelectorAll("[data-w]").forEach(b=>b.onclick=async()=>{ const a=b.dataset.w;
     if(a==="skip") return wrAdvance();
     if(a==="hear") return wrSay(c.x.w);
-    if(a==="hearS") return wrSay(c.x.s);
-    if(a==="line"){ stopAll(); if(curRec) curRec.stop(); c.st.listening=false; c.st.tries=0; c.st.heard=""; if(c.st.line<wrStory().length-1){ c.st.line++; render(); return wrMic(c); } c.st.fb="good"; return render(); }
-    if(a==="ans"){ stopAll(); c.st.listening=false; c.st.showAns=true; render(); if(c.k==="cold") await playItem(c.it); else await wrSay(wrTarget(c)); if(wrCur()===c&&!c.st.fb&&speechOK) wrMic(c); }
+    if(a==="line"){ stopAll(); if(curRec) curRec.stop(); c.st.listening=false; c.st.okLine=false; c.st.round=0; if(c.st.li<c.lines.length-1){ c.st.li++; render(); return wrMic(c); } c.st.fb="good"; render(); if(c.k==="cold") wrNext(c,600); return; }
+    if(a==="grey"){ if(curRec) curRec.stop(); c.st.listening=false; render(); if(c.st.round>0) await wrGrey(c); else { const li=c.st.li; await wrSlow(c.lines[li].t,i=>wrLit(li,i)); } if(wrCur()===c&&!c.st.fb&&speechOK) wrMic(c); return; }
+    if(a==="ans"){ stopAll(); c.st.listening=false; c.st.showAns=true; render(); await wrSay(wrTarget(c)); if(wrCur()===c&&!c.st.fb&&speechOK) wrMic(c); }
   });
   const t=setInterval(()=>{ const el=app.querySelector(".wr .clock"); if(!el||view!=="wr"||!W){ clearInterval(t); return; } el.textContent="⏱ "+mmss(W.base+Date.now()-W.t0); },1000);
 }
@@ -855,7 +913,7 @@ function renderWRDone(){ const tot=Math.round((W.end-W.t0)/1000), rd=tot-(W.word
 function wrPanel(){ const r=wrRec(), P=wrPlan(), pg=BOOK_NW[P.pk][0];
   return `<div class="panel"><h3>🔤 단어 + 📖 읽기 (말하기 20분 뒤 6분 → 하루 약 26분)</h3>
   <div class="field"><label for="wron">매일 미션에 넣기</label><select id="wron"><option value="1" ${wrOn()?"selected":""}>켜기</option><option value="0" ${wrOn()?"":"selected"}>끄기</option></select></div>
-  <div class="note">${r.n}일 했어요 · 배운 단어 ${Object.keys(r.words).length}개 · 다음: 새 단어 ${P.words.map(x=>x.e+" "+h(x.w)).join(", ")}${P.rev.length?` · 복습 ${P.rev.map(x=>h(x.w)).join(", ")}`:""} · 소리 ${h(P.snd.snd)} · 그림책 ${pg}쪽 (일주일에 2쪽)</div>
+  <div class="note">${r.n}일 했어요 · 배운 단어 ${Object.keys(r.words).length}개 · 다음: 새 단어 ${P.words.map(x=>x.e+" "+h(x.w)).join(", ")}${P.rev.length?` · 복습 ${P.rev.map(x=>h(x.w)).join(", ")}`:""} · 소리 ${h(P.snd.snd)} · 그림책 ${pg}쪽 그림 + 쉬운 문장 2줄 (2일에 1쪽)</div>
   <div class="note">${BOOK?`📘 그림책 "${h(BOOK.title||"")}" 들어 있어요 (${(BOOK.pages||[]).length}쪽).`:`📘 그림책 파일이 아직 없어요. 위 "📦 천일문 파일"에서 picture-book.json 을 골라 주세요. 없으면 그림책 읽기만 빠져요.`}</div>
   <div><button class="tbtn" id="wrgo" style="font-size:18px;padding:10px 18px">다음 단어·읽기 미리 해 보기 ▶</button> <span class="note">기록에 안 남아요</span></div></div>`; }
 
@@ -885,8 +943,9 @@ function renderHome(){
   const nb=n(c=>c.type==="say"&&c.fresh&&byId[c.id].src==="book"), nx=n(c=>c.type==="say"&&c.fresh&&byId[c.id].src==="bonus"), nr=n(c=>c.type==="say"&&!c.fresh), nt=n(c=>c.type==="talk");
   const mins=Math.round(nb*1.1+nx*1.1+nr*.7+nt*1.5+n(c=>c.type==="pick")*.3);
   let mission;
-  if(doneToday()) mission=`<div class="mission done"><div class="spark" aria-hidden="true">✨ 🌟 ✨</div><h2>야호! 오늘 미션 성공! 🎉</h2><div class="donerow"><span class="donestk">${h(S.days[today].sticker)}</span><div class="done-msg">새 스티커를 받았어요!<br>서현이 최고! 💜 내일 또 만나요</div></div><div class="sub">오늘 배운 문장을 아빠한테 영어로 자랑해 봐요.</div>${wrOn()&&wrRec().last!==today?`<button class="go" id="wrstart" style="margin-top:12px">🔤 단어 + 📖 읽기 하기 ▶</button>`:""}</div>`;
-  else if(wrOn()&&S.spk&&S.spk.date===today) mission=`<div class="mission"><h2>말하기 끝! 👏</h2><div class="plan">이제 🔤 단어 3분 + 📖 읽기 3분만 하면 미션 성공이에요</div><button class="go" id="wrstart">단어·읽기 시작하기 ▶</button></div>`;
+  const wrLeft=wrOn()&&wrRec().last!==today&&(doneToday()||(S.spk&&S.spk.date===today)); // dad 2026-11-20: one mission straight through, no extra buttons
+  if(wrLeft) mission=`<div class="mission"><h2>오늘의 미션 · 이어서 하기</h2><div class="plan">말하기 끝! 👏 이제 🔤 단어 + 📖 읽기만 하면 돼요</div><button class="go" id="wrstart">이어서 하기 ▶</button></div>`;
+  else if(doneToday()) mission=`<div class="mission done"><div class="spark" aria-hidden="true">✨ 🌟 ✨</div><h2>야호! 오늘 미션 성공! 🎉</h2><div class="donerow"><span class="donestk">${h(S.days[today].sticker)}</span><div class="done-msg">새 스티커를 받았어요!<br>서현이 최고! 💜 내일 또 만나요</div></div><div class="sub">오늘 배운 문장을 아빠한테 영어로 자랑해 봐요.</div></div>`;
   else if(!q.some(c=>c.type!=="tip")) mission=`<div class="mission"><h2>오늘은 할 게 없어요</h2><div class="sub">내일 다시 와요!</div></div>`;
   else {
     const w=curWeek(), ss=S.session, resume=ss&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
@@ -1436,7 +1495,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/20-5 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/20-9 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
