@@ -779,7 +779,7 @@ async function wrMic(c){ if(c.st.listening||(c.st.fb&&!c.st.echo)) return; if(c.
   if(W.daily&&alts.length) logHeard(tg,alts,ok);
   if(ok){ chime(); return wrGood(c); }
   if(alts.length){ c.st.tries++; c.st.empty=0; buzz(); } else c.st.empty++;
-  render(); if(speechOK&&!r.aborted&&c.st.empty<2&&c.st.tries<4) setTimeout(()=>{ if(wrCur()===c&&!c.st.listening&&!document.hidden) wrMic(c); },700); }
+  render(); if(speechOK&&!r.aborted) setTimeout(()=>{ if(wrCur()===c&&!c.st.listening&&!document.hidden) wrMic(c); },700); }
 async function wrGood(c){ const st=c.st; st.tries=0; st.heard=""; st.empty=0;
   if(st.echo){ st.echoOk=true; render(); await wrSay(wrTarget(c)); return wrNext(c,600); }
   if(c.k==="say"&&!st.phase){ st.fb="good"; render(); await wrSay(c.x.w); await new Promise(r=>setTimeout(r,400)); if(wrCur()!==c) return; st.phase=1; st.fb=null; render(); await wrSay(c.x.s); return wrMic(c); }
@@ -1436,7 +1436,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/20-4 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/20-5 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
