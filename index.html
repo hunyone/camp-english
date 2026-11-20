@@ -795,6 +795,8 @@ function wrFinish(){ W.end=Date.now();
   if(!W.daily){ view="wrdone"; render(); fanfare(); return; }
   const r=wrRec(), today=todayStr();
   if(r.last!==today){ W.P.words.forEach(x=>{ if(!r.words[x.w]) r.words[x.w]={d:today,src:x.src}; }); W.P.sight.forEach(x=>{ if(!r.sight[x.w]) r.sight[x.w]=today; }); r.n++; r.last=today; }
+  const ws=Math.round((W.end-W.t0)/1000), dd=S.days[today];
+  if(dd&&!(S.spk&&S.spk.date===today)){ dd.n=(dd.n||0)+W.q.length; dd.secs=(dd.secs||0)+ws; save(); W=null; L=null; view="finish"; render(); fanfare(); return; } // mission was already done before 단어·읽기 existed: add to today's record
   const sp=S.spk&&S.spk.date===today?S.spk:{n:0,wrong:0,week:curWeek(),secs:0};
   finalizeDay(sp.n+W.q.length,sp.wrong,sp.week,sp.secs+Math.round((W.end-W.t0)/1000)); }
 async function wrPick(c,k){ if(c.st.fb) return; const o=c.opts[k], right=c.x.w, val=c.k==="listen"?o.w:o;
@@ -883,7 +885,7 @@ function renderHome(){
   const nb=n(c=>c.type==="say"&&c.fresh&&byId[c.id].src==="book"), nx=n(c=>c.type==="say"&&c.fresh&&byId[c.id].src==="bonus"), nr=n(c=>c.type==="say"&&!c.fresh), nt=n(c=>c.type==="talk");
   const mins=Math.round(nb*1.1+nx*1.1+nr*.7+nt*1.5+n(c=>c.type==="pick")*.3);
   let mission;
-  if(doneToday()) mission=`<div class="mission done"><div class="spark" aria-hidden="true">✨ 🌟 ✨</div><h2>야호! 오늘 미션 성공! 🎉</h2><div class="donerow"><span class="donestk">${h(S.days[today].sticker)}</span><div class="done-msg">새 스티커를 받았어요!<br>서현이 최고! 💜 내일 또 만나요</div></div><div class="sub">오늘 배운 문장을 아빠한테 영어로 자랑해 봐요.</div></div>`;
+  if(doneToday()) mission=`<div class="mission done"><div class="spark" aria-hidden="true">✨ 🌟 ✨</div><h2>야호! 오늘 미션 성공! 🎉</h2><div class="donerow"><span class="donestk">${h(S.days[today].sticker)}</span><div class="done-msg">새 스티커를 받았어요!<br>서현이 최고! 💜 내일 또 만나요</div></div><div class="sub">오늘 배운 문장을 아빠한테 영어로 자랑해 봐요.</div>${wrOn()&&wrRec().last!==today?`<button class="go" id="wrstart" style="margin-top:12px">🔤 단어 + 📖 읽기 하기 ▶</button>`:""}</div>`;
   else if(wrOn()&&S.spk&&S.spk.date===today) mission=`<div class="mission"><h2>말하기 끝! 👏</h2><div class="plan">이제 🔤 단어 3분 + 📖 읽기 3분만 하면 미션 성공이에요</div><button class="go" id="wrstart">단어·읽기 시작하기 ▶</button></div>`;
   else if(!q.some(c=>c.type!=="tip")) mission=`<div class="mission"><h2>오늘은 할 게 없어요</h2><div class="sub">내일 다시 와요!</div></div>`;
   else {
@@ -1434,7 +1436,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/20-3 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/20-4 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
