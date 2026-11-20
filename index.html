@@ -235,10 +235,17 @@ details summary{cursor:pointer;color:var(--pine);font-family:var(--f-disp);font-
 .snd{font-family:var(--f-en);font-weight:700;font-size:clamp(70px,13vh,120px);line-height:1;color:var(--maple)}
 .en.wbig{font-size:clamp(56px,10vh,90px)}
 .story{display:flex;flex-direction:column;gap:6px;width:100%;max-width:700px}
-.sl{display:grid;grid-template-columns:52px 1fr 30px;align-items:center;gap:10px;padding:6px 14px;border-radius:16px;opacity:.45;text-align:left}
+.sl{display:grid;grid-template-columns:1fr 30px;align-items:center;gap:10px;padding:6px 14px;border-radius:16px;opacity:.45;text-align:left}
+.storybox{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;width:100%;max-width:1100px}
+.storybox img{height:min(54vh,520px);width:auto;border-radius:16px;box-shadow:0 4px 0 var(--line)}
+.storybox .story{max-width:none;align-items:stretch}
+.storybox .btns,.storybox .ko{justify-content:center;text-align:center}
+@media (max-width:820px){.storybox{grid-template-columns:1fr}.storybox img{height:auto;width:min(100%,300px);max-height:34vh;object-fit:cover;justify-self:center}}
 .sl span{font-size:38px}.sl b{font-family:var(--f-en);font-weight:600;font-size:clamp(24px,4.2vh,34px)}.sl i{font-style:normal;color:var(--pine)}
 .sl.on{opacity:1;background:var(--sun-soft);border:2px solid #F5C451}.sl.ok{opacity:.85}
 .wr .mic{width:120px;height:120px}
+.storybox .mic{width:96px;height:96px}
+.storybox .sl b{font-size:clamp(22px,3.8vh,32px)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .card [data-act="next"]{display:none!important}
 .mission.done{text-align:center;justify-items:center}
@@ -659,117 +666,196 @@ function newBookQueue(w,book){ // dad 2026-11-19: brand-new 천일문 sentences,
 function doneToday(){ return !!S.days[todayStr()]; }
 function streak(){ let n=0,d=todayStr(); if(!S.days[d]) d=addDays(d,-1); while(S.days[d]){n++; d=addDays(d,-1);} return n; }
 
-// ---------- 🔤 단어 + 📖 읽기 샘플 (dad 2026-11-20: try one day's 6 minutes from the parent screen before it joins the mission; nothing here is saved) ----------
-const WR_WORDS=[["hat","🧢","모자"],["cup","🥤","컵"],["bag","🎒","가방"],["map","🗺️","지도"]].map(([w,e,ko])=>({w,e,ko,s:`I have a ${w}.`,sko:`나는 ${ko}${((ko.charCodeAt(ko.length-1)-44032)%28)?"이":"가"} 있어요`}));
-const WR_SOUND={snd:"sh",ko:"쉬~",tip:"s 와 h 가 만나면 '쉬~' 소리가 나요 🤫",words:[["ship","🚢","배"],["fish","🐟","물고기"],["shoe","👟","신발"]].map(([w,e,ko])=>({w,e,ko}))};
-const WR_SIGHT=[["the","I like the cat."],["is","It is big."],["was","It was fun."],["said","Mom said hi."]].map(([w,s])=>({w,s}));
-const WR_STORY=[["🐶","This is Max.","이건 맥스예요."],["🎩","Max has a big hat.","맥스는 큰 모자가 있어요."],["🐟","The hat was on the fish!","모자가 물고기 위에 있었어요!"],["😮","\"Oh no!\" said Max.","\"어머나!\" 맥스가 말했어요."]].map(([e,t,ko])=>({e,t,ko}));
-// one-word answers: the recognizer often hears a near word, so accept close ones (sh vs ch stays strict: that is the point of the card)
-const WR_OK={hat:["hat","hats","had","hut","hot","head"],cup:["cup","cups","cop","cap","cub"],bag:["bag","bags","back","beg","bug","bad"],map:["map","maps","mop","nap","mab","mapp"],
-  ship:["ship","ships","sheep","shipp"],fish:["fish","fishes","fished","fiche"],shoe:["shoe","shoes","shoo","show","shu","sue"]};
-const wrHit=(w,alts)=>(alts||[]).some(a=>toks(a).some(x=>(WR_OK[w]||[w]).includes(x)));
+// ---------- 🔤 단어 3분 + 📖 읽기 3분 (dad 2026-11-20): after the 20-min speaking part, so the day is ~26 min ----------
+// words: 2 picture words from the picture book + 2 camp-life words a day, back as "그림 보고 말하기" 1, 3 and 7 days later.
+// reading: one phonics sound a day, the book page's new words as sight words, one known 천일문 sentence read cold, then the book page (2 pages a week).
+// The book's pictures and text live only in the tablet (picture-book.json loaded from the parent screen), never in this public file.
+let BOOK=null; try{ idbGet("book").then(t=>{ try{ if(t){ BOOK=JSON.parse(t); if(view==="home"||view==="parent") render(); } }catch(e){} }); }catch(e){}
+const jo=(ko,a,b)=>{ const c=ko.charCodeAt(ko.length-1)-44032; return ko+(c>=0&&c<11172&&c%28?a:b); };
+const LIFE=[["cup","🥤","컵","I need a cup.","컵이 필요해요"],["juice","🧃","주스","Can I have some juice?","주스 좀 마셔도 돼요?"],["pizza","🍕","피자","I like pizza.","나는 피자를 좋아해요"],["sandwich","🥪","샌드위치","I have a sandwich.","나는 샌드위치가 있어요"],
+ ["hat","🧢","모자","I have a hat.","나는 모자가 있어요"],["map","🗺️","지도","Look at the map.","지도를 봐요"],["tent","⛺","텐트","This is our tent.","이건 우리 텐트예요"],["lake","🏞️","호수","We swim in the lake.","우리는 호수에서 수영해요"],
+ ["happy","😊","기쁜","I am happy.","나는 기뻐요"],["tired","😴","피곤한","I am tired.","나는 피곤해요"],["scared","😨","무서운","I am scared.","나는 무서워요"],["sick","🤒","아픈","I feel sick.","나는 몸이 안 좋아요"],
+ ["water","💧","물","Can I have some water?","물 좀 마셔도 돼요?"],["jacket","🧥","외투","I need my jacket.","내 외투가 필요해요"],["shoes","👟","신발","Where are my shoes?","내 신발 어디 있어요?"],["bathroom","🚻","화장실","Can I go to the bathroom?","화장실 가도 돼요?"],
+ ["pancake","🥞","팬케이크","I like pancakes.","나는 팬케이크를 좋아해요"],["cereal","🥣","시리얼","I eat cereal.","나는 시리얼을 먹어요"],["friend","🧑‍🤝‍🧑","친구","She is my friend.","그 애는 내 친구예요"],["teacher","🧑‍🏫","선생님","He is my teacher.","그분은 우리 선생님이에요"],
+ ["bike","🚲","자전거","I can ride a bike.","나는 자전거를 탈 수 있어요"],["swim","🏊","수영하다","I can swim.","나는 수영할 수 있어요"],["sunscreen","🧴","선크림","I need sunscreen.","선크림이 필요해요"],["umbrella","☂️","우산","I have an umbrella.","나는 우산이 있어요"],
+ ["rain","🌧️","비","It is raining.","비가 와요"],["cold","🥶","추운","I am cold.","나는 추워요"],["hot","🥵","더운","It is hot.","더워요"],["hungry","🤤","배고픈","I am hungry.","나는 배고파요"],
+ ["thirsty","💦","목마른","I am thirsty.","나는 목말라요"],["bed","🛏️","침대","This is my bed.","이건 내 침대예요"],["flashlight","🔦","손전등","I need a flashlight.","손전등이 필요해요"],["fire","🔥","모닥불","Let's sit by the fire.","모닥불 옆에 앉자"],
+ ["canoe","🛶","카누","I want to ride a canoe.","카누 타고 싶어요"],["bug","🐛","벌레","There is a bug!","벌레가 있어요!"],["bee","🐝","벌","There is a bee!","벌이 있어요!"],["ice cream","🍦","아이스크림","I want ice cream.","아이스크림 먹고 싶어요"],
+ ["hot dog","🌭","핫도그","I like hot dogs.","나는 핫도그를 좋아해요"],["towel","🛁","수건","I need a towel.","수건이 필요해요"],["boat","⛵","배","We are on a boat.","우리는 배 위에 있어요"],["forest","🌲","숲","Let's walk in the forest.","숲속을 걸어요"]]
+ .map(([w,e,ko,s,sko])=>({w,e,ko,s,sko,src:"life"}));
+// picture words from the book, by page (the sentence frame "I can see ~" is the book's own pattern)
+const BOOKW=[[4,"hill","⛰️","언덕","I can see a hill.","언덕이 보여요"],[4,"dog","🐕","강아지","I can see a dog.","강아지가 보여요"],[4,"milk","🥛","우유","I want some milk.","우유 마시고 싶어요"],[4,"cat","🐈","고양이","I can see a cat.","고양이가 보여요"],
+ [6,"car","🚗","자동차","I can see a car.","자동차가 보여요"],[6,"house","🏠","집","I can see a house.","집이 보여요"],[6,"flower","🌸","꽃","I like flowers.","나는 꽃을 좋아해요"],[6,"bus","🚌","버스","I can see a bus.","버스가 보여요"],
+ [8,"fish","🐟","물고기","I can see a fish.","물고기가 보여요"],[8,"tree","🌳","나무","I can see a tree.","나무가 보여요"],[10,"pig","🐷","돼지","I can see a pig.","돼지가 보여요"],[10,"apple","🍎","사과","I like apples.","나는 사과를 좋아해요"],
+ [10,"cake","🍰","케이크","I want some cake.","케이크 먹고 싶어요"],[10,"cow","🐄","소","I can see a cow.","소가 보여요"],[12,"farm","🚜","농장","This is a farm.","여기는 농장이에요"],[12,"sea","🌊","바다","I can see the sea.","바다가 보여요"],
+ [14,"train","🚂","기차","I can see a train.","기차가 보여요"],[14,"toy","🧸","장난감","I have a toy.","나는 장난감이 있어요"],[16,"sun","☀️","해","I can see the sun.","해가 보여요"],[18,"tea","🍵","차","I want some tea.","차 마시고 싶어요"],
+ [20,"ball","⚽","공","Let's play with the ball.","공 가지고 놀자"],[22,"rabbit","🐇","토끼","I can see a rabbit.","토끼가 보여요"],[26,"shop","🏪","가게","Let's go to the shop.","가게에 가자"],[28,"chair","🪑","의자","I sit on a chair.","나는 의자에 앉아요"],
+ [30,"boy","👦","남자아이","I can see a boy.","남자아이가 보여요"],[30,"girl","👧","여자아이","I can see a girl.","여자아이가 보여요"],[30,"school","🏫","학교","I go to school.","나는 학교에 가요"],[32,"street","🛣️","길","Look at the street.","길을 봐요"],
+ [32,"station","🚉","역","We go to the station.","우리는 역에 가요"],[36,"window","🪟","창문","Look out of the window.","창밖을 봐요"],[40,"bag","👜","가방","This is my bag.","이건 내 가방이에요"],[44,"fireman","🧑‍🚒","소방관","He is a fireman.","그분은 소방관이에요"],
+ [46,"policeman","👮","경찰관","He is a policeman.","그분은 경찰관이에요"],[48,"newspaper","📰","신문","I can read the newspaper.","나는 신문을 읽을 수 있어요"],[50,"horse","🐴","말","I can see a horse.","말이 보여요"],[50,"bed","🛏️","침대","I go to bed.","나는 자러 가요"]]
+ .map(([p,w,e,ko,s,sko])=>({p,w,e,ko,s,sko,src:"book"}));
+const SOUNDS=[["sh","'쉬~'","s 와 h 가 만나면 '쉬~' 소리 🤫",[["ship","🚢","배"],["fish","🐟","물고기"],["shoe","👟","신발"]]],
+ ["ch","'취'","c 와 h 가 만나면 '취' 소리 🚂",[["chick","🐥","병아리"],["cheese","🧀","치즈"],["chair","🪑","의자"]]],
+ ["ee","'이~'","e 두 개는 길게 '이~'",[["bee","🐝","벌"],["tree","🌳","나무"],["feet","🦶","발"]]],
+ ["ck","'크'","단어 끝 ck 는 짧게 '크'",[["duck","🦆","오리"],["sock","🧦","양말"],["clock","⏰","시계"]]],
+ ["oo","'우~'","o 두 개는 '우~'",[["moon","🌙","달"],["spoon","🥄","숟가락"],["boot","👢","장화"]]],
+ ["th","th","th 는 혀를 이 사이로 살짝 내밀고 '쓰' 👅",[["three","3️⃣","셋"],["bath","🛁","목욕"],["teeth","🦷","이"]]],
+ ["a_e","'에이'","끝에 e 가 붙으면 a 는 '에이' (e 는 소리 안 나요)",[["cake","🍰","케이크"],["snake","🐍","뱀"],["game","🎮","게임"]]],
+ ["ar","'아r'","a 와 r 은 '아r'",[["car","🚗","자동차"],["star","⭐","별"],["farm","🚜","농장"]]],
+ ["i_e","'아이'","끝에 e 가 붙으면 i 는 '아이'",[["bike","🚲","자전거"],["kite","🪁","연"],["five","5️⃣","다섯"]]],
+ ["oa","'오우'","o 와 a 가 만나면 '오우'",[["boat","⛵","배"],["goat","🐐","염소"],["coat","🧥","외투"]]],
+ ["or","'오r'","o 와 r 은 '오r'",[["corn","🌽","옥수수"],["fork","🍴","포크"],["horse","🐴","말"]]],
+ ["o_e","'오우'","끝에 e 가 붙으면 o 는 '오우'",[["rose","🌹","장미"],["bone","🦴","뼈"],["home","🏠","집"]]],
+ ["ow","'아우'","o 와 w 는 '아우'",[["cow","🐄","소"],["owl","🦉","부엉이"],["clown","🤡","광대"]]],
+ ["ai","'에이'","a 와 i 가 만나면 '에이'",[["rain","🌧️","비"],["snail","🐌","달팽이"],["train","🚂","기차"]]],
+ ["wh","'우'","w 와 h 는 '우' (h 는 소리 안 나요)",[["whale","🐳","고래"],["wheel","🛞","바퀴"],["white","⚪","하얀색"]]],
+ ["ng","'응'","n 과 g 는 코로 '응'",[["ring","💍","반지"],["king","🤴","왕"],["sing","🎤","노래하다"]]],
+ ["ou","'아우'","o 와 u 가 만나면 '아우'",[["house","🏠","집"],["mouse","🐭","생쥐"],["mouth","👄","입"]]],
+ ["ir","'어r'","er, ir, ur 은 모두 '어r'",[["bird","🐦","새"],["girl","👧","여자아이"],["turtle","🐢","거북"]]]]
+ .map(([snd,say,tip,ws])=>({snd,say,tip,words:ws.map(([w,e,ko])=>({w,e,ko}))}));
+// the book's "new words", each with a short sentence of our own for the say-it-once ending
+const SIGHT=Object.fromEntries([["walk","Let's walk."],["hill","I see a hill."],["by","Sit by me."],["where","Where is my bag?"],["now","Come here now."],["them","I like them."],["pigs","I see two pigs."],["of","I want a cup of milk."],
+ ["talk","Let's talk."],["about","Tell me about it."],["top","Look at the top."],["eat","Let's eat."],["sun","I see the sun."],["going","I am going home."],["sit","Sit down, please."],["afternoon","Good afternoon."],
+ ["said","Mom said yes."],["so","I think so."],["run","I can run."],["after","Run after me."],["pull","Pull the door."],["out","Let's go out."],["must","You must stop."],["but","It is small but cute."],
+ ["chair","Sit on the chair."],["asks","She asks a question."],["had","I had lunch."],["our","This is our house."],["from","I am from Korea."],["street","Look at the street."],["soon","See you soon."],["as","It is as big as a car."],
+ ["window","Look out of the window."],["more","I want more."],["who","Who is it?"],["other","Get the other one."],["which","Which one do you like?"],["bag","This is my bag."],["again","Say it again."],["takes","She takes the bus."],
+ ["brother","He is my brother."],["men","Look at the men."],["sister","She is my sister."],["know","I know it."],["how","How are you?"],["saw","I saw a dog."]]);
+const BOOK_NW=[[4,"walk","hill"],[6,"by","where"],[8,"now","them"],[10,"pigs","of"],[12,"talk","about"],[14,"top","eat"],[16,"sun","going"],[18,"sit","afternoon"],[20,"said","so"],[22,"run","after"],[24,"pull","out"],[26,"must","but"],
+ [28,"chair","asks"],[30,"had","our"],[32,"from","street"],[34,"soon","as"],[36,"window","more"],[38,"who","other"],[40,"which","bag"],[42,"again","takes"],[44,"brother","men"],[46,"sister","know"],[48,"how","saw"],[50]];
+// one-word answers: the recognizer often hears a near word, so accept close ones (the sound of the day stays strict)
+const WR_OK={hat:["hat","hats","had","hut","hot","head"],cup:["cup","cups","cop","cap","cub"],map:["map","maps","mop","nap"],ship:["ship","ships","sheep"],shoe:["shoe","shoes","shoo","show","shu"],
+  chick:["chick","chicks","chic","check"],cheese:["cheese","cheeses","chees"],bee:["bee","be","b","bea","bees"],duck:["duck","ducks","dock"],sock:["sock","socks","sak"],
+  three:["three","3"],five:["five","5"],rose:["rose","roses","rows"],cow:["cow","cows"],owl:["owl","owls","al","all"],whale:["whale","whales","wail","wales","well"],wheel:["wheel","wheels","we'll"],
+  car:["car","cars","ca"],boat:["boat","boats"],coat:["coat","coats"],goat:["goat","goats"],tent:["tent","tents","10"],bus:["bus","buses","boss"],pig:["pig","pigs","big"],sea:["sea","see","c"],tea:["tea","tee","t"],sun:["sun","son","sunday"],
+  bag:["bag","bags","back","beg","bug"],bug:["bug","bugs","bag"],bed:["bed","beds","bad"],hot:["hot","hat"],cold:["cold","called","coal"],sick:["sick","seek","six"],hill:["hill","hills","heal","hil"],cat:["cat","cats","kat"],
+  cereal:["cereal","serial"],flower:["flower","flowers","flour"],farm:["farm","farms","firm"],toy:["toy","toys"],boy:["boy","boys"],girl:["girl","girls"],swim:["swim","swimming","swims"],rain:["rain","raining","reign","rains"]};
+const NUMWD={"3":"three","5":"five","10":"ten"};
+function ed1(a,b){ if(Math.abs(a.length-b.length)>1) return false; let i=0,j=0,d=0; while(i<a.length&&j<b.length){ if(a[i]===b[j]){i++;j++;continue;} if(++d>1) return false; if(a.length>b.length) i++; else if(b.length>a.length) j++; else {i++;j++;} } return d+(a.length-i)+(b.length-j)<=1; }
+const wrHit=(w,alts)=>(alts||[]).some(a=>String(a).toLowerCase().replace(/\b\d+\b/g,m=>NUMWD[m]||m).split(/[^a-z']+/).some(x=>x&&((WR_OK[w]||[w,w+"s",w+"es"]).includes(x)||(w.length>=4&&x.slice(0,2)===w.slice(0,2)&&ed1(x,w)))));
+const wrOn=()=>S.wrOn!==false;
+function wrRec(){ return S.wr||(S.wr={n:0,words:{},sight:{},last:null}); }
+const wrPage=r=>Math.min(Math.floor((r.n*2)/7),BOOK_NW.length-1); // 2 book pages a week of 7 days that were actually done
+function wrPlan(){ const r=wrRec(), today=todayStr(), pk=wrPage(r), page=BOOK_NW[pk][0], seen=w=>!!r.words[w], seed=r.n;
+  const book=BOOKW.filter(x=>x.p<=page&&!seen(x.w)).concat(BOOKW.filter(x=>x.p>page&&!seen(x.w))).slice(0,2);
+  const life=LIFE.filter(x=>!seen(x.w)&&!book.some(b=>b.w===x.w)).slice(0,2);
+  const words=book.concat(life);
+  const all=Object.fromEntries(BOOKW.concat(LIFE).map(x=>[x.w,x]));
+  const rev=Object.entries(r.words).filter(([w,o])=>all[w]&&[1,3,7].includes(diffDays(o.d,today))).sort((a,b)=>diffDays(a[1].d,today)-diffDays(b[1].d,today)).slice(0,3).map(([w])=>all[w]);
+  const snd=SOUNDS[r.n%SOUNDS.length];
+  const nw=BOOK_NW[pk].slice(1), old=Object.keys(r.sight).filter(w=>!nw.includes(w)&&SIGHT[w]);
+  const sight=nw.concat(shuffle(old)).slice(0,nw.length?3:3).map(w=>({w,s:SIGHT[w]}));
+  const pool=ITEMS.filter(i=>i.src==="book"&&i.src_audio&&i.week<=Math.max(7,S.bookWeek-1)&&S.items[i.id]&&S.items[i.id].box>=1);
+  const cold=pool.length?pool[(seed*7)%pool.length]:null;
+  return {page,pk,words,rev,snd,sight,cold}; }
 let W=null;
-function wrStart(){
-  const seen=ITEMS.filter(i=>i.src==="book"&&i.week<=7&&i.src_audio&&/\b(is|the)\b/i.test(i.text));
-  const cold=shuffle(seen.filter(i=>S.items[i.id])).concat(shuffle(seen)).filter((x,k,a)=>a.indexOf(x)===k).slice(0,2);
-  const q=[{k:"intro"}, ...shuffle(WR_WORDS).map(x=>({k:"listen",x})), ...shuffle(WR_WORDS).map(x=>({k:"say",x})),
-    {k:"sound"}, ...WR_SOUND.words.map(x=>({k:"read",x})), ...shuffle(WR_SIGHT).map(x=>({k:"sight",x})), ...cold.map(it=>({k:"cold",it})), {k:"story"}];
-  W={q,i:0,t0:Date.now(),tRead:0,wordSecs:0}; view="wr"; wrEnter(); render();
+function wrStart(daily){ const P=wrPlan();
+  const q=[{k:"intro"}, ...shuffle(P.words).map(x=>({k:"listen",x})), ...shuffle(P.words).map(x=>({k:"say",x})), ...P.rev.map(x=>({k:"say",x,rev:true})),
+    {k:"sound"}, ...P.snd.words.map(x=>({k:"read",x})), ...shuffle(P.sight).map(x=>({k:"sight",x})), ...(P.cold?[{k:"cold",it:P.cold}]:[]), ...(BOOK&&BOOK.pages&&BOOK.pages[P.pk]?[{k:"story"}]:[])];
+  W={q,i:0,t0:Date.now(),tRead:0,wordSecs:0,daily:!!daily,P,base:daily&&S.spk&&S.spk.date===todayStr()?S.spk.secs*1000:0}; view="wr"; wrEnter(); render();
 }
 const wrCur=()=>W.q[W.i];
+const wrStory=()=>BOOK.pages[W.P.pk].lines;
 function wrEnter(){ const c=wrCur(); if(!c) return; c.st={tries:0,heard:"",fb:null,listening:false,phase:0,line:0,miss:[],empty:0};
-  if(c.k==="listen"){ c.opts=shuffle(WR_WORDS); }
-  if(c.k==="sight"){ c.opts=shuffle(WR_SIGHT.map(s=>s.w)); }
+  if(c.k==="listen"){ c.opts=shuffle(W.P.words); }
+  if(c.k==="sight"){ const others=shuffle(Object.keys(SIGHT).filter(w=>w!==c.x.w&&!W.P.sight.some(s=>s.w===w))); c.opts=shuffle([c.x.w,...W.P.sight.filter(s=>s.w!==c.x.w).map(s=>s.w),...others].slice(0,4)); }
   if(c.k==="sound"&&!W.tRead){ W.tRead=Date.now(); W.wordSecs=Math.round((W.tRead-W.t0)/1000); }
   setTimeout(()=>wrAuto(c),350); }
 const wrSay=(t,key)=>playSrc(key||("wr:"+t),null,t);
 async function wrAuto(c){ if(view!=="wr"||wrCur()!==c) return;
-  if(c.k==="intro"){ for(let k=0;k<WR_WORDS.length;k++){ if(view!=="wr"||wrCur()!==c) return; c.st.lit=k; render(); await wrSay(WR_WORDS[k].w); await new Promise(r=>setTimeout(r,350)); } c.st.lit=-1; render(); return; }
+  if(c.k==="intro"){ for(let k=0;k<W.P.words.length;k++){ if(view!=="wr"||wrCur()!==c) return; c.st.lit=k; render(); await wrSay(W.P.words[k].w); await new Promise(r=>setTimeout(r,350)); } c.st.lit=-1; render(); return; }
   if(c.k==="listen") return wrSay(c.x.w);
   if(c.k==="sight") return wrSay(c.x.w);
   if(c.k==="say"||c.k==="read"||c.k==="cold"||c.k==="story") return wrMic(c);
-  if(c.k==="sound"){ for(const x of WR_SOUND.words){ if(view!=="wr"||wrCur()!==c) return; await wrSay(x.w); await new Promise(r=>setTimeout(r,300)); } }
+  if(c.k==="sound"){ for(const x of W.P.snd.words){ if(view!=="wr"||wrCur()!==c) return; await wrSay(x.w); await new Promise(r=>setTimeout(r,300)); } }
 }
-function wrTarget(c){ if(c.k==="say") return c.st.phase?c.x.s:c.x.w; if(c.k==="read") return c.x.w; if(c.k==="cold") return c.it.text; if(c.k==="story") return WR_STORY[c.st.line].t;
+function wrTarget(c){ if(c.k==="say") return c.st.phase?c.x.s:c.x.w; if(c.k==="read") return c.x.w; if(c.k==="cold") return c.it.text; if(c.k==="story") return wrStory()[c.st.line].t;
   if(c.k==="listen") return c.x.w; if(c.k==="sight") return c.x.s; return ""; }
 async function wrMic(c){ if(c.st.listening||(c.st.fb&&!c.st.echo)) return; if(c.st.echo&&c.st.echoOk) return;
   const inp=document.getElementById("sayin"); if(!speechOK){ window._typed=inp?inp.value:""; if(!window._typed.trim()){ inp&&inp.focus(); return; } }
   c.st.listening=true; render(); const r=await listenOnce(); if(view!=="wr"||wrCur()!==c) return; c.st.listening=false;
   if((r.err&&!speechOK)||micBusy){ render(); return; }
   const tg=wrTarget(c), alts=r.alts||[]; c.st.heard=alts[0]||c.st.heard||""; if(alts[0]){ c.st.raw=alts[0]; c.st.tgt=tg; }
-  const one=!/\s/.test(tg.trim()), ok=alts.length&&(one?wrHit(tg.replace(/\W/g,"").toLowerCase(),alts):matches(tg,alts,true));
+  const one=!/\s/.test(tg.trim()), ok=!!(alts.length&&(one?wrHit(tg.replace(/[^A-Za-z']/g,"").toLowerCase(),alts):matches(tg,alts,true)));
+  if(W.daily&&alts.length) logHeard(tg,alts,ok);
   if(ok){ chime(); return wrGood(c); }
   if(alts.length){ c.st.tries++; c.st.empty=0; buzz(); } else c.st.empty++;
-  render(); if(speechOK&&!r.aborted&&c.st.empty<2) setTimeout(()=>{ if(wrCur()===c&&!c.st.listening&&!document.hidden) wrMic(c); },700); }
+  render(); if(speechOK&&!r.aborted&&c.st.empty<2&&c.st.tries<4) setTimeout(()=>{ if(wrCur()===c&&!c.st.listening&&!document.hidden) wrMic(c); },700); }
 async function wrGood(c){ const st=c.st; st.tries=0; st.heard=""; st.empty=0;
   if(st.echo){ st.echoOk=true; render(); await wrSay(wrTarget(c)); return wrNext(c,600); }
   if(c.k==="say"&&!st.phase){ st.fb="good"; render(); await wrSay(c.x.w); await new Promise(r=>setTimeout(r,400)); if(wrCur()!==c) return; st.phase=1; st.fb=null; render(); await wrSay(c.x.s); return wrMic(c); }
-  if(c.k==="story"){ st.done=(st.done||0)+1; render(); await wrSay(WR_STORY[st.line].t); if(wrCur()!==c) return;
-    if(st.line<WR_STORY.length-1){ st.line++; render(); return wrMic(c); } st.fb="good"; render(); return; }
+  if(c.k==="story"){ render(); await wrSay(wrStory()[st.line].t); if(wrCur()!==c) return;
+    if(st.line<wrStory().length-1){ st.line++; st.tries=0; render(); return wrMic(c); } st.fb="good"; render(); return; }
   st.fb="good"; render();
   if(c.k==="read"){ await wrSay(c.x.w); return wrNext(c,900); }
   if(c.k==="cold"){ await playItem(c.it); return wrNext(c,900); }
   wrNext(c,900); }
 function wrNext(c,wait){ setTimeout(()=>{ if(view==="wr"&&wrCur()===c) wrAdvance(); },wait||0); }
-function wrAdvance(){ stopAll(); W.i++; if(W.i>=W.q.length){ W.end=Date.now(); view="wrdone"; render(); fanfare(); return; } wrEnter(); render(); }
-async function wrPick(c,k){ if(c.st.fb) return; const o=c.opts[k], right=c.k==="listen"?c.x.w:c.x.w, val=c.k==="listen"?o.w:o;
+function wrAdvance(){ stopAll(); W.i++; if(W.i>=W.q.length) return wrFinish(); wrEnter(); render(); }
+function wrFinish(){ W.end=Date.now();
+  if(!W.daily){ view="wrdone"; render(); fanfare(); return; }
+  const r=wrRec(), today=todayStr();
+  if(r.last!==today){ W.P.words.forEach(x=>{ if(!r.words[x.w]) r.words[x.w]={d:today,src:x.src}; }); W.P.sight.forEach(x=>{ if(!r.sight[x.w]) r.sight[x.w]=today; }); r.n++; r.last=today; }
+  const sp=S.spk&&S.spk.date===today?S.spk:{n:0,wrong:0,week:curWeek(),secs:0};
+  finalizeDay(sp.n+W.q.length,sp.wrong,sp.week,sp.secs+Math.round((W.end-W.t0)/1000)); }
+async function wrPick(c,k){ if(c.st.fb) return; const o=c.opts[k], right=c.x.w, val=c.k==="listen"?o.w:o;
   if(val!==right){ if(!c.st.miss.includes(k)) c.st.miss.push(k); buzz(); render(); setTimeout(()=>wrSay(right),500); return; }
   c.st.fb="good"; c.st.echo=true; chime(); render(); await wrSay(c.k==="listen"?c.x.w:c.x.s); if(wrCur()===c) wrMic(c); } // standing rule: every pick ends with it said aloud once
 function wrMicHTML(c,label){ return micBlock({st:c.st},label); }
-function wrBody(c){ const st=c.st, part=["intro","listen","say"].includes(c.k)?`<span class="tag">🔤 단어</span>`:`<span class="tag talk">📖 읽기</span>`;
+const ul=(w,snd)=>{ const parts=snd.split("_"); if(parts.length===2){ const re=new RegExp(`(${parts[0]})([a-z])(e)$`); return w.replace(re,"<u>$1</u>$2<u>$3</u>"); } return w.replace(snd,`<u>${snd}</u>`); };
+function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes(c.k)?`<span class="tag">🔤 단어</span>`:`<span class="tag talk">📖 읽기</span>`;
   const nav=(extra)=>`<div class="btns">${extra||""}<button class="big skip" data-w="skip">다음 →</button></div>`;
-  if(c.k==="intro") return `<div class="tags">${part}<span class="tag rev">오늘의 새 단어 4개</span></div><div class="ko big">그림을 보고 잘 들어 봐요!</div>
-    <div class="wgrid">${WR_WORDS.map((x,k)=>`<button class="wtile ${st.lit===k?"lit":""}" data-say="${k}"><span class="we">${x.e}</span><b>${x.w}</b><small>${x.ko}</small></button>`).join("")}</div>
+  if(c.k==="intro") return `<div class="tags">${W.daily?`<span class="tag bonus">말하기 끝! 이제 단어랑 읽기 🎉</span>`:""}${part}<span class="tag rev">오늘의 새 단어 ${P.words.length}개</span></div><div class="ko big">그림을 보고 잘 들어 봐요!</div>
+    <div class="wgrid">${P.words.map((x,k)=>`<button class="wtile ${st.lit===k?"lit":""}" data-say="${k}"><span class="we">${x.e}</span><b>${h(x.w)}</b><small>${h(x.ko)}</small></button>`).join("")}</div>
     <div class="ko">그림을 누르면 다시 들려요</div>${nav()}`;
-  if(c.k==="listen"){ if(st.fb) return `<div class="tags">${part}<span class="tag rev">👂 듣고 그림 고르기</span></div><div class="pic"><span>${c.x.e}</span></div><div class="feedback good">맞아요! 💖<div class="en">${c.x.w}</div><small>${c.x.ko}</small>${st.echoOk?"따라 말하기 성공! 💖":wrMicHTML(c,"따라 말해 봐요!")}</div>${nav(`<button class="big soft" data-w="hear">🔊 다시 듣기</button>`)}`;
+  if(c.k==="listen"){ if(st.fb) return `<div class="tags">${part}<span class="tag rev">👂 듣고 그림 고르기</span></div><div class="pic"><span>${c.x.e}</span></div><div class="feedback good">맞아요! 💖<div class="en">${h(c.x.w)}</div><small>${h(c.x.ko)}</small>${st.echoOk?"따라 말하기 성공! 💖":wrMicHTML(c,"따라 말해 봐요!")}</div>${nav(`<button class="big soft" data-w="hear">🔊 다시 듣기</button>`)}`;
     return `<div class="tags">${part}<span class="tag rev">👂 듣고 그림 고르기</span></div><div class="ko big">무슨 단어일까요? 그림을 눌러요</div>
     <div class="wgrid">${c.opts.map((o,k)=>`<button class="wtile ${st.miss.includes(k)?"no":""}" data-pick="${k}"><span class="we">${o.e}</span></button>`).join("")}</div>${nav(`<button class="big soft" data-w="hear">🔊 다시 듣기</button>`)}`; }
   if(c.k==="say"){ const ph=st.phase;
-    return `<div class="tags">${part}<span class="tag rev">🗣️ 그림 보고 말하기</span></div><div class="pic"><span>${c.x.e}</span></div>
-    ${ph?`<div class="en">${h(c.x.s)}</div><div class="ko">${h(c.x.sko)} · 문장으로 따라 말해 봐요!</div>`:st.fb?`<div class="feedback good">딩동댕! 💖<div class="en">${c.x.w}</div></div>`:`<div class="ko big">이건 영어로 뭘까요?</div>${st.showAns?`<div class="en">${c.x.w}</div>`:""}`}
+    return `<div class="tags">${part}<span class="tag rev">${c.rev?"🔁 복습 · ":""}🗣️ 그림 보고 말하기</span></div><div class="pic"><span>${c.x.e}</span></div>
+    ${ph?`<div class="en">${h(c.x.s)}</div><div class="ko">${h(c.x.sko)} · 문장으로 따라 말해 봐요!</div>`:st.fb?`<div class="feedback good">딩동댕! 💖<div class="en">${h(c.x.w)}</div></div>`:`<div class="ko big">이건 영어로 뭘까요?</div>${st.showAns?`<div class="en">${h(c.x.w)}</div>`:""}`}
     ${st.fb&&!ph?"":wrMicHTML(c,"영어로 말해요")}${nav(`<button class="big soft" data-w="ans">🔊 정답 듣기</button>`)}`; }
-  if(c.k==="sound") return `<div class="tags">${part}<span class="tag rev">오늘의 소리</span></div><div class="snd">${WR_SOUND.snd}</div><div class="ko big">${WR_SOUND.tip}</div>
-    <div class="wrow">${WR_SOUND.words.map((x,k)=>`<button class="wtile" data-sw="${k}"><b>${x.w.replace(WR_SOUND.snd,`<u>${WR_SOUND.snd}</u>`)}</b></button>`).join("")}</div><div class="ko">단어를 누르면 들려요. 이제 혼자 읽어 볼 거예요!</div>${nav()}`;
-  if(c.k==="read") return `<div class="tags">${part}<span class="tag rev">🔎 ${WR_SOUND.snd} 단어 읽기</span></div>${st.fb?`<div class="pic"><span>${c.x.e}</span></div>`:`<div class="ko big">소리 내서 읽어 봐요!</div>`}
-    <div class="en wbig">${c.x.w.replace(WR_SOUND.snd,`<u>${WR_SOUND.snd}</u>`)}</div>${st.fb?`<div class="feedback good">딩동댕! 💖<small>${c.x.ko}</small></div>`:wrMicHTML(c,"읽어 봐요")}${nav(`<button class="big soft" data-w="ans">🔊 정답 듣기</button>`)}`;
-  if(c.k==="sight"){ if(st.fb) return `<div class="tags">${part}<span class="tag rev">👀 한눈에 읽는 단어</span></div><div class="en wbig">${c.x.w}</div><div class="feedback good">맞아요! 💖<div class="en">${h(c.x.s).replace(new RegExp("\\b"+c.x.w+"\\b","i"),m=>`<u>${m}</u>`)}</div>${st.echoOk?"따라 말하기 성공! 💖":wrMicHTML(c,"문장으로 따라 말해 봐요!")}</div>${nav(`<button class="big soft" data-w="hearS">🔊 다시 듣기</button>`)}`;
+  if(c.k==="sound") return `<div class="tags">${part}<span class="tag rev">오늘의 소리</span></div><div class="snd">${h(P.snd.snd.replace("_","_"))}</div><div class="ko big">${h(P.snd.tip)}</div>
+    <div class="wrow">${P.snd.words.map((x,k)=>`<button class="wtile" data-sw="${k}"><b>${ul(x.w,P.snd.snd)}</b></button>`).join("")}</div><div class="ko">단어를 누르면 들려요. 이제 혼자 읽어 볼 거예요!</div>${nav()}`;
+  if(c.k==="read") return `<div class="tags">${part}<span class="tag rev">🔎 ${h(P.snd.snd)} 단어 읽기</span></div>${st.fb?`<div class="pic"><span>${c.x.e}</span></div>`:`<div class="ko big">소리 내서 읽어 봐요!</div>`}
+    <div class="en wbig">${ul(c.x.w,P.snd.snd)}</div>${st.fb?`<div class="feedback good">딩동댕! 💖<small>${h(c.x.ko)}</small></div>`:wrMicHTML(c,"읽어 봐요")}${nav(`<button class="big soft" data-w="ans">🔊 정답 듣기</button>`)}`;
+  if(c.k==="sight"){ if(st.fb) return `<div class="tags">${part}<span class="tag rev">👀 한눈에 읽는 단어</span></div><div class="en wbig">${h(c.x.w)}</div><div class="feedback good">맞아요! 💖<div class="en">${h(c.x.s).replace(new RegExp("\\b"+c.x.w+"\\b","i"),m=>`<u>${m}</u>`)}</div>${st.echoOk?"따라 말하기 성공! 💖":wrMicHTML(c,"문장으로 따라 말해 봐요!")}</div>${nav(`<button class="big soft" data-w="hearS">🔊 다시 듣기</button>`)}`;
     return `<div class="tags">${part}<span class="tag rev">👀 한눈에 읽는 단어</span></div><div class="ko big">잘 듣고 맞는 단어를 눌러요</div>
-    <div class="wgrid words">${c.opts.map((o,k)=>`<button class="wtile ${st.miss.includes(k)?"no":""}" data-pick="${k}"><b>${o}</b></button>`).join("")}</div>${nav(`<button class="big soft" data-w="hear">🔊 다시 듣기</button>`)}`; }
-  if(c.k==="cold") return `<div class="tags">${part}<span class="tag rev">🤫 소리 없이 먼저 읽기</span></div><div class="ko big">${st.fb?"원어민 소리로 확인해요! 🔊":"아는 문장이에요. 소리 듣기 전에 먼저 읽어 봐요!"}</div>
+    <div class="wgrid words">${c.opts.map((o,k)=>`<button class="wtile ${st.miss.includes(k)?"no":""}" data-pick="${k}"><b>${h(o)}</b></button>`).join("")}</div>${nav(`<button class="big soft" data-w="hear">🔊 다시 듣기</button>`)}`; }
+  if(c.k==="cold") return `<div class="tags">${part}<span class="tag rev">🤫 소리 없이 먼저 읽기</span></div><div class="ko big">${st.fb?"원어민 소리로 확인해요! 🔊":"아는 문장이에요. 듣기 전에 먼저 읽어 봐요!"}</div>
     <div class="en">${h(c.it.text)}</div>${st.fb?`<div class="feedback good">딩동댕! 💖<small>${h(c.it.ko||"")}</small></div>`:wrMicHTML(c,"읽어 봐요")}${nav(`<button class="big soft" data-w="ans">🔊 원어민 소리 듣기</button>`)}`;
-  if(c.k==="story") return `<div class="tags">${part}<span class="tag rev">📚 그림 이야기 (일주일에 한 번)</span></div>
-    <div class="story">${WR_STORY.map((x,k)=>`<div class="sl ${k===st.line&&!st.fb?"on":k<st.line||st.fb?"ok":""}"><span>${x.e}</span><b>${h(x.t)}</b>${k<st.line||st.fb?"<i>✔</i>":""}</div>`).join("")}</div>
-    ${st.fb?`<div class="feedback good">이야기를 다 읽었어요! 🎉<small>${WR_STORY.map(x=>x.ko).join(" ")}</small></div>`:`<div class="ko">${h(WR_STORY[st.line].ko)}</div>${wrMicHTML(c,"한 줄씩 읽어 봐요")}`}
-    <div class="btns">${st.fb?"":`<button class="big soft" data-w="ans">🔊 이 줄 듣기</button>`}<button class="big ${st.fb?"next":"skip"}" data-w="${st.fb?"skip":"line"}">${st.fb?"끝! ✨":"다음 줄 →"}</button></div>`;
+  if(c.k==="story"){ const pg=BOOK.pages[P.pk], L2=pg.lines;
+    return `<div class="tags">${part}<span class="tag rev">📚 그림책 ${pg.p}쪽</span></div>
+    <div class="storybox"><img src="${pg.img}" alt=""><div class="story">${L2.map((x,k)=>`<div class="sl ${k===st.line&&!st.fb?"on":k<st.line||st.fb?"ok":""}"><b>${h(x.t)}</b>${k<st.line||st.fb?"<i>✔</i>":""}</div>`).join("")}
+    ${st.fb?`<div class="feedback good">다 읽었어요! 🎉</div>`:`<div class="ko">${h(L2[st.line].ko)}</div>${wrMicHTML(c,"한 줄씩 읽어 봐요")}`}
+    <div class="btns">${st.fb?"":`<button class="big soft" data-w="ans">🔊 이 줄 듣기</button>`}<button class="big ${st.fb?"next":"skip"}" data-w="${st.fb?"skip":"line"}">${st.fb?"끝! ✨":"다음 줄 →"}</button></div></div></div>`; }
   return ""; }
 function renderWR(){ const c=wrCur(), pct=Math.round(W.i/W.q.length*100);
-  app.innerHTML=`<div class="lesson wr"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${W.i+1} / ${W.q.length}</div><div class="clock">⏱ ${mmss(Date.now()-W.t0)}</div></div>
+  app.innerHTML=`<div class="lesson wr"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${W.i+1} / ${W.q.length}</div><div class="clock">⏱ ${mmss(W.base+Date.now()-W.t0)}</div></div>
    <div class="card">${wrBody(c)}</div></div>`;
-  document.getElementById("quit").onclick=()=>{ stopAll(); W=null; view="parent"; render(); };
+  document.getElementById("quit").onclick=()=>{ stopAll(); const d=W.daily; W=null; view=d?"home":"parent"; render(); };
   app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>wrPick(c,+b.dataset.pick));
-  app.querySelectorAll("[data-say]").forEach(b=>b.onclick=()=>wrSay(WR_WORDS[+b.dataset.say].w));
-  app.querySelectorAll("[data-sw]").forEach(b=>b.onclick=()=>wrSay(WR_SOUND.words[+b.dataset.sw].w));
+  app.querySelectorAll("[data-say]").forEach(b=>b.onclick=()=>wrSay(W.P.words[+b.dataset.say].w));
+  app.querySelectorAll("[data-sw]").forEach(b=>b.onclick=()=>wrSay(W.P.snd.words[+b.dataset.sw].w));
   app.querySelectorAll('[data-act="mic"]').forEach(b=>b.onclick=()=>wrMic(c));
   app.querySelectorAll("[data-w]").forEach(b=>b.onclick=async()=>{ const a=b.dataset.w;
     if(a==="skip") return wrAdvance();
     if(a==="hear") return wrSay(c.x.w);
     if(a==="hearS") return wrSay(c.x.s);
-    if(a==="line"){ stopAll(); c.st.tries=0; c.st.heard=""; if(c.st.line<WR_STORY.length-1){ c.st.line++; render(); return wrMic(c); } c.st.fb="good"; return render(); }
-    if(a==="ans"){ stopAll(); c.st.showAns=true; render(); if(c.k==="cold") await playItem(c.it); else await wrSay(wrTarget(c)); if(wrCur()===c&&!c.st.fb&&speechOK) wrMic(c); }
+    if(a==="line"){ stopAll(); if(curRec) curRec.stop(); c.st.listening=false; c.st.tries=0; c.st.heard=""; if(c.st.line<wrStory().length-1){ c.st.line++; render(); return wrMic(c); } c.st.fb="good"; return render(); }
+    if(a==="ans"){ stopAll(); c.st.listening=false; c.st.showAns=true; render(); if(c.k==="cold") await playItem(c.it); else await wrSay(wrTarget(c)); if(wrCur()===c&&!c.st.fb&&speechOK) wrMic(c); }
   });
-  const t=setInterval(()=>{ const el=app.querySelector(".wr .clock"); if(!el||view!=="wr"){ clearInterval(t); return; } el.textContent="⏱ "+mmss(Date.now()-W.t0); },1000);
+  const t=setInterval(()=>{ const el=app.querySelector(".wr .clock"); if(!el||view!=="wr"||!W){ clearInterval(t); return; } el.textContent="⏱ "+mmss(W.base+Date.now()-W.t0); },1000);
 }
 function renderWRDone(){ const tot=Math.round((W.end-W.t0)/1000), rd=tot-(W.wordSecs||0), f=s=>`${Math.floor(s/60)}분 ${s%60}초`;
-  app.innerHTML=`<div class="finish"><div class="crown">🔤 📖 🎉</div><h2>샘플 끝!</h2><div class="ko">단어 ${f(W.wordSecs||0)} · 읽기 ${f(rd)} · 합계 ${f(tot)}</div>
-  <div class="panel" style="text-align:left;max-width:760px"><h3>매일 미션에 넣으면 이렇게 돼요 (아빠용)</h3>
-  <div class="note">• 지금 말하기(천일문 10분 + 전화영어 10분)는 그대로, 끝나고 🔤 단어 3분 → 📖 읽기 3분 = 하루 약 26분<br>
-  • 단어: 매일 새 단어 3~4개 (천일문 · 전화영어 · 캠프 생활: 음식, 물건, 장소, 기분). 오늘 단어는 다음날, 3일 뒤에 그림 보고 말하기로 다시 나와요<br>
-  • 읽기 소리: sh → ch → th → a_e → i_e … 하루 한 소리, 단어 3개<br>
-  • 한눈에 읽는 단어(the, is, was, said …)는 주마다 4개씩 바뀌고, 소리 없이 먼저 읽기는 이미 배운 천일문 문장으로 해요<br>
-  • 그림 이야기는 일주일에 한 번만 (오늘은 샘플이라 같이 넣었어요)<br>
-  • 이 샘플은 기록에 남지 않아요. 새 단어 목소리는 태블릿 기본 목소리예요 (ElevenLabs 이번 달 사용량이 끝나서, 다음 달에 Sarah 목소리로 바꿔요)</div></div>
+  app.innerHTML=`<div class="finish"><div class="crown">🔤 📖 🎉</div><h2>미리 보기 끝!</h2><div class="ko">단어 ${f(W.wordSecs||0)} · 읽기 ${f(rd)} · 합계 ${f(tot)} (기록에는 안 남았어요)</div>
   <button class="big next" id="wrback">아빠 화면으로</button></div>`;
   document.getElementById("wrback").onclick=()=>{ W=null; view="parent"; render(); }; }
+function wrPanel(){ const r=wrRec(), P=wrPlan(), pg=BOOK_NW[P.pk][0];
+  return `<div class="panel"><h3>🔤 단어 + 📖 읽기 (말하기 20분 뒤 6분 → 하루 약 26분)</h3>
+  <div class="field"><label for="wron">매일 미션에 넣기</label><select id="wron"><option value="1" ${wrOn()?"selected":""}>켜기</option><option value="0" ${wrOn()?"":"selected"}>끄기</option></select></div>
+  <div class="note">${r.n}일 했어요 · 배운 단어 ${Object.keys(r.words).length}개 · 다음: 새 단어 ${P.words.map(x=>x.e+" "+h(x.w)).join(", ")}${P.rev.length?` · 복습 ${P.rev.map(x=>h(x.w)).join(", ")}`:""} · 소리 ${h(P.snd.snd)} · 그림책 ${pg}쪽 (일주일에 2쪽)</div>
+  <div class="note">${BOOK?`📘 그림책 "${h(BOOK.title||"")}" 들어 있어요 (${(BOOK.pages||[]).length}쪽).`:`📘 그림책 파일이 아직 없어요. 위 "📦 천일문 파일"에서 picture-book.json 을 골라 주세요. 없으면 그림책 읽기만 빠져요.`}</div>
+  <div><button class="tbtn" id="wrgo" style="font-size:18px;padding:10px 18px">다음 단어·읽기 미리 해 보기 ▶</button> <span class="note">기록에 안 남아요</span></div></div>`; }
 
 // ---------- views ----------
 let view="home", L=null, gate=null, confirmReset=false, confirmToday=false;
@@ -798,12 +884,13 @@ function renderHome(){
   const mins=Math.round(nb*1.1+nx*1.1+nr*.7+nt*1.5+n(c=>c.type==="pick")*.3);
   let mission;
   if(doneToday()) mission=`<div class="mission done"><div class="spark" aria-hidden="true">✨ 🌟 ✨</div><h2>야호! 오늘 미션 성공! 🎉</h2><div class="donerow"><span class="donestk">${h(S.days[today].sticker)}</span><div class="done-msg">새 스티커를 받았어요!<br>서현이 최고! 💜 내일 또 만나요</div></div><div class="sub">오늘 배운 문장을 아빠한테 영어로 자랑해 봐요.</div></div>`;
+  else if(wrOn()&&S.spk&&S.spk.date===today) mission=`<div class="mission"><h2>말하기 끝! 👏</h2><div class="plan">이제 🔤 단어 3분 + 📖 읽기 3분만 하면 미션 성공이에요</div><button class="go" id="wrstart">단어·읽기 시작하기 ▶</button></div>`;
   else if(!q.some(c=>c.type!=="tip")) mission=`<div class="mission"><h2>오늘은 할 게 없어요</h2><div class="sub">내일 다시 와요!</div></div>`;
   else {
     const w=curWeek(), ss=S.session, resume=ss&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
     const phN=q.filter(c=>c.phone).length, sayN=q.filter(c=>c.type==="say").length, pickN=n(c=>c.type==="pick"), talkN=n(c=>c.type==="talk");
     const whoN=n(c=>c.kind==="hs"), wmN=n(c=>c.kind==="wm"), gmN=n(c=>c.kind==="where"||c.kind==="grab");
-    mission=`<div class="mission"><h2>오늘의 미션 · ${w===-1?"📞 전화영어 데이":w?w+"주차"+(weekRound(w)>1?` <span style="font-size:.75em">🔁 ${weekRound(w)}바퀴째</span>`:""):"전체 복습"}</h2><div class="plan">${w===-1?"오늘은 전화영어 수업 문장만 연습해요":w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${whoN?` · 누구일까 ${whoN}개`:""}${wmN?` · 단어 맞추기 ${wmN}개`:""}${gmN&&w===-1?` · 그림 게임 ${gmN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${phN&&w!==-1?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
+    mission=`<div class="mission"><h2>오늘의 미션 · ${w===-1?"📞 전화영어 데이":w?w+"주차"+(weekRound(w)>1?` <span style="font-size:.75em">🔁 ${weekRound(w)}바퀴째</span>`:""):"전체 복습"}</h2><div class="plan">${w===-1?"오늘은 전화영어 수업 문장만 연습해요":w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${whoN?` · 누구일까 ${whoN}개`:""}${wmN?` · 단어 맞추기 ${wmN}개`:""}${gmN&&w===-1?` · 그림 게임 ${gmN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${wrOn()?"<br>그다음 🔤 단어 + 📖 읽기 (6분)":""}${phN&&w!==-1?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
   }
   const dn=["일","월","화","수","목","금","토"], wk=[];
   for(let i=6;i>=0;i--){ const d=addDays(today,-i); const [y,m,dd]=d.split("-").map(Number);
@@ -813,7 +900,7 @@ function renderHome(){
   const banner=S.offset?`<div class="testbanner">⚠️ 테스트 날짜 모드예요 (실제보다 ${S.offset}일 뒤). 아빠 화면 → "오늘로 돌아오기"를 눌러 주세요.</div>`:"";
   app.innerHTML=topBar()+banner+mission+`<div class="section-t">이번 주 <small>매일 하면 불꽃이 커져요</small></div><div class="week">${wk.join("")}</div>`+
     `<div class="section-t">스티커 모음 <small>${S.stickers.length}개 모았어요</small></div><div class="board">${slots.join("")}</div>`;
-  bindLogo(); const s=document.getElementById("start"); if(s) s.onclick=startLesson;
+  bindLogo(); const s=document.getElementById("start"); if(s) s.onclick=startLesson; const ws=document.getElementById("wrstart"); if(ws) ws.onclick=()=>wrStart(true);
 }
 
 function elapsed(){ return L? L.base+(Date.now()-L.tStart) : 0; }
@@ -821,7 +908,7 @@ function mmss(ms){ const s=Math.floor(ms/1000); return Math.floor(s/60)+":"+Stri
 function saveSession(){ S.session={date:todayStr(),week:curWeek(),i:L.i,elapsed:elapsed(),queue:L.queue.map(c=>({type:c.type,id:c.id,kind:c.kind,fresh:c.fresh,fmt:c.fmt,due:c.due}))}; save(); }
 function startLesson(){
   const ss=S.session, resume=ss&&ss.date===todayStr()&&ss.week===curWeek()&&ss.i<ss.queue.length;
-  if(!S.daySnap||S.daySnap.date!==todayStr()) S.daySnap={date:todayStr(),items:JSON.parse(JSON.stringify(S.items)),talks:JSON.parse(JSON.stringify(S.talks)),weekPass:JSON.parse(JSON.stringify(S.weekPass||{})),nextWeek:S.nextWeek};
+  if(!S.daySnap||S.daySnap.date!==todayStr()) S.daySnap={date:todayStr(),items:JSON.parse(JSON.stringify(S.items)),talks:JSON.parse(JSON.stringify(S.talks)),weekPass:JSON.parse(JSON.stringify(S.weekPass||{})),wr:JSON.parse(JSON.stringify(S.wr||null)),nextWeek:S.nextWeek};
   const queue=resume?ss.queue:buildQueue();
   if(resume){ // phone cards not reached yet are rebuilt, so a mission saved before an update still gets the newest phone sentences
     const isPh=c=>c.phone||(byId[c.id]&&byId[c.id].src==="phone")||(c.type==="talk"&&talkById[c.id]&&talkById[c.id].src==="phone")||c.kind==="tense"||c.kind==="wm"||c.kind==="where"||c.kind==="grab";
@@ -1250,10 +1337,14 @@ function advance(){
 }
 function finishLesson(){
   const today=todayStr(), owned=new Set(S.stickers), choices=STICKERS.filter(s=>!owned.has(s));
-  const opts=shuffle(choices.length>=3?choices:STICKERS).slice(0,3), pick=opts[0]; L.stkOpts=opts;
   const wk=curWeek(); const left=wk>0&&ITEMS.some(i=>i.src==="book"&&i.week===wk&&!S.items[i.id]); if(wk!==-1&&!left){ S.nextWeek = wk===0||wk>=S.bookWeek ? 1 : wk+1; S.weekPass=S.weekPass||{}; S.weekPass[wk]=(S.weekPass[wk]||0)+1; } S.session=null;
   const secs=Math.round(elapsed()/1000);
-  if(!S.days[today]){ S.days[today]={sticker:pick,n:L.total,wrong:L.wrong.size,week:wk,secs}; S.stickers.push(pick); }
+  if(wrOn()&&!S.days[today]){ S.spk={date:today,n:L.total,wrong:L.wrong.size,week:wk,secs}; save(); return wrStart(true); } // dad 2026-11-20: 단어 + 읽기 6 min after speaking
+  finalizeDay(L.total,L.wrong.size,wk,secs);
+}
+function finalizeDay(n,wrong,wk,secs){ const today=todayStr(), owned=new Set(S.stickers), choices=STICKERS.filter(s=>!owned.has(s));
+  const opts=shuffle(choices.length>=3?choices:STICKERS).slice(0,3), pick=opts[0]; if(!L) L={}; L.stkOpts=opts; W=null;
+  if(!S.days[today]){ S.days[today]={sticker:pick,n,wrong,week:wk,secs}; S.stickers.push(pick); }
   save(); view="finish"; render(); fanfare();
 }
 function confetti(){
@@ -1322,8 +1413,8 @@ function renderParent(){
     <div class="stat"><div class="lab">연속 학습</div><div class="num">${streak()}<small>일</small></div></div>
     <div class="stat"><div class="lab">he/she 문장 틀린 횟수</div><div class="num">${hsWrong}<small>번</small></div></div>
   </div>
-  <div class="panel"><h3>📦 천일문 파일</h3><div class="note">지금 파일: ${MAXW}주차까지 들어 있어요. 새 파일을 받으면 여기서 골라 주세요 (공부 기록은 그대로예요).</div><label class="tbtn" style="cursor:pointer;display:inline-block">새 천일문 파일 고르기<input id="packin2" type="file" hidden></label><span id="packmsg" class="note"></span></div>
-  <div class="panel"><h3>🔤 단어 + 📖 읽기 (샘플)</h3><div class="note">새로 넣을 단어 3분 + 읽기 3분을 하루치 미리 해 보는 곳이에요. 기록에 남지 않고, 오늘 미션에도 영향이 없어요. 괜찮으면 말해 주세요. 그때 매일 미션(말하기 20분 + 6분 = 26분)에 넣을게요.</div><div><button class="tbtn" id="wrgo" style="font-size:18px;padding:10px 18px">샘플 해 보기 ▶</button></div></div>
+  <div class="panel"><h3>📦 천일문 파일</h3><div class="note">지금 파일: ${MAXW}주차까지 들어 있어요. 새 파일을 받으면 여기서 골라 주세요 (공부 기록은 그대로예요). 그림책 파일(picture-book.json)도 여기서 골라요.</div><label class="tbtn" style="cursor:pointer;display:inline-block">새 천일문 파일 고르기<input id="packin2" type="file" hidden></label><span id="packmsg" class="note"></span></div>
+  ${wrPanel()}
   <div class="panel"><h3>주차별 문제 수</h3>${weekTable()}<div class="note">말하기 = 책 문장 + 바꿔 말하기. 틀린 문장 복습(최대 ${S.reviewCap}개)과 다시 나오는 문장은 빼고 센 숫자예요.</div></div>
   <div class="panel"><h3>책 문장 (${S.bookWeek}주차까지 ${tb}개)</h3>${bar(cb,tb)}</div>
   <div class="panel"><h3>바꿔 말하기 문장 (${tx}개: 의문문, 부정문, he/she)</h3>${bar(cx,tx)}<div class="note">한 번도 안 틀리고 세 번 넘게 맞히면 "아는 문장"이 돼요.</div></div>
@@ -1343,18 +1434,19 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/20-2 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/20-3 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
-  $("wrgo").onclick=()=>wrStart();
+  $("wrgo").onclick=()=>wrStart(false);
+  $("wron").onchange=e=>{ S.wrOn=e.target.value==="1"; save(); render(); };
   app.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>playItem(byId[b.dataset.play]));
   app.querySelectorAll("[data-tip]").forEach(b=>b.onclick=()=>{ delete S.tips[b.dataset.tip]; save(); render(); });
   $("bw").onchange=e=>{S.bookWeek=+e.target.value;save();render();};
   $("nb").onchange=e=>{ const v=+e.target.value; if(v===-1) S.phoneOnly=todayStr(); else { S.phoneOnly=null; S.nextWeek=v; } S.session=null; save(); };
   $("nx").onchange=e=>{S.whoCount=+e.target.value;save();};
   if($("packin2")) $("packin2").onchange=async e=>{ const f=e.target.files[0]; if(!f) return; const m=$("packmsg");
-    try{ const txt=await f.text(); const d=JSON.parse(txt); if(!d.items||!d.talks||(d.v||0)<7) throw 0; await idbSet("pack",txt); m.textContent=" ✓ 넣었어요! 다시 시작할게요"; setTimeout(()=>location.reload(),900); }
-    catch(_){ m.textContent=" 이 파일이 아니에요. cheonilmun-pack.json 파일을 골라 주세요."; } };
+    try{ const txt=await f.text(); const d=JSON.parse(txt); if(d.kind==="picture-book"&&d.pages){ await idbSet("book",txt); BOOK=d; m.textContent=" ✓ 그림책을 넣었어요!"; setTimeout(render,900); return; } if(!d.items||!d.talks||(d.v||0)<7) throw 0; await idbSet("pack",txt); m.textContent=" ✓ 넣었어요! 다시 시작할게요"; setTimeout(()=>location.reload(),900); }
+    catch(_){ m.textContent=" 이 파일이 아니에요. cheonilmun-pack.json 이나 picture-book.json 을 골라 주세요."; } };
   $("rc").onchange=e=>{S.reviewCap=+e.target.value;save();};
   $("dep").onchange=e=>{ if(e.target.value){S.depart=e.target.value;save();render();} };
   $("skip").onclick=()=>{S.offset++;save();render();};
@@ -1363,7 +1455,7 @@ function renderParent(){
   if($("today0ask")) $("today0ask").onclick=()=>{ confirmToday=true; render(); };
   if($("today0no")) $("today0no").onclick=()=>{ confirmToday=false; render(); };
   if($("today0")) $("today0").onclick=()=>{ confirmToday=false; const today=todayStr(), sn=S.daySnap; // undo everything done today: answers, timer, sticker
-    if(sn&&sn.date===today){ S.items=sn.items; S.talks=sn.talks; S.weekPass=sn.weekPass; S.nextWeek=sn.nextWeek; }
+    if(sn&&sn.date===today){ S.items=sn.items; S.talks=sn.talks; S.weekPass=sn.weekPass; S.nextWeek=sn.nextWeek; if("wr" in sn) S.wr=sn.wr; } S.spk=null;
     if(S.days[today]){ const k=S.stickers.lastIndexOf(S.days[today].sticker); if(k>=0) S.stickers.splice(k,1); delete S.days[today]; }
     S.heardLog=(S.heardLog||[]).filter(x=>x.d!==today); S.session=null; S.daySnap=null; save(); view="home"; render(); };
   if($("real")) $("real").onclick=()=>{S.offset=0;save();render();};
