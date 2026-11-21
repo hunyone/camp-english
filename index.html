@@ -414,16 +414,18 @@ function phoneCards(){ const today=todayStr(), big=isPhoneDay();
   const say=[]; for(const u of units.slice(0,NU)) say.push(...u.list.map(o=>o.x));
   const talks=PTALKS.map((t,k)=>{ if(t.base){ const b=byId[t.base]; if(!b||openStage(b)<3) return null; } const r=rank(S.talks[t.id],t); return r<9?{t,k,r}:null; }).filter(Boolean)
     .sort((a,b)=>a.r-b.r||a.k-b.k).slice(0,NT).map(o=>o.t);
-  const wm=PMATCH.map((m,k)=>{ const r=rank(S.items[m.id],{pri:true}); return r<9?{m,k,r}:null; }).filter(Boolean).sort((a,b)=>a.r-b.r||a.k-b.k).slice(0,NM).map(o=>o.m);
+  const wm=PMATCH.map((m,k)=>{ const s0=S.items[m.id]; let r=rank(s0,{pri:true}); if(s0&&s0.last===addDays(todayStr(),-1)&&r<9) r+=.9; return r<9?{m,k,r:Math.round(r*2)/2,l:(s0&&s0.last)||"",z:Math.random()}:null; }).filter(Boolean).sort((a,b)=>a.r-b.r||(a.l<b.l?-1:a.l>b.l?1:0)||a.z-b.z).reduce(wmMix,[]).flat().slice(0,NM).map(o=>o.m);
   const tz=shuffle(TENSE).sort((a,b)=>((S.items[b.id]||{}).recentWrong||0)-((S.items[a.id]||{}).recentWrong||0)).slice(0,TENSE_N);
   return say.map(i=>({type:"say",id:i.id,fresh:true,phone:true})).concat(talks.map(t=>({type:"talk",id:t.id,phone:true})),tz.map(z=>({type:"pick",kind:"tense",id:z.id,phone:true})),shuffle(wm).map(m=>({type:"pick",kind:"wm",id:m.id,phone:true})),
     shuffle(GAMES.where).slice(0,big?2:1).map(g=>({type:"pick",kind:"where",id:g.id,phone:true})),TAKE.map((t,k)=>{ const s0=S.items[t.id]; let r=rank(s0,{pri:true}); if(s0&&s0.last===addDays(todayStr(),-1)) r+=.9; return {t,k,r,l:(s0&&s0.last)||"",z:Math.random()}; }).filter(o=>o.r<9).sort((a,b)=>a.r-b.r||(a.l<b.l?-1:a.l>b.l?1:0)||a.z-b.z).slice(0,big?2:1).map(o=>({type:"pick",kind:"grab",id:o.t.id,phone:true}))); }
+// dad 2026-11-21 "단어맞추기 맨날 똑같은 단어": one word that is due again, then one she hasn't seen for longest / new, in turn
+function wmMix(acc,o,i,all){ if(i) return acc; const due=all.filter(x=>x.r<=1), rest=all.filter(x=>x.r>1); const out=[]; for(let k=0;k<Math.max(due.length,rest.length);k++){ if(due[k]) out.push(due[k]); if(rest[k]) out.push(rest[k]); } return out; }
 function phoneBudget(units,today,rank0){ // dad 2026-11-19: 전화영어 = half of the day (~10 min)
   const yd=addDays(today,-1), rank=(s,x)=>{ const r=rank0(s,x); return r<9&&s&&s.last===yd&&s.recentWrong===0?r+.8:r; }; // dad 11/19: don't open with the same talk/game as yesterday when others are waiting
   const mk={unit:u=>u.list.map(o=>({type:"say",id:o.x.id,fresh:true,phone:true}))};
   const talks=PTALKS.map((t,k)=>{ if(t.base){ const b=byId[t.base]; if(!b||openStage(b)<3) return null; } const r=rank(S.talks[t.id],t); return r<9?{t,k,r}:null; }).filter(Boolean)
     .sort((a,b)=>a.r-b.r||a.k-b.k).map(o=>({type:"talk",id:o.t.id,phone:true}));
-  const wm=PMATCH.map((m,k)=>{ const r=rank(S.items[m.id],{pri:true}); return r<9?{m,k,r}:null; }).filter(Boolean).sort((a,b)=>a.r-b.r||a.k-b.k).map(o=>({type:"pick",kind:"wm",id:o.m.id,phone:true}));
+  const wm=PMATCH.map((m,k)=>{ const s0=S.items[m.id]; let r=rank(s0,{pri:true}); if(s0&&s0.last===addDays(todayStr(),-1)&&r<9) r+=.9; return r<9?{m,k,r:Math.round(r*2)/2,l:(s0&&s0.last)||"",z:Math.random()}:null; }).filter(Boolean).sort((a,b)=>a.r-b.r||(a.l<b.l?-1:a.l>b.l?1:0)||a.z-b.z).reduce(wmMix,[]).flat().map(o=>({type:"pick",kind:"wm",id:o.m.id,phone:true}));
   const tz=shuffle(TENSE).sort((a,b)=>((S.items[b.id]||{}).recentWrong||0)-((S.items[a.id]||{}).recentWrong||0)).map(z=>({type:"pick",kind:"tense",id:z.id,phone:true}));
   const wh=shuffle(GAMES.where).map(g=>({type:"pick",kind:"where",id:g.id,phone:true}));
   const gr=TAKE.map((t,k)=>{ const s0=S.items[t.id]; let r=rank(s0,{pri:true}); if(s0&&s0.last===addDays(todayStr(),-1)) r+=.9; return {t,k,r,l:(s0&&s0.last)||"",z:Math.random()}; }).filter(o=>o.r<9).sort((a,b)=>a.r-b.r||(a.l<b.l?-1:a.l>b.l?1:0)||a.z-b.z).map(o=>({type:"pick",kind:"grab",id:o.t.id,phone:true}));
@@ -1540,7 +1542,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/21-3 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/21-4 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
