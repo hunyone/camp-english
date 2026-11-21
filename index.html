@@ -296,6 +296,9 @@ details summary{cursor:pointer;color:var(--pine);font-family:var(--f-disp);font-
  .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));width:100%;max-width:1000px}
  .opts .opt{text-align:center}
 }
+.rl.many .sl{padding:2px 10px;gap:6px}.rl.many .sl b{font-size:clamp(18px,3vh,26px)!important;line-height:1.3}.rl.many .wd{padding:0 4px!important;border-width:1px!important;border-radius:8px!important}
+.storybox:has(.rl.many) img{height:min(36vh,330px)}.storybox:has(.rl.many){gap:12px}.rl.many{gap:2px}.rl.many .sl b{line-height:1.2!important}.storybox:has(.rl.many) .rlmsg{font-size:19px!important;padding:0!important;min-height:0}.storybox:has(.rl.many) .heard{display:none}.storybox:has(.rl.many) .mic{width:76px;height:76px}.storybox:has(.rl.many) .rlmsg{margin:0}
+@media (max-width:820px){.storybox:has(.rl.many) img{max-height:24vh}}
 </style>
 
 <div class="wrap" id="app"></div>
@@ -790,7 +793,12 @@ const SWOK={the:["the","duh","da","thee","de","they","that"],a:["a","uh","ah","e
  them:["them","then","dem","than"],this:["this","these","dis","thesis"],that:["that","dat","the","than"],what:["what","whut","what's","watt"],with:["with","wif","whiz","wit"],will:["will","well","we'll","wheel"],some:["some","sum","sam","son"],come:["come","calm","cum","comes"],
  our:["our","hour","are","hours","ours"],had:["had","hat","head","hand","have"],saw:["saw","so","sow","sauce","song"],know:["know","no","now"],from:["from","form","front","farm"],which:["which","witch","rich","wish"],who:["who","whom","hoo","whose"],get:["get","gate","got","gets"],
  not:["not","knot","nut","nod"],more:["more","moore","mor","mall"],must:["must","mast","mussed","most"],let:["let","lit","late","lead"],play:["play","plays","pray","plate"],soon:["soon","sun","son"],little:["little","litter","liddle"],him:["him","hem","hymn","them"],be:["be","bee","b"],for:["for","four","4","far"],am:["am","um","m","em"]};
-const wrPage=r=>Math.min(r.n,BOOK_NW.length-1); // dad 2026-11-21: a new page every day she does it (she liked it), yesterday's page read again first
+// dad 2026-11-21 (2nd): remember the pages she actually READ (not "finished the day"), so yesterday's page always comes back even if she stopped early
+const NPG=BOOK_NW.length-1;
+function wrPages(r){ if(!r.pages){ r.pages={}; for(let k=0;k<Math.min(r.n,NPG);k++) r.pages[k]="0000"; } return r.pages; }
+const wrPage=r=>{ const pg=wrPages(r), today=todayStr(); for(let k=0;k<NPG;k++){ if(!pg[k]||pg[k]===today) return k; } return NPG-1; };
+const wrPrevPage=(r,pk)=>{ const pg=wrPages(r), today=todayStr(); let best=-1; for(const k in pg){ if(+k!==pk&&pg[k]<today&&(best<0||pg[k]>pg[best]||pg[k]===pg[best]&&+k>best)) best=+k; } return best; };
+const bookLines=(pk,page)=>{ const bp=BOOK&&BOOK.pages&&BOOK.pages[pk]; return bp&&bp.lines&&bp.lines.length?bp.lines.map(l=>({t:l.t,ko:l.ko||""})):(EASY[page]||[]).map(([t,ko])=>({t,ko})); }; // the book's own 4 lines (tablet only); our 2 easy lines if the book isn't loaded
 function wrPlan(){ const r=wrRec(), today=todayStr(), pk=wrPage(r), page=BOOK_NW[pk][0], seen=w=>!!r.words[w], seed=r.n;
   const book=BOOKW.filter(x=>x.p<=page&&!seen(x.w)).concat(BOOKW.filter(x=>x.p>page&&!seen(x.w))).slice(0,3); // dad 2026-11-21: she likes this part → 5 new words
   const life=LIFE.filter(x=>!seen(x.w)&&!book.some(b=>b.w===x.w)).slice(0,2);
@@ -798,7 +806,7 @@ function wrPlan(){ const r=wrRec(), today=todayStr(), pk=wrPage(r), page=BOOK_NW
   const all=Object.fromEntries(BOOKW.concat(LIFE).map(x=>[x.w,x]));
   const rev=Object.entries(r.words).filter(([w,o])=>all[w]&&[1,3,7].includes(diffDays(o.d,today))).sort((a,b)=>diffDays(a[1].d,today)-diffDays(b[1].d,today)).slice(0,3).map(([w])=>all[w]);
   const snd=SOUNDS[r.n%SOUNDS.length];
-  const lines=(EASY[page]||[]).map(([t,ko])=>({t,ko})), prevPk=pk>0?pk-1:-1, prevPage=prevPk>=0?BOOK_NW[prevPk][0]:0, prevLines=prevPk>=0?(EASY[prevPage]||[]).map(([t,ko])=>({t,ko})):[];
+  const lines=bookLines(pk,page), prevPk=wrPrevPage(r,pk), prevPage=prevPk>=0?BOOK_NW[prevPk][0]:0, prevLines=prevPk>=0?bookLines(prevPk,prevPage):[];
   const inLines=[...new Set(lines.flatMap(l=>l.t.toLowerCase().replace(/[^a-z' ]/g,"").split(" ")).filter(w=>SW.has(w)))];
   const fresh=inLines.filter(w=>!r.sight[w]), old=inLines.filter(w=>r.sight[w]);
   const sight=fresh.concat(shuffle(old)).slice(0,3).map(w=>({w,line:lines.find(l=>new RegExp("\\b"+w+"\\b","i").test(l.t))}));
@@ -807,7 +815,7 @@ function wrPlan(){ const r=wrRec(), today=todayStr(), pk=wrPage(r), page=BOOK_NW
   return {page,pk,words,rev,snd,sight,cold,lines,prevPk,prevPage,prevLines}; }
 let W=null;
 function wrQueue(P){ return [{k:"intro"}, ...shuffle(P.words).map(x=>({k:"listen",x})), ...shuffle(P.words).map(x=>({k:"say",x})), ...P.rev.map(x=>({k:"say",x,rev:true})),
-    ...P.sight.map(x=>({k:"sight",x})), {k:"sound"}, ...P.snd.words.map(x=>({k:"read",x})), ...(P.cold?[{k:"cold",it:P.cold}]:[]), ...(P.prevLines.length?[{k:"story",pk:P.prevPk,page:P.prevPage,lines:P.prevLines,again:true}]:[]), ...(P.lines.length?[{k:"story",pk:P.pk,page:P.page,lines:P.lines}]:[])]; }
+    ...P.sight.map(x=>({k:"sight",x})), {k:"sound"}, ...P.snd.words.map(x=>({k:"read",x})), ...(P.cold?[{k:"cold",it:P.cold}]:[]), ...(P.prevLines.length?[{k:"story",pk:P.prevPk,page:P.prevPage,lines:P.prevLines,again:true}]:[]), ...(P.lines.length?[{k:"story",pk:P.pk,page:P.page,lines:P.lines,follow:true},{k:"story",pk:P.pk,page:P.page,lines:P.lines,alone:true}]:[])]; }
 const wrExtra=()=>{ try{ return wrOn()&&!S.days[todayStr()]?wrQueue(wrPlan()).length:0; }catch(e){ return 0; } }; // dad 2026-11-21: one count for the whole mission
 function wrStart(daily){ const P=wrPlan(), q=wrQueue(P), off=daily&&L&&L.queue?L.queue.length:0;
   W={off,q,i:0,t0:Date.now(),tRead:0,wordSecs:0,daily:!!daily,P,base:daily&&S.spk&&S.spk.date===todayStr()?S.spk.secs*1000:0}; view="wr"; wrEnter(); render();
@@ -818,6 +826,7 @@ const wtok=w=>w.toLowerCase().replace(/[^a-z']/g,"");
 function wrEnter(){ const c=wrCur(); if(!c) return; c.st={tries:0,heard:"",fb:null,listening:false,phase:0,line:0,miss:[],empty:0,li:0,round:0};
   if(c.k==="listen"){ c.opts=shuffle(W.P.words); }
   if(isRL(c)){ if(c.k==="cold") c.lines=[{t:c.it.text,ko:c.it.ko||""}]; c.st.green=c.lines.map(l=>l.t.split(" ").map(()=>false)); }
+  if(c.k==="story"&&!c.again&&W.daily){ wrPages(wrRec())[c.pk]=todayStr(); save(); }
   if(c.k==="sight"&&!W.tRead){ W.tRead=Date.now(); W.wordSecs=Math.round((W.tRead-W.t0)/1000); }
   setTimeout(()=>wrAuto(c),350); }
 const wrSay=(t,key)=>playSrc(key||("wr:"+t),null,t);
@@ -834,7 +843,8 @@ async function wrAuto(c){ if(view!=="wr"||wrCur()!==c) return;
   const P=W.P;
   if(c.k==="intro"){ for(let k=0;k<P.words.length;k++){ if(view!=="wr"||wrCur()!==c) return; c.st.lit=k; render(); await wrSay(P.words[k].w); await new Promise(r=>setTimeout(r,350)); } c.st.lit=-1; render(); return; }
   if(c.k==="listen") return wrSay(c.x.w);
-  if(c.k==="say"||c.k==="read"||c.k==="sight"||isRL(c)) return wrMic(c); // reading cards: no sound first, she reads it herself
+  if(isRL(c)) return wrLineStart(c);
+  if(c.k==="say"||c.k==="read"||c.k==="sight") return wrMic(c); // reading cards: no sound first, she reads it herself
   if(c.k==="sound"){ for(const x of P.snd.words){ if(view!=="wr"||wrCur()!==c) return; await wrSay(x.w); await new Promise(r=>setTimeout(r,300)); } }
 }
 function wrTarget(c){ if(c.k==="say") return c.st.phase?c.x.s:c.x.w; if(c.k==="read"||c.k==="sight") return c.x.w; if(isRL(c)) return c.lines[c.st.li].t;
@@ -861,11 +871,12 @@ async function wrMic(c){ if(c.st.listening||(c.st.fb&&!c.st.echo)||c.st.okLine) 
   render(); if(speechOK&&!r.aborted) setTimeout(()=>{ if(wrCur()===c&&!c.st.listening&&!document.hidden) wrMic(c); },700); }
 async function wrGrey(c){ const li=c.st.li, ws=c.lines[li].t.split(" "), G=c.st.green[li]; // read only the grey words to her, slowly, each one lit
   for(let i=0;i<ws.length;i++){ if(G[i]) continue; if(view!=="wr"||wrCur()!==c) return; wrLit(li,i); await wrSlow(ws[i].replace(/[^A-Za-z']/g,""),()=>wrLit(li,i)); await new Promise(r=>setTimeout(r,250)); } wrLit(li,-1); }
+async function wrLineStart(c){ if(c.follow){ const li=c.st.li; c.st.hearing=true; render(); await wrSlow(c.lines[li].t,i=>wrLit(li,i)); c.st.hearing=false; if(view!=="wr"||wrCur()!==c||c.st.li!==li) return; render(); } return wrMic(c); } // 따라 읽기: hear the line slowly first
 async function wrLineDone(c,helped){ const st=c.st; wrCombo(!helped&&!st.round); st.okLine=true; st.helped=helped; st.heard=""; render();
-  const li=st.li; if(c.k==="cold"&&!helped) await playItem(c.it); else await wrSlow(c.lines[li].t,i=>wrLit(li,i)); if(view!=="wr"||wrCur()!==c) return;
+  const li=st.li; if(c.k==="cold"&&!helped) await playItem(c.it); else if(!c.follow||helped) await wrSlow(c.lines[li].t,i=>wrLit(li,i)); if(view!=="wr"||wrCur()!==c) return;
   await new Promise(r=>setTimeout(r,400)); st.okLine=false; st.helped=false; st.round=0; st.tries=0;
-  if(st.li<c.lines.length-1){ st.li++; render(); return wrMic(c); }
-  st.fb="good"; render(); if(c.k==="cold") wrNext(c,900); }
+  if(st.li<c.lines.length-1){ st.li++; render(); return wrLineStart(c); }
+  st.fb="good"; render(); if(c.k==="cold"||c.follow) wrNext(c,900); }
 async function wrGood(c){ const st=c.st; if(!st.echo&&!(c.k==="say"&&st.phase)) wrCombo(!st.helped&&!st.tries&&!st.showAns); st.tries=0; st.heard=""; st.empty=0;
   if(st.echo){ st.echoOk=true; render(); await wrSay(wrTarget(c)); return wrNext(c,600); }
   if(c.k==="say"&&!st.phase&&c.rev){ st.fb="good"; render(); await wrSay(c.x.w); if(wrCur()!==c) return; st.phase=1; st.fb=null; st.helped=false; render(); return wrMic(c); } // review: say the sentence alone first
@@ -890,7 +901,7 @@ async function wrPick(c,k){ if(c.st.fb) return; const o=c.opts[k], right=c.x.w, 
 function wrMicHTML(c,label){ return micBlock({st:c.st},label); }
 const ul=(w,snd)=>{ const parts=snd.split("_"); if(parts.length===2){ const re=new RegExp(`(${parts[0]})([a-z])(e)$`); return w.replace(re,"<u>$1</u>$2<u>$3</u>"); } return w.replace(snd,`<u>${snd}</u>`); };
 const goodMsg=st=>st.helped?"잘했어요! 같이 들어 봐요 🔊":"딩동댕! 💖";
-function rlHTML(c){ const st=c.st; return `<div class="rl">${c.lines.map((l,li)=>{ const cur=!st.fb&&li===st.li, past=st.fb||li<st.li, G=st.green[li];
+function rlHTML(c){ const st=c.st; return `<div class="rl ${c.lines.length>2?"many":""}">${c.lines.map((l,li)=>{ const cur=!st.fb&&li===st.li, past=st.fb||li<st.li, G=st.green[li];
   return `<div class="sl ${cur?"on":past?"ok":""}" ${!past&&!cur?'style="opacity:.25"':""}><b>${l.t.split(" ").map((w,i)=>`<span class="wd ${(cur&&(st.round>0||st.okLine))||past?(G[i]?"g":"x"):""}" data-l="${li}" data-i="${i}">${h(w)}</span>`).join(" ")}</b>${past?"<i>✔</i>":""}</div>`; }).join("")}</div>`; }
 function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes(c.k)?`<span class="tag">🔤 단어</span>`:`<span class="tag talk">📖 읽기</span>`;
   const nav=(extra)=>`<div class="btns">${extra||""}<button class="big skip" data-w="skip">다음 →</button></div>`;
@@ -912,10 +923,10 @@ function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes
   if(c.k==="read") return `<div class="tags">${part}<span class="tag rev">🔎 ${h(P.snd.snd)} 단어 읽기</span></div>${st.fb?`<div class="pic"><span>${c.x.e}</span></div>`:`<div class="ko big">소리 내서 읽어 봐요!</div>`}
     <div class="en wbig">${ul(c.x.w,P.snd.snd)}</div>${st.fb?`<div class="feedback good">${goodMsg(st)}<small>${h(c.x.ko)}</small></div>`:wrMicHTML(c,"읽어 봐요")}${nav(`<button class="big soft" data-w="ans">🔊 정답 듣기</button>`)}`;
   if(isRL(c)){ const li=Math.min(st.li,c.lines.length-1), story=c.k==="story", pg=story&&BOOK&&BOOK.pages&&BOOK.pages[c.pk];
-    const msg=st.fb?"다 읽었어요! 🎉":st.okLine?goodMsg(st):st.round>0?"초록은 잘 읽었어요! 회색 단어만 듣고 다시 읽어 봐요":"🤫 듣기 전에 먼저 혼자 읽어 봐요!";
-    const inner=`<div class="ko big rlmsg">${msg}</div>${rlHTML(c)}<div class="ko">${h(c.lines[li].ko||"")}</div>${st.fb||st.okLine?"":wrMicHTML(c,"")}
+    const msg=st.fb?"다 읽었어요! 🎉":st.okLine?goodMsg(st):st.round>0?"초록은 잘 읽었어요! 회색 단어만 듣고 다시 읽어 봐요":c.follow?(st.hearing?"👂 잘 들어 봐요":"🗣️ 이제 따라 읽어 봐요!"):c.alone?"🤫 이번엔 혼자 읽어 봐요!":"🤫 듣기 전에 먼저 혼자 읽어 봐요!";
+    const inner=`<div class="ko big rlmsg">${msg}</div>${rlHTML(c)}<div class="ko">${h(c.lines[li].ko||"")}</div>${st.fb||st.okLine||st.hearing?"":wrMicHTML(c,"")}
       <div class="btns">${st.fb?"":`<button class="big soft" data-w="grey">🐢 ${st.round>0?"회색 단어 듣기":"천천히 듣기"}</button>`}<button class="big ${st.fb?"next":"skip"}" data-w="${st.fb?"skip":"line"}">${st.fb?"끝! ✨":"다음 →"}</button></div>`;
-    return `<div class="tags">${part}<span class="tag rev">${story?`📚 그림책 ${c.page}쪽${c.again?" · 어제 읽은 쪽 한 번 더":" · 오늘의 새 쪽"}`:"🤫 아는 문장 먼저 읽기"}</span></div>${pg?`<div class="storybox"><img src="${pg.img}" alt=""><div class="story">${inner}</div></div>`:inner}`; }
+    return `<div class="tags">${part}<span class="tag rev">${story?`📚 그림책 ${c.page}쪽${c.again?" · 🔁 어제 읽은 쪽 복습":c.follow?" · 오늘의 새 쪽 · 따라 읽기":" · 오늘의 새 쪽 · 혼자 읽기"}`:"🤫 아는 문장 먼저 읽기"}</span></div>${pg?`<div class="storybox"><img src="${pg.img}" alt=""><div class="story">${inner}</div></div>`:inner}`; }
   return ""; }
 function renderWR(){ const c=wrCur(), pct=Math.round((W.off+W.i)/(W.off+W.q.length)*100);
   app.innerHTML=`<div class="lesson wr"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로" ${W.i?"":"style=\"opacity:.3\""}>←</button><button class="backbtn" id="fwd" aria-label="앞으로">→</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${W.off+W.i+1} / ${W.off+W.q.length}</div><div class="clock">⏱ ${mmss(W.base+Date.now()-W.t0)}</div></div>
@@ -931,7 +942,7 @@ function renderWR(){ const c=wrCur(), pct=Math.round((W.off+W.i)/(W.off+W.q.leng
   app.querySelectorAll("[data-w]").forEach(b=>b.onclick=async()=>{ const a=b.dataset.w;
     if(a==="skip") return wrAdvance();
     if(a==="hear") return wrSay(c.x.w);
-    if(a==="line"){ stopAll(); if(curRec) curRec.stop(); c.st.listening=false; c.st.okLine=false; c.st.round=0; if(c.st.li<c.lines.length-1){ c.st.li++; render(); return wrMic(c); } c.st.fb="good"; render(); if(c.k==="cold") wrNext(c,600); return; }
+    if(a==="line"){ stopAll(); if(curRec) curRec.stop(); c.st.listening=false; c.st.okLine=false; c.st.round=0; if(c.st.li<c.lines.length-1){ c.st.li++; render(); return wrLineStart(c); } c.st.fb="good"; render(); if(c.k==="cold") wrNext(c,600); return; }
     if(a==="grey"){ if(curRec) curRec.stop(); c.st.listening=false; render(); if(c.st.round>0) await wrGrey(c); else { const li=c.st.li; await wrSlow(c.lines[li].t,i=>wrLit(li,i)); } if(wrCur()===c&&!c.st.fb&&speechOK) wrMic(c); return; }
     if(a==="ans"){ stopAll(); c.st.listening=false; c.st.showAns=true; render(); await wrSay(wrTarget(c)); if(wrCur()===c&&!c.st.fb&&speechOK) wrMic(c); }
   });
@@ -944,7 +955,7 @@ function renderWRDone(){ const tot=Math.round((W.end-W.t0)/1000), rd=tot-(W.word
 function wrPanel(){ const r=wrRec(), P=wrPlan(), pg=BOOK_NW[P.pk][0];
   return `<div class="panel"><h3>🔤 단어 + 📖 읽기 (말하기 20분 뒤 6분 → 하루 약 26분)</h3>
   <div class="field"><label for="wron">매일 미션에 넣기</label><select id="wron"><option value="1" ${wrOn()?"selected":""}>켜기</option><option value="0" ${wrOn()?"":"selected"}>끄기</option></select></div>
-  <div class="note">${r.n}일 했어요 · 배운 단어 ${Object.keys(r.words).length}개 · 다음: 새 단어 ${P.words.map(x=>x.e+" "+h(x.w)).join(", ")}${P.rev.length?` · 복습 ${P.rev.map(x=>h(x.w)).join(", ")}`:""} · 소리 ${h(P.snd.snd)} · 그림책 ${pg}쪽 (매일 새 쪽 2줄 + 어제 쪽 2줄 다시 읽기)</div>
+  <div class="note">${r.n}일 했어요 · 배운 단어 ${Object.keys(r.words).length}개 · 다음: 새 단어 ${P.words.map(x=>x.e+" "+h(x.w)).join(", ")}${P.rev.length?` · 복습 ${P.rev.map(x=>h(x.w)).join(", ")}`:""} · 소리 ${h(P.snd.snd)} · 그림책 ${pg}쪽 (어제 쪽 복습 + 새 쪽 따라 읽기, 혼자 읽기)</div>
   <div class="note">${BOOK?`📘 그림책 "${h(BOOK.title||"")}" 들어 있어요 (${(BOOK.pages||[]).length}쪽).`:`📘 그림책 파일이 아직 없어요. 위 "📦 천일문 파일"에서 picture-book.json 을 골라 주세요. 없으면 그림책 읽기만 빠져요.`}</div>
   <div><button class="tbtn" id="wrgo" style="font-size:18px;padding:10px 18px">다음 단어·읽기 미리 해 보기 ▶</button> <span class="note">기록에 안 남아요</span></div></div>`; }
 
@@ -1544,7 +1555,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/21-5 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/21-6 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
