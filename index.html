@@ -565,16 +565,16 @@ function matches(target,alts,allowIt){
 const audioCache={};
 let voices=[]; function loadVoices(){ try{ voices=speechSynthesis.getVoices(); }catch(e){} } loadVoices(); try{ speechSynthesis.onvoiceschanged=loadVoices; }catch(e){}
 function stopAll(){ if(curRec) curRec.stop(); Object.values(audioCache).forEach(a=>{try{a.pause()}catch(e){}}); try{speechSynthesis.cancel()}catch(e){} }
-function playSrc(key,src,text,role){
+function playSrc(key,src,text,role,rate){ rate=rate||1;
   stopAll();
   if(!src && TTS[text]){ src="data:audio/mpeg;base64,"+TTS[text]; key="t:"+text; }
-  if(src){ const a=audioCache[key]||(audioCache[key]=new Audio(src)); a.currentTime=0;
-    return new Promise(res=>{ a.onended=res; a.play().catch(res); setTimeout(res,6000); }); }
+  if(src){ const a=audioCache[key]||(audioCache[key]=new Audio(src)); a.currentTime=0; a.preservesPitch=a.webkitPreservesPitch=true; a.playbackRate=rate;
+    return new Promise(res=>{ a.onended=res; a.play().catch(res); setTimeout(res,6000/rate); }); }
   return new Promise(res=>{
     if(!("speechSynthesis" in window)){ res(); return; }
-    const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=0.75; u.pitch = role==="b"?0.85:(role==="a"?1.15:1);
+    const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=0.75*(rate<1?0.85+rate*0.15:1); u.pitch = role==="b"?0.85:(role==="a"?1.15:1);
     const en=voices.filter(v=>/^en[-_]US/i.test(v.lang)); const v= role==="b" ? (en[1]||en[0]) : en[0]; if(v) u.voice=v;
-    u.onend=res; u.onerror=res; speechSynthesis.speak(u); setTimeout(res,5000);
+    u.onend=res; u.onerror=res; speechSynthesis.speak(u); setTimeout(res,5000/rate);
   });
 }
 const playItem=it=>playSrc(it.id,it.src_audio,it.text);
@@ -1133,11 +1133,9 @@ function blankOf(it){ // blank the word(s) the pattern swaps: compare with the b
   return W.map((w,k)=>idx.includes(k)?w.replace(/^[A-Za-z']+/,"( ? )"):w).join(" "); }
 // dad 2026-11-21: a new sentence is first heard word by word, then slowly joined, then at natural speed ("It. is. a. secret." → slow → normal)
 async function ladderPlay(c){ const it=byId[c.id], st=c.steps&&c.steps[c.st.step];
-  if(!(c.steps&&c.steps.length===4&&/^r[12]$/.test(st))) return playItem(it);
-  if(st==="r2") return wrSlow(it.text,()=>{});
-  stopAll(); const ws=it.text.split(" ");
-  for(const w of ws){ if(cur()!==c||view!=="lesson") return; await new Promise(res=>{ const u=new SpeechSynthesisUtterance(w.replace(/[^A-Za-z']/g,"")); u.lang="en-US"; u.rate=0.7; const en=voices.filter(v=>/^en[-_]US/i.test(v.lang)); if(en[0]) u.voice=en[0]; u.onend=res; u.onerror=res; speechSynthesis.speak(u); setTimeout(res,2500); }); await new Promise(r=>setTimeout(r,280)); }
-}
+  // dad 2026-11-21 (2nd note): NOT word by word (choppy, "a" read as 에이) — the whole sentence, slow first, then a bit faster, then normal
+  const rate=c.steps&&c.steps.length===4?({r1:0.7,r2:0.85}[st]||1):1;
+  return playSrc(it.id,it.src_audio,it.text,null,rate); }
 function sayBody(c){
   const it=byId[c.id], step=c.steps[c.st.step]==="tf"&&c.st.fb?"speak":c.steps[c.st.step];
   if(/^r\d$/.test(step)){
@@ -1542,7 +1540,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/21-2 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/21-3 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
