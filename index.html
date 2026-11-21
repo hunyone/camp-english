@@ -804,10 +804,11 @@ function wrPlan(){ const r=wrRec(), today=todayStr(), pk=wrPage(r), page=BOOK_NW
   const cold=pool.length?pool[(seed*7)%pool.length]:null;
   return {page,pk,words,rev,snd,sight,cold,lines,prevPk,prevPage,prevLines}; }
 let W=null;
-function wrStart(daily){ const P=wrPlan();
-  const q=[{k:"intro"}, ...shuffle(P.words).map(x=>({k:"listen",x})), ...shuffle(P.words).map(x=>({k:"say",x})), ...P.rev.map(x=>({k:"say",x,rev:true})),
-    ...P.sight.map(x=>({k:"sight",x})), {k:"sound"}, ...P.snd.words.map(x=>({k:"read",x})), ...(P.cold?[{k:"cold",it:P.cold}]:[]), ...(P.prevLines.length?[{k:"story",pk:P.prevPk,page:P.prevPage,lines:P.prevLines,again:true}]:[]), ...(P.lines.length?[{k:"story",pk:P.pk,page:P.page,lines:P.lines}]:[])];
-  W={q,i:0,t0:Date.now(),tRead:0,wordSecs:0,daily:!!daily,P,base:daily&&S.spk&&S.spk.date===todayStr()?S.spk.secs*1000:0}; view="wr"; wrEnter(); render();
+function wrQueue(P){ return [{k:"intro"}, ...shuffle(P.words).map(x=>({k:"listen",x})), ...shuffle(P.words).map(x=>({k:"say",x})), ...P.rev.map(x=>({k:"say",x,rev:true})),
+    ...P.sight.map(x=>({k:"sight",x})), {k:"sound"}, ...P.snd.words.map(x=>({k:"read",x})), ...(P.cold?[{k:"cold",it:P.cold}]:[]), ...(P.prevLines.length?[{k:"story",pk:P.prevPk,page:P.prevPage,lines:P.prevLines,again:true}]:[]), ...(P.lines.length?[{k:"story",pk:P.pk,page:P.page,lines:P.lines}]:[])]; }
+const wrExtra=()=>{ try{ return wrOn()&&!S.days[todayStr()]?wrQueue(wrPlan()).length:0; }catch(e){ return 0; } }; // dad 2026-11-21: one count for the whole mission
+function wrStart(daily){ const P=wrPlan(), q=wrQueue(P), off=daily&&L&&L.queue?L.queue.length:0;
+  W={off,q,i:0,t0:Date.now(),tRead:0,wordSecs:0,daily:!!daily,P,base:daily&&S.spk&&S.spk.date===todayStr()?S.spk.secs*1000:0}; view="wr"; wrEnter(); render();
 }
 const wrCur=()=>W?W.q[W.i]:null;
 const isRL=c=>c.k==="cold"||c.k==="story"; // read-a-line cards: she reads first, then each word turns green or stays grey
@@ -914,8 +915,8 @@ function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes
       <div class="btns">${st.fb?"":`<button class="big soft" data-w="grey">🐢 ${st.round>0?"회색 단어 듣기":"천천히 듣기"}</button>`}<button class="big ${st.fb?"next":"skip"}" data-w="${st.fb?"skip":"line"}">${st.fb?"끝! ✨":"다음 →"}</button></div>`;
     return `<div class="tags">${part}<span class="tag rev">${story?`📚 그림책 ${c.page}쪽${c.again?" · 어제 읽은 쪽 한 번 더":" · 오늘의 새 쪽"}`:"🤫 아는 문장 먼저 읽기"}</span></div>${pg?`<div class="storybox"><img src="${pg.img}" alt=""><div class="story">${inner}</div></div>`:inner}`; }
   return ""; }
-function renderWR(){ const c=wrCur(), pct=Math.round(W.i/W.q.length*100);
-  app.innerHTML=`<div class="lesson wr"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${W.i+1} / ${W.q.length}</div><div class="clock">⏱ ${mmss(W.base+Date.now()-W.t0)}</div></div>
+function renderWR(){ const c=wrCur(), pct=Math.round((W.off+W.i)/(W.off+W.q.length)*100);
+  app.innerHTML=`<div class="lesson wr"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${W.off+W.i+1} / ${W.off+W.q.length}</div><div class="clock">⏱ ${mmss(W.base+Date.now()-W.t0)}</div></div>
    <div class="card">${W.flash?`<div class="combo">COMBO ${W.combo}! 🔥</div>`:""}${wrBody(c)}</div></div>`;
   document.getElementById("quit").onclick=()=>{ stopAll(); const d=W.daily; W=null; view=d?"home":"parent"; render(); };
   app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>wrPick(c,+b.dataset.pick));
@@ -977,7 +978,7 @@ function renderHome(){
     const w=curWeek(), ss=S.session, resume=ss&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
     const phN=q.filter(c=>c.phone).length, sayN=q.filter(c=>c.type==="say").length, pickN=n(c=>c.type==="pick"), talkN=n(c=>c.type==="talk");
     const whoN=n(c=>c.kind==="hs"), wmN=n(c=>c.kind==="wm"), gmN=n(c=>c.kind==="where"||c.kind==="grab");
-    mission=`<div class="mission"><h2>오늘의 미션 · ${w===-1?"📞 전화영어 데이":w?w+"주차"+(weekRound(w)>1?` <span style="font-size:.75em">🔁 ${weekRound(w)}바퀴째</span>`:""):"전체 복습"}</h2><div class="plan">${w===-1?"오늘은 전화영어 수업 문장만 연습해요":w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${whoN?` · 누구일까 ${whoN}개`:""}${wmN?` · 단어 맞추기 ${wmN}개`:""}${gmN&&w===-1?` · 그림 게임 ${gmN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${wrOn()?"<br>그다음 🔤 단어 + 📖 읽기 (6분)":""}${phN&&w!==-1?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
+    mission=`<div class="mission"><h2>오늘의 미션 · ${w===-1?"📞 전화영어 데이":w?w+"주차"+(weekRound(w)>1?` <span style="font-size:.75em">🔁 ${weekRound(w)}바퀴째</span>`:""):"전체 복습"}</h2><div class="plan">${w===-1?"오늘은 전화영어 수업 문장만 연습해요":w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${whoN?` · 누구일까 ${whoN}개`:""}${wmN?` · 단어 맞추기 ${wmN}개`:""}${gmN&&w===-1?` · 그림 게임 ${gmN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${wrExtra()?` · 단어·그림책 ${wrExtra()}개`:""}${phN&&w!==-1?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
   }
   const dn=["일","월","화","수","목","금","토"], wk=[];
   for(let i=6;i>=0;i--){ const d=addDays(today,-i); const [y,m,dd]=d.split("-").map(Number);
@@ -1002,7 +1003,7 @@ function startLesson(){
     const done=queue.slice(0,ss.i), rest=queue.slice(ss.i).filter(c=>!isPh(c)), fresh=phoneCards().filter(c=>!done.some(d=>d.id===c.id));
     queue.splice(0,queue.length,...done,...fresh,...rest); }
   L={queue,i:resume?ss.i:0,total:queue.length,wrong:new Set(),retried:new Set(),done:new Set(),base:resume?(ss.elapsed||0):0,tStart:Date.now()};
-  saveSession();
+  L.wx=wrExtra(); saveSession();
   view="lesson"; enterCard(); render();
 }
 function cur(){ return L.queue[L.i]; }
@@ -1090,16 +1091,16 @@ function stepsHTML(c){
   return `<div class="steps">${c.steps.map((s,k)=>`<span class="step ${k===c.st.step?"cur":k<c.st.step?"ok":""}">${k<c.st.step?"✓ ":""}${N[s]}</span>`).join("")}</div>`;
 }
 function renderLesson(){
-  const c=cur(); const pct=Math.round(L.i/L.queue.length*100);
+  const c=cur(); const pct=Math.round(L.i/(L.queue.length+(L.wx||0))*100);
   let body="";
   if(c.type==="tip") body=tipBody(c);
   else if(c.type==="say") body=sayBody(c);
   else if(c.type==="talk") body=talkBody(c);
   else body=pickBody(c);
-  app.innerHTML=`<div class="lesson"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로">←</button><button class="backbtn" id="fwd" aria-label="앞으로" ${L.i>=L.queue.length-1?"disabled style=\"opacity:.3\"":""}>→</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${L.i+1} / ${L.queue.length}</div><div class="clock" id="clock">⏱ ${mmss(elapsed())}</div></div>
+  app.innerHTML=`<div class="lesson"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로">←</button><button class="backbtn" id="fwd" aria-label="앞으로" >→</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${L.i+1} / ${L.queue.length+(L.wx||0)}</div><div class="clock" id="clock">⏱ ${mmss(elapsed())}</div></div>
    ${stepsHTML(c)}<div class="card ${c.type==="tip"?"tip":""}">${c.st&&c.st.fb==="good"&&c.st.combo>=2?`<div class="combo">COMBO ${c.st.combo}! 🔥${c.st.record&&c.st.combo>=3?" 신기록!":""}</div>`:""}${body}</div></div>`;
   document.getElementById("quit").onclick=()=>{stopAll();saveSession();view="home";render();};
-  document.getElementById("fwd").onclick=()=>{ if(L.i<L.queue.length-1){ stopAll(); L.i++; saveSession(); enterCard(); render(); } };
+  document.getElementById("fwd").onclick=()=>{ if(L.i<L.queue.length-1){ stopAll(); L.i++; saveSession(); enterCard(); render(); } else advance(); };
   document.getElementById("prev").onclick=()=>{ stopAll(); if(L.i>0){ L.i--; saveSession(); enterCard(); render(); } else { view="home"; render(); } };
   bindCard(c);
 }
@@ -1541,7 +1542,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/21-1 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/21-2 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
