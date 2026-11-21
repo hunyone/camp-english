@@ -918,9 +918,11 @@ function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes
     return `<div class="tags">${part}<span class="tag rev">${story?`📚 그림책 ${c.page}쪽${c.again?" · 어제 읽은 쪽 한 번 더":" · 오늘의 새 쪽"}`:"🤫 아는 문장 먼저 읽기"}</span></div>${pg?`<div class="storybox"><img src="${pg.img}" alt=""><div class="story">${inner}</div></div>`:inner}`; }
   return ""; }
 function renderWR(){ const c=wrCur(), pct=Math.round((W.off+W.i)/(W.off+W.q.length)*100);
-  app.innerHTML=`<div class="lesson wr"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${W.off+W.i+1} / ${W.off+W.q.length}</div><div class="clock">⏱ ${mmss(W.base+Date.now()-W.t0)}</div></div>
+  app.innerHTML=`<div class="lesson wr"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로" ${W.i?"":"style=\"opacity:.3\""}>←</button><button class="backbtn" id="fwd" aria-label="앞으로">→</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${W.off+W.i+1} / ${W.off+W.q.length}</div><div class="clock">⏱ ${mmss(W.base+Date.now()-W.t0)}</div></div>
    <div class="card">${W.flash?`<div class="combo">COMBO ${W.combo}! 🔥</div>`:""}${wrBody(c)}</div></div>`;
   document.getElementById("quit").onclick=()=>{ stopAll(); const d=W.daily; W=null; view=d?"home":"parent"; render(); };
+  document.getElementById("prev").onclick=()=>{ if(!W.i) return; stopAll(); W.flash=false; W.i--; wrEnter(); render(); };
+  document.getElementById("fwd").onclick=()=>wrAdvance(); // dad 2026-11-21: ← → in 단어·읽기 too
   app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>wrPick(c,+b.dataset.pick));
   app.querySelectorAll("[data-say]").forEach(b=>b.onclick=()=>wrSay(W.P.words[+b.dataset.say].w));
   app.querySelectorAll("[data-sw]").forEach(b=>b.onclick=()=>wrSay(W.P.snd.words[+b.dataset.sw].w));
@@ -1542,7 +1544,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/21-4 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/21-5 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
