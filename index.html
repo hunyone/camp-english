@@ -573,8 +573,17 @@ function stopAll(){ if(curRec) curRec.stop(); Object.values(audioCache).forEach(
 function playSrc(key,src,text,role,rate){ rate=rate||1;
   stopAll();
   if(!src && TTS[text]){ src="data:audio/mpeg;base64,"+TTS[text]; key="t:"+text; }
-  if(src){ const a=audioCache[key]||(audioCache[key]=new Audio(src)); a.currentTime=0; a.preservesPitch=a.webkitPreservesPitch=true; a.playbackRate=rate;
-    return new Promise(res=>{ a.onended=res; a.play().catch(res); setTimeout(res,6000/rate); }); }
+  rate=1; // dad 2026-11-22: slowed playback went silent on the tablet (week 9) → always normal speed
+  if(src){ // a fresh player every time, and the tablet voice if the recording can't play, so a card is never silent
+    const a=new Audio(src); audioCache[key]=a;
+    return new Promise(res=>{ let done=false, started=false; const fin=()=>{ if(!done){ done=true; res(); } };
+      const fallback=()=>{ if(done||started) return; done=true; speakTTS(text,role,rate).then(res); };
+      a.onplaying=()=>{ started=true; }; a.onended=fin; a.onerror=fallback;
+      a.play().catch(e=>{ if(e&&e.name==="NotAllowedError") fin(); else fallback(); });
+      setTimeout(()=>{ if(!started&&!done&&a.paused) fallback(); },1500); setTimeout(fin,8000); }); }
+  return speakTTS(text,role,rate);
+}
+function speakTTS(text,role,rate){ rate=rate||1;
   return new Promise(res=>{
     if(!("speechSynthesis" in window)){ res(); return; }
     const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=0.75*(rate<1?0.85+rate*0.15:1); u.pitch = role==="b"?0.85:(role==="a"?1.15:1);
@@ -1555,7 +1564,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/21-6 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/22-1 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
