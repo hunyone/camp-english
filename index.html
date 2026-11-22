@@ -402,7 +402,7 @@ const pDrills=(b,st)=>st===3?PTALKS.filter(t=>t.base===b.id):PHONE.filter(i=>i.b
 const mastered=(arr,store)=>arr.every(x=>store[x.id]&&store[x.id].box>=2&&store[x.id].recentWrong===0); // box 2 = passed the 빈칸 step too
 function openStage(b){ let st=1;
   for(;st<=2;st++){ const d=pDrills(b,st); if(d.length&&!mastered(d,S.items)) return st; } return 3; }
-function phoneCards(){ const today=todayStr(), big=isPhoneDay();
+function phoneCards(){ const today=todayStr(), big=isPhoneDay(); if(!big) return phoneHalf();
   const NU=big?4:PHONE_UNITS, NT=big?5:PHONE_TALK, NM=big?6:2;
   const rank=(s,x)=>!s?(x.pri?1.5:1.6):(s.recentWrong>0?0:(s.due<=today?1:9)); // dad 2026-11-17: yesterday's sentences (review) come before brand-new ones
   const units=PBASE.map((b,k)=>{ const st=openStage(b); const list=[];
@@ -648,7 +648,8 @@ function buildQueue(wArg){
   if(!wArg&&curWeek()===-1) return phoneCards();
   if(!wArg&&curWeek()===0) return reviewAllQueue();
   const w=wArg||curWeek(), q=[];
-  const ph=wArg?[]:phoneCards(); q.push(...ph);
+  if(!wArg) return phoneHalf().concat(bookHalf(w)); // dad 2026-11-22: fixed day plan
+  const ph=[]; q.push(...ph);
   const book=ITEMS.filter(i=>i.src==="book"&&i.week===w);
   if(!wArg&&book.some(i=>!S.items[i.id])) return ph.concat(newBookQueue(w,book));
   const pass=(S.weekPass||{})[w]||0;
@@ -705,6 +706,61 @@ function newBookQueue(w,book){ // dad 2026-11-19: brand-new 천일문 sentences,
   const old=shuffle(ITEMS.filter(i=>i.src==="book"&&i.week<w&&S.items[i.id]&&!q.some(c=>c.id===i.id))).sort((a,b)=>(S.items[a.id].last||"")<(S.items[b.id].last||"")?-1:1);
   let t=costOf(q); for(const i of old){ if(t+.6>HALF_MIN) break; q.push({type:"say",id:i.id,fresh:false,old:true,fmt:"ko"}); t+=.6; }
   return fitBook(q,c=>c.due?0:c.type==="say"&&byId[c.id].src==="book"&&!S.items[c.id]?0:c.type==="pick"?1:c.fmt==="tf"?1:c.type==="talk"?1:c.old?4:2,HALF_MIN+1.6); }
+// ---------- dad 2026-11-22: one fixed day plan. Every day has the same slots; only what goes in them rotates. A slot with nothing to put in stays empty. ----------
+const QV=2; // queue version: a mission saved by an older plan is rebuilt
+const dayNo=()=>diffDays("2026-01-01",todayStr());
+const lastOf=id=>((S.items[id]||{}).last)||"";
+const byOld=(a,b)=>lastOf(a.id)<lastOf(b.id)?-1:lastOf(a.id)>lastOf(b.id)?1:0;
+function notRecent(list,n){ const today=todayStr(), y=addDays(today,-1); const a=list.filter(x=>{ const l=lastOf(x.id); return l!==today&&l!==y; }), b=list.filter(x=>!a.includes(x)&&lastOf(x.id)!==today);
+  return shuffle(a).sort(byOld).concat(shuffle(b).sort(byOld)).slice(0,n); }
+const FMTS=["blank","order","ko"];
+function revFmt(id){ const s=S.items[id]; let f=s.recentWrong>0||s.box<=1?"blank":s.box===2?"order":"ko"; if(s.lf===f) f=FMTS[(FMTS.indexOf(f)+1)%3]; return f; } // never the same shape twice in a row
+function phoneHalf(){ const today=todayStr(), y=addDays(today,-1), out={nw:[],rv:[],tk:[],gm:[]};
+  // new: the newest lesson's first unseen sentence + 2 of its first swaps; else the next drills of a sentence already met
+  const nb=[...PBASE].filter(b=>!S.items[b.id]).sort((a,b)=>(b.lesson||"").localeCompare(a.lesson||"")||PBASE.indexOf(a)-PBASE.indexOf(b))[0];
+  if(nb){ out.nw.push(nb); pDrills(nb,1).filter(d=>!S.items[d.id]).slice(0,2).forEach(d=>out.nw.push(d)); }
+  else { for(const b of PBASE){ const st=openStage(b); if(st>2) continue; const d=pDrills(b,st).filter(x=>!S.items[x.id]).slice(0,2); if(d.length){ out.nw.push(...d); break; } } }
+  // reviews: sentences due again (missed ones first, then the oldest due)
+  const due=PHONE.filter(i=>{ const s=S.items[i.id]; return s&&s.due<=today&&s.last!==today&&!out.nw.includes(i); })
+    .sort((a,b)=>(S.items[b.id].recentWrong-S.items[a.id].recentWrong)||(S.items[a.id].due<S.items[b.id].due?-1:1)||byOld(a,b));
+  out.rv=due.slice(0,3);
+  // talk: one phone talk, not yesterday's
+  const tks=PTALKS.filter(t=>{ if(t.base){ const b=byId[t.base]; if(!b||!S.items[b.id]) return false; } const s=S.talks[t.id]; return !s||s.last!==today&&s.last!==y; })
+    .sort((a,b)=>{ const sa=S.talks[a.id], sb=S.talks[b.id], r=s=>!s?1:s.recentWrong>0?0:s.due<=today?1:2; return r(sa)-r(sb)||(((sa||{}).last||"")<((sb||{}).last||"")?-1:1); });
+  out.tk=tks.slice(0,1);
+  // games: 2 of the 4 kinds, turning each day (word match, yesterday/every day, take-put-bring-give, in/on/under)
+  const K=["wm","tense","grab","where"], d=dayNo();
+  [K[(2*d)%4],K[(2*d+1)%4]].forEach(k=>{ const L0=k==="wm"?PMATCH:k==="tense"?TENSE:k==="grab"?TAKE:GAMES.where; if(!L0.length) return;
+    const x=(k==="wm"?L0.filter(m=>S.items[m.id]&&S.items[m.id].due<=today):[]).concat(notRecent(L0,3))[0]; if(x) out.gm.push({type:"pick",kind:k,id:x.id,phone:true}); });
+  const say=x=>({type:"say",id:x.id,fresh:!S.items[x.id],phone:true});
+  const N=out.nw.map(say), R=out.rv.map(x=>({...say(x),fresh:false})), T=out.tk.map(t=>({type:"talk",id:t.id,phone:true})), G=out.gm;
+  return [N[0],N[1],R[0],T[0],N[2],R[1],G[0],R[2],G[1]].filter(Boolean).concat(N.slice(3)); }
+function bookHalf(w){ const today=todayStr(), y=addDays(today,-1), book=ITEMS.filter(i=>i.src==="book"&&i.week===w);
+  const news=book.filter(i=>!S.items[i.id]).slice(0,NEW_BOOK);
+  const met=b=>S.items[b.id]&&S.items[b.id].first<today;
+  // reviews: next day / ~3 days / ~7 days, a different shape each time
+  const rv=dueBook(w).filter(i=>!news.includes(i)).sort((a,b)=>(S.items[b.id].recentWrong-S.items[a.id].recentWrong)||(S.items[a.id].due<S.items[b.id].due?-1:1)||byOld(a,b)).slice(0,4)
+    .map(i=>({type:"say",id:i.id,fresh:false,due:true,fmt:revFmt(i.id)}));
+  // 바꿔 말하기: one changed sentence (question / not / he-she) of a sentence met before today
+  const kinds=[/^(Is|Are|Do|Does|Can)\b/,/n't |\bnot\b/,/^(He|She)\b/], want=kinds[dayNo()%3];
+  const dr=ITEMS.filter(d=>d.src==="drill"&&byId[d.base]&&byId[d.base].src==="book"&&met(byId[d.base])&&!S.items[d.id]&&byId[d.base].week>=Math.max(1,w-1));
+  const tf=(dr.find(d=>want.test(d.text))||dr[0]); const TF=tf?[{type:"say",id:tf.id,fresh:true,fmt:"tf"}]:[];
+  // older weeks (1 ~ last week): 2 sentences she hasn't said for longest, Korean only
+  const used=new Set(rv.map(c=>c.id)); const OLD=notRecent(ITEMS.filter(i=>i.src==="book"&&i.week<w&&S.items[i.id]&&!used.has(i.id)),2).map(i=>({type:"say",id:i.id,fresh:false,old:true,fmt:"ko"}));
+  // 누구일까 (he / she): 1
+  const hsP=ITEMS.filter(i=>i.week<=w&&(i.who===HE||i.who===SHE)&&/^(he|she|is he|is she|does he|does she)\b/i.test(i.text)); const hsM=hsP.filter(i=>byId[i.base]&&S.items[i.base]);
+  const WHO=notRecent(hsM.length>=3?hsM:hsP,1).map(i=>({type:"pick",kind:"hs",id:i.id}));
+  // game: 1, turning each day: can/can't, a/an, am·is·are, 물어보는 말로
+  const gk=["can","an","be","qf"][dayNo()%4]; const GL=gk==="can"?CAN:gk==="an"?AN:gk==="be"?metOnly(BE):metOnly(QF);
+  const GM=GL.length?[{type:"pick",kind:gk,id:notRecent(GL,1)[0].id}]:[];
+  // 대화 2 (dad 2026-11-22): this week's book dialogue once one of its sentences has been met (or comes today), else an older dialogue due again
+  const nrm=x=>x.toLowerCase().replace(/[^a-z' ]/g,"").trim(); const knows=t=>t.lines.some(l=>book.some(b=>nrm(l.text).startsWith(nrm(b.text))&&(S.items[b.id]||news.includes(b))));
+  const tl=s=>(s&&s.last)||"";
+  const allMet=book.every(b=>S.items[b.id]||news.includes(b)); const cw=TALKS.filter(t=>t.week===w&&(knows(t)||allMet)&&!(S.talks[t.id]&&S.talks[t.id].last===today)).sort((a,b)=>(S.talks[a.id]?1:0)-(S.talks[b.id]?1:0)||(tl(S.talks[a.id])<tl(S.talks[b.id])?-1:1));
+  const ow=TALKS.filter(t=>t.week<w&&!cw.includes(t)).sort((a,b)=>{ const sa=S.talks[a.id], sb=S.talks[b.id], r=s=>!s?2:s.recentWrong>0?0:s.due<=today?1:3; return r(sa)-r(sb)||(tl(sa)<tl(sb)?-1:1); });
+  const TK2=cw.filter(t=>!S.talks[t.id]||S.talks[t.id].last!==y).concat(cw,ow).filter((t,k,a)=>a.indexOf(t)===k).slice(0,2).map(t=>({type:"talk",id:t.id}));
+  const N=news.map(i=>({type:"say",id:i.id,fresh:true}));
+  return [GM[0],N[0],rv[0],N[1],WHO[0],rv[1],N[2],TF[0],rv[2],N[3],rv[3],OLD[0],OLD[1],TK2[0],TK2[1]].filter(Boolean); }
 function doneToday(){ return !!S.days[todayStr()]; }
 function streak(){ let n=0,d=todayStr(); if(!S.days[d]) d=addDays(d,-1); while(S.days[d]){n++; d=addDays(d,-1);} return n; }
 
@@ -999,7 +1055,7 @@ function renderHome(){
   else if(doneToday()) mission=`<div class="mission done"><div class="spark" aria-hidden="true">✨ 🌟 ✨</div><h2>야호! 오늘 미션 성공! 🎉</h2><div class="donerow"><span class="donestk">${h(S.days[today].sticker)}</span><div class="done-msg">새 스티커를 받았어요!<br>서현이 최고! 💜 내일 또 만나요</div></div><div class="sub">오늘 배운 문장을 아빠한테 영어로 자랑해 봐요.</div></div>`;
   else if(!q.some(c=>c.type!=="tip")) mission=`<div class="mission"><h2>오늘은 할 게 없어요</h2><div class="sub">내일 다시 와요!</div></div>`;
   else {
-    const w=curWeek(), ss=S.session, resume=ss&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
+    const w=curWeek(), ss=S.session, resume=ss&&ss.qv===QV&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
     const phN=q.filter(c=>c.phone).length, sayN=q.filter(c=>c.type==="say").length, pickN=n(c=>c.type==="pick"), talkN=n(c=>c.type==="talk");
     const whoN=n(c=>c.kind==="hs"), wmN=n(c=>c.kind==="wm"), gmN=n(c=>c.kind==="where"||c.kind==="grab");
     mission=`<div class="mission"><h2>오늘의 미션 · ${w===-1?"📞 전화영어 데이":w?w+"주차"+(weekRound(w)>1?` <span style="font-size:.75em">🔁 ${weekRound(w)}바퀴째</span>`:""):"전체 복습"}</h2><div class="plan">${w===-1?"오늘은 전화영어 수업 문장만 연습해요":w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${whoN?` · 누구일까 ${whoN}개`:""}${wmN?` · 단어 맞추기 ${wmN}개`:""}${gmN&&w===-1?` · 그림 게임 ${gmN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${wrExtra()?` · 단어·그림책 ${wrExtra()}개`:""}${phN&&w!==-1?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
@@ -1017,9 +1073,9 @@ function renderHome(){
 
 function elapsed(){ return L? L.base+(Date.now()-L.tStart) : 0; }
 function mmss(ms){ const s=Math.floor(ms/1000); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
-function saveSession(){ S.session={date:todayStr(),week:curWeek(),i:L.i,elapsed:elapsed(),queue:L.queue.map(c=>({type:c.type,id:c.id,kind:c.kind,fresh:c.fresh,fmt:c.fmt,due:c.due}))}; save(); }
+function saveSession(){ S.session={qv:QV,date:todayStr(),week:curWeek(),i:L.i,elapsed:elapsed(),queue:L.queue.map(c=>({type:c.type,id:c.id,kind:c.kind,fresh:c.fresh,fmt:c.fmt,due:c.due}))}; save(); }
 function startLesson(){
-  const ss=S.session, resume=ss&&ss.date===todayStr()&&ss.week===curWeek()&&ss.i<ss.queue.length;
+  const ss=S.session, resume=ss&&ss.qv===QV&&ss.date===todayStr()&&ss.week===curWeek()&&ss.i<ss.queue.length;
   if(!S.daySnap||S.daySnap.date!==todayStr()) S.daySnap={date:todayStr(),items:JSON.parse(JSON.stringify(S.items)),talks:JSON.parse(JSON.stringify(S.talks)),weekPass:JSON.parse(JSON.stringify(S.weekPass||{})),wr:JSON.parse(JSON.stringify(S.wr||null)),nextWeek:S.nextWeek};
   const queue=resume?ss.queue:buildQueue();
   if(resume){ // phone cards not reached yet are rebuilt, so a mission saved before an update still gets the newest phone sentences
@@ -1458,10 +1514,11 @@ function checkOrder(c){
     else if(said.some(w=>/^(he|she)$/i.test(w)) && c.target.some(w=>/^(he|she)$/i.test(w)) && !said.join(" ").toLowerCase().includes(c.target.find(w=>/^(he|she)$/i.test(w)).toLowerCase())) c.st.why="남자는 he, 여자는 she!";
     else if(said.some(w=>/^(this|that)$/i.test(w)) && !said.map(w=>w.toLowerCase()).includes(c.target[0].toLowerCase())) c.st.why="가까우면 this, 멀면 that!";
   }
-  c.st.fb= ok?"good":"bad"; ok?chime():buzz(); render(); playItem(byId[c.id]);
+  c.st.fb= ok?"good":"bad"; ok?chime():buzz(); render();
+  autoNext(c,playItem(byId[c.id]),ok?900:2000); // dad 2026-11-22: the 다음 button is hidden app-wide, so the order card moves on by itself (it used to stop here)
 }
 function advance(){
-  stopAll(); L.i++; if(L.i<L.queue.length) saveSession();
+  stopAll(); { const c=cur(); if(c&&c.type==="say"&&S.items[c.id]&&c.fmt) S.items[c.id].lf=c.fmt; } L.i++; if(L.i<L.queue.length) saveSession();
   if(L.i>=L.queue.length) return finishLesson();
   enterCard(); render();
 }
@@ -1550,7 +1607,7 @@ function renderParent(){
   <div class="panel"><h3>바꿔 말하기 문장 (${tx}개: 의문문, 부정문, he/she)</h3>${bar(cx,tx)}<div class="note">한 번도 안 틀리고 세 번 넘게 맞히면 "아는 문장"이 돼요.</div></div>
   <div class="panel"><h3>자주 틀리는 문장 <span class="note">저녁에 이것만 한두 개 같이 말해 보세요</span></h3><div class="list">${weak.length?weak.map(row).join(""):`<div class="note">아직 틀린 문장이 없어요.</div>`}</div></div>
   <div class="panel"><details><summary>앱이 들은 말 (최근 ${Math.min(30,(S.heardLog||[]).length)}개)</summary><div class="note">❌는 틀렸다고 나온 것. 서현이가 맞게 말했는데 ❌라면 이 화면을 찍어서 보내 주세요.</div><div class="list">${(S.heardLog||[]).slice(0,30).map(x=>`<div class="row" style="grid-template-columns:auto 1fr"><span>${x.ok?"⭕":"❌"}</span><div class="t">${h(x.t)}<small>들은 말: ${h(x.h)} · ${x.d.slice(5)}</small></div></div>`).join("")||`<div class="note">아직 없어요.</div>`}</div></details></div>
-  ${PHONE.length?`<div class="panel"><h3>📞 전화영어 (수업 문장 ${PBASE.length}개 · 바꿔 말하기 포함 ${PHONE.length}개)</h3><div class="note">매일 미션 맨 앞에 수업 문장 ${PHONE_UNITS}개와 각 문장의 패턴 연습(문장마다 최대 5장), 선생님 질문 ${PHONE_TALK}개, 어제/매일 고르기 ${TENSE_N}개가 나와요. 각 문장은 ① 뒤 단어 바꾸기 → ② 앞 사람 바꾸기 → ③ 질문하고 대답하기 순서로, 앞 단계 문장을 다 맞히면 다음 단계가 열려요.</div><div class="list">${PBASE.map(i=>{ const s=S.items[i.id], k=status(s), st=openStage(i), stl=[1,2,3].some(n=>pDrills(i,n).length)?" · 지금 "+["","① 뒤 단어 바꾸기","② 앞 사람 바꾸기","③ 질문·대답"][st]:""; return `<div class="row" style="grid-template-columns:1fr auto auto"><div class="t">${h(i.text)}<small>${h(i.ko)} · ${i.lesson.slice(5).replace("-","/")} 수업${stl}${s?` · 틀림 ${s.wrong}번`:""}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span><button class="mini" data-play="${i.id}" aria-label="듣기">🔊</button></div>`; }).join("")}${PTALKS.filter(t=>!t.base).map(t=>{ const s=S.talks[t.id], k=status(s); return `<div class="row" style="grid-template-columns:1fr auto"><div class="t">${h(t.lines[0].text)} → ${h(t.lines[1].text)}<small>선생님 질문 · ${t.lines[1].ko}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span></div>`; }).join("")}</div></div>`:""}
+  ${PHONE.length?`<div class="panel"><h3>📞 전화영어 (수업 문장 ${PBASE.length}개 · 바꿔 말하기 포함 ${PHONE.length}개)</h3><div class="note">매일 미션 맨 앞에 새 수업 문장 1개 + 바꿔 말하기 2개, 복습 3개, 선생님 질문 1개, 게임 2개(단어 맞추기 · 어제/매일 · 챙겨 가기 · in/on/under 중 날마다 돌아가며)가 나와요. 각 문장은 ① 뒤 단어 바꾸기 → ② 앞 사람 바꾸기 → ③ 질문하고 대답하기 순서로, 앞 단계 문장을 다 맞히면 다음 단계가 열려요.</div><div class="list">${PBASE.map(i=>{ const s=S.items[i.id], k=status(s), st=openStage(i), stl=[1,2,3].some(n=>pDrills(i,n).length)?" · 지금 "+["","① 뒤 단어 바꾸기","② 앞 사람 바꾸기","③ 질문·대답"][st]:""; return `<div class="row" style="grid-template-columns:1fr auto auto"><div class="t">${h(i.text)}<small>${h(i.ko)} · ${i.lesson.slice(5).replace("-","/")} 수업${stl}${s?` · 틀림 ${s.wrong}번`:""}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span><button class="mini" data-play="${i.id}" aria-label="듣기">🔊</button></div>`; }).join("")}${PTALKS.filter(t=>!t.base).map(t=>{ const s=S.talks[t.id], k=status(s); return `<div class="row" style="grid-template-columns:1fr auto"><div class="t">${h(t.lines[0].text)} → ${h(t.lines[1].text)}<small>선생님 질문 · ${t.lines[1].ko}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span></div>`; }).join("")}</div></div>`:""}
   <div class="panel"><h3>최근 4주</h3><div class="cal">${cells.join("")}</div></div>
   <div class="panel"><details><summary>전체 문장 보기 (${avail.length}개)</summary><div class="list">${avail.map(row).join("")}</div></details></div>
   <div class="panel"><h3>설정</h3>
@@ -1564,7 +1621,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/22-1 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/22-2 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
