@@ -439,7 +439,7 @@ function phoneBudget(units,today,rank0){ // dad 2026-11-19: 전화영어 = half 
   const got={unit:[],talk:[],tz:[],wm:[],wh:[],gr:[]}, used={unit:0,talk:0,tz:0,wm:0,wh:0,gr:0}; let t=0;
   for(const k of order){ const g=pools[k][used[k]]; if(!g) continue; const c=costOf(g); if(t>0&&t+c>HALF_MIN+.4) continue; used[k]++; got[k].push(...g); t+=c; }
   return [...got.unit,...got.talk,...got.tz,...shuffle(got.wm),...got.wh,...got.gr]; }
-const APPV="11/22-9"; // shown on home (under the chips) and in the parent screen
+const APPV="11/22-10"; // shown on home (under the chips) and in the parent screen
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -1084,7 +1084,7 @@ function topBar(){
 }
 function bindLogo(){
   const el=document.getElementById("logo"); if(!el) return; let t=null;
-  const start=e=>{ e.preventDefault(); t=setTimeout(()=>{ t=null; openGate(); },1000); };
+  const start=e=>{ e.preventDefault(); view="parent"; render(); }; // dad 2026-11-22: tap the heart → straight into 아빠 화면, no PIN
   const end=()=>{ if(t){clearTimeout(t); t=null;} };
   el.addEventListener("pointerdown",start); el.addEventListener("pointerup",end); el.addEventListener("pointerleave",end); el.addEventListener("pointercancel",end);
   el.addEventListener("contextmenu",e=>e.preventDefault());
@@ -1640,6 +1640,7 @@ function todayTable(){ // dad 2026-11-22: today's cards in the order she sees th
     rows.push([m,sb,h(c.x?c.x.w+(c.k==="say"?" → "+c.x.s:""):c.k==="intro"?P.words.map(w=>w.w).join(", "):c.k==="sound"?P.snd.snd+" : "+P.snd.words.map(w=>w.w).join(", "):c.k==="cold"?c.it.text:c.k==="story"?c.page+"쪽 "+(c.old?"(예전 쪽 다시)":c.again?"(어제 쪽 다시)":"(오늘의 새 쪽)"):"")]); }); }
   const w=curWeek(), big=w===-1?"📞 전화영어 데이":w?w+"주차":"전체 복습";
   return `<table class="wtable ttbl"><tr><th>#</th><th>대분류</th><th>중분류</th><th>소분류</th><th style="text-align:left">문장 / 단어</th></tr>${rows.map((r,k)=>`<tr><td>${k+1}</td><td>${big}</td><td>${r[0]}</td><td>${r[1]}</td><td style="text-align:left">${r[2]}</td></tr>`).join("")}</table>`; }
+const PORD={learn:0,weak:1,new:2,know:3}; // dad 2026-11-22: 익히는 중 first
 function renderParent(){
   const today=todayStr();
   const avail=ITEMS.filter(unlocked);
@@ -1664,30 +1665,15 @@ function renderParent(){
     <div class="stat"><div class="lab">연속 학습</div><div class="num">${streak()}<small>일</small></div></div>
     <div class="stat"><div class="lab">he/she 문장 틀린 횟수</div><div class="num">${hsWrong}<small>번</small></div></div>
   </div>
-  <div class="panel"><h3>📦 천일문 파일</h3><div class="note">지금 파일: ${MAXW}주차까지 들어 있어요. 새 파일을 받으면 여기서 골라 주세요 (공부 기록은 그대로예요). 그림책 파일(picture-book.json)도 여기서 골라요.</div><label class="tbtn" style="cursor:pointer;display:inline-block">새 천일문 파일 고르기<input id="packin2" type="file" hidden></label><span id="packmsg" class="note"></span></div>
-  ${wrPanel()}
+  <div class="panel"><h3>오늘 공부</h3>
+    <div class="tools">${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}</div>
+    <div class="note">${syncState} · 앱 버전 ${APPV} · 전화영어 문장 ${PHONE.length}개${S.offset?` · 지금 보는 날짜 ${today} (실제보다 ${S.offset}일 뒤)`:""}</div></div>
+  <div class="panel"><h3>📦 천일문 파일</h3><div class="note">지금 파일: ${MAXW}주차까지 들어 있어요. 새 파일을 받으면 여기서 골라 주세요 (공부 기록은 그대로예요). 그림책 파일(picture-book.json)도 여기서 골라요.</div><div class="note">${BOOK?`📘 그림책 "${h(BOOK.title||"")}" 들어 있어요 (${(BOOK.pages||[]).length}쪽).${(BOOK.pages||[]).some(p=>(p.lines||[]).some(l=>l.a))?" 🔊 천천히 듣기 소리 있음":" ⚠️ 천천히 듣기 소리가 없는 옛 파일이에요. 새 picture-book.json 을 골라 주세요."}`:`📘 그림책 파일이 아직 없어요.`}</div><label class="tbtn" style="cursor:pointer;display:inline-block">새 천일문 파일 고르기<input id="packin2" type="file" hidden></label><span id="packmsg" class="note"></span></div>
   <div class="panel"><details><summary>📋 오늘 카드 순서 (대분류 › 중분류 › 소분류 › 문장)</summary>${todayTable()}</details></div>
-  <div class="panel"><h3>주차별 문제 수</h3>${weekTable()}<div class="note">말하기 = 책 문장 + 바꿔 말하기. 틀린 문장 복습(최대 ${S.reviewCap}개)과 다시 나오는 문장은 빼고 센 숫자예요.</div></div>
-  <div class="panel"><h3>책 문장 (${S.bookWeek}주차까지 ${tb}개)</h3>${bar(cb,tb)}</div>
-  <div class="panel"><h3>바꿔 말하기 문장 (${tx}개: 의문문, 부정문, he/she)</h3>${bar(cx,tx)}<div class="note">한 번도 안 틀리고 세 번 넘게 맞히면 "아는 문장"이 돼요.</div></div>
-  <div class="panel"><h3>자주 틀리는 문장 <span class="note">저녁에 이것만 한두 개 같이 말해 보세요</span></h3><div class="list">${weak.length?weak.map(row).join(""):`<div class="note">아직 틀린 문장이 없어요.</div>`}</div></div>
-  <div class="panel"><details><summary>앱이 들은 말 (최근 ${Math.min(30,(S.heardLog||[]).length)}개)</summary><div class="note">❌는 틀렸다고 나온 것. 서현이가 맞게 말했는데 ❌라면 이 화면을 찍어서 보내 주세요.</div><div class="list">${(S.heardLog||[]).slice(0,30).map(x=>`<div class="row" style="grid-template-columns:auto 1fr"><span>${x.ok?"⭕":"❌"}</span><div class="t">${h(x.t)}<small>들은 말: ${h(x.h)} · ${x.d.slice(5)}</small></div></div>`).join("")||`<div class="note">아직 없어요.</div>`}</div></details></div>
-  ${PHONE.length?`<div class="panel"><h3>📞 전화영어 (수업 문장 ${PBASE.length}개 · 바꿔 말하기 포함 ${PHONE.length}개)</h3><div class="note">매일 미션 맨 앞에 새 수업 문장 1개 + 바꿔 말하기 2개, 복습 3개, 선생님 질문 1개, 게임 2개(단어 맞추기 · 어제/매일 · 챙겨 가기 · in/on/under 중 날마다 돌아가며)가 나와요. 각 문장은 ① 뒤 단어 바꾸기 → ② 앞 사람 바꾸기 → ③ 질문하고 대답하기 순서로, 앞 단계 문장을 다 맞히면 다음 단계가 열려요.</div><div class="list">${PBASE.map(i=>{ const s=S.items[i.id], k=status(s), st=openStage(i), stl=[1,2,3].some(n=>pDrills(i,n).length)?" · 지금 "+["","① 뒤 단어 바꾸기","② 앞 사람 바꾸기","③ 질문·대답"][st]:""; return `<div class="row" style="grid-template-columns:1fr auto auto"><div class="t">${h(i.text)}<small>${h(i.ko)} · ${i.lesson.slice(5).replace("-","/")} 수업${stl}${s?` · 틀림 ${s.wrong}번`:""}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span><button class="mini" data-play="${i.id}" aria-label="듣기">🔊</button></div>`; }).join("")}${PTALKS.filter(t=>!t.base).map(t=>{ const s=S.talks[t.id], k=status(s); return `<div class="row" style="grid-template-columns:1fr auto"><div class="t">${h(t.lines[0].text)} → ${h(t.lines[1].text)}<small>선생님 질문 · ${t.lines[1].ko}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span></div>`; }).join("")}</div></div>`:""}
-  <div class="panel"><h3>최근 4주</h3><div class="cal">${cells.join("")}</div></div>
-  <div class="panel"><details><summary>전체 문장 보기 (${avail.length}개)</summary><div class="list">${avail.map(row).join("")}</div></details></div>
-  <div class="panel"><h3>설정</h3>
-    <div class="field"><label for="bw">책 진도</label><select id="bw">${Array.from({length:MAXW},(_,k)=>k+1).map(n=>`<option value="${n}" ${n===S.bookWeek?"selected":""}>${n}주차까지</option>`).join("")}</select></div>
-    <div class="field"><label for="nb">오늘(다음) 할 주차</label><select id="nb">${Array.from({length:S.bookWeek},(_,k)=>k+1).map(n=>`<option value="${n}" ${n===curWeek()?"selected":""}>${n}주차</option>`).join("")}<option value="0" ${curWeek()===0?"selected":""}>전체 복습</option><option value="-1" ${curWeek()===-1?"selected":""}>📞 전화영어만 (오늘)</option></select>
-      <label for="nx">누구일까</label><select id="nx">${[0,1,2,3,4,5].map(n=>`<option ${n===(S.whoCount??3)?"selected":""}>${n}</option>`).join("")}</select>
-      <label for="rc">복습 최대</label><select id="rc">${[4,6,8,10,12].map(n=>`<option ${n===S.reviewCap?"selected":""}>${n}</option>`).join("")}</select></div>
-    <div class="field"><label for="dep">출발일</label><input type="date" id="dep" value="${S.depart}"></div>
-    <div class="note">음성인식: ${speechOK?"켜짐 (아이가 말하면 앱이 듣고 확인해요)":"이 화면에서는 키보드 음성 입력(🎤)으로 말한 걸 글자로 받아서 확인해요. 키보드 음성 입력 언어를 영어로 해 두세요."}</div>
-    <h3>테스트용</h3>
-    <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
-    <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
-      ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 ${APPV} · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
-  const $=id=>document.getElementById(id);
+  <div class="panel"><h3>자주 틀리는 문장 <span class="note">요즘 틀린 문장이 먼저, 그다음 많이 틀린 순서 (최대 8개)</span></h3><div class="list">${weak.length?weak.map(row).join(""):`<div class="note">아직 틀린 문장이 없어요.</div>`}</div></div>
+  ${PHONE.length?`<div class="panel"><h3>📞 전화영어 (수업 문장 ${PBASE.length}개 · 바꿔 말하기 포함 ${PHONE.length}개)</h3><div class="note">매일 미션 맨 앞에 새 수업 문장 1개 + 바꿔 말하기 2개, 복습 3개, 선생님 질문 1개, 게임 2개(단어 맞추기 · 어제/매일 · 챙겨 가기 · in/on/under 중 날마다 돌아가며)가 나와요. 각 문장은 ① 뒤 단어 바꾸기 → ② 앞 사람 바꾸기 → ③ 질문하고 대답하기 순서로, 앞 단계 문장을 다 맞히면 다음 단계가 열려요.</div><div class="note">익히는 중 = 맞힌 적은 있지만 아직 덜 익은 문장 · 헷갈림 = 최근에 틀린 문장 (그 뒤 두 번 맞히면 풀려요) · 아는 문장 = 최근 안 틀리고 세 번 넘게 이어서 맞힌 문장 · 아직 = 안 나온 문장</div><div class="list">${PBASE.slice().sort((a,b)=>PORD[status(S.items[a.id])]-PORD[status(S.items[b.id])]).map(i=>{ const s=S.items[i.id], k=status(s), st=openStage(i), stl=[1,2,3].some(n=>pDrills(i,n).length)?" · 지금 "+["","① 뒤 단어 바꾸기","② 앞 사람 바꾸기","③ 질문·대답"][st]:""; return `<div class="row" style="grid-template-columns:1fr auto auto"><div class="t">${h(i.text)}<small>${h(i.ko)} · ${i.lesson.slice(5).replace("-","/")} 수업${stl}${s?` · 틀림 ${s.wrong}번`:""}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span><button class="mini" data-play="${i.id}" aria-label="듣기">🔊</button></div>`; }).join("")}${PTALKS.filter(t=>!t.base).sort((a,b)=>PORD[status(S.talks[a.id])]-PORD[status(S.talks[b.id])]).map(t=>{ const s=S.talks[t.id], k=status(s); return `<div class="row" style="grid-template-columns:1fr auto"><div class="t">${h(t.lines[0].text)} → ${h(t.lines[1].text)}<small>선생님 질문 · ${t.lines[1].ko}</small></div><span class="pill ${label[k][1]}">${label[k][0]}</span></div>`; }).join("")}</div></div>`:""}
+</div>`;
+  const $=id=>document.getElementById(id)||{}; // dad 2026-11-22: many controls removed from 아빠 화면
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
   $("wron").onchange=e=>{ S.wrOn=e.target.value==="1"; save(); render(); };
