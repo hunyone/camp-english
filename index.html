@@ -441,6 +441,7 @@ const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
 const TTS = DATA.tts||{};
+const TTSX={}; fetch("tts/tts.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():{}).then(m=>Object.assign(TTSX,m)).catch(()=>{}); // dad 2026-11-22: recorded voice for every sentence that had only the tablet voice
 
 // ---------- state ----------
 function blank(){ return {v:2, items:{}, talks:{}, days:{}, stickers:[], tips:{}, bookWeek:7, newBook:2, whoCount:3, reviewCap:6, depart:"2027-07-01", offset:0, pin:null, updatedAt:0}; }
@@ -569,10 +570,11 @@ function matches(target,alts,allowIt){
 // ---------- audio ----------
 const audioCache={};
 let voices=[]; function loadVoices(){ try{ voices=speechSynthesis.getVoices(); }catch(e){} } loadVoices(); try{ speechSynthesis.onvoiceschanged=loadVoices; }catch(e){}
-function stopAll(){ if(curRec) curRec.stop(); Object.values(audioCache).forEach(a=>{try{a.pause()}catch(e){}}); try{speechSynthesis.cancel()}catch(e){} }
+function stopAll(){ if(curRec) curRec.stop(); Object.values(audioCache).forEach(a=>{try{a.pause()}catch(e){}}); try{ if(speechSynthesis.speaking||speechSynthesis.pending){ speechSynthesis.cancel(); window._cancelAt=Date.now(); } }catch(e){} }
 function playSrc(key,src,text,role,rate){ rate=rate||1;
   stopAll();
   if(!src && TTS[text]){ src="data:audio/mpeg;base64,"+TTS[text]; key="t:"+text; }
+  if(!src && TTSX[text]){ src=TTSX[text]; key="x:"+text; }
   rate=1; // dad 2026-11-22: slowed playback went silent on the tablet (week 9) → always normal speed
   if(src){ // a fresh player every time, and the tablet voice if the recording can't play, so a card is never silent
     const a=new Audio(src); audioCache[key]=a;
@@ -588,7 +590,11 @@ function speakTTS(text,role,rate){ rate=rate||1;
     if(!("speechSynthesis" in window)){ res(); return; }
     const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=0.75*(rate<1?0.85+rate*0.15:1); u.pitch = role==="b"?0.85:(role==="a"?1.15:1);
     const en=voices.filter(v=>/^en[-_]US/i.test(v.lang)); const v= role==="b" ? (en[1]||en[0]) : en[0]; if(v) u.voice=v;
-    u.onend=res; u.onerror=res; speechSynthesis.speak(u); setTimeout(res,5000/rate);
+    u.onend=res; u.onerror=res; window._utt=u; // keep a reference: Android Chrome drops utterances that get garbage-collected
+    // dad 2026-11-22: tablet voice was silent on the first card. Chrome on Android throws away a speak() that comes right after cancel(), so wait a moment
+    const go=()=>{ try{ speechSynthesis.resume(); }catch(e){} speechSynthesis.speak(u); };
+    const wait=Math.max(0,250-(Date.now()-(window._cancelAt||0))); if(wait) setTimeout(go,wait); else go();
+    setTimeout(res,5000/rate+wait);
   });
 }
 const playItem=it=>playSrc(it.id,it.src_audio,it.text);
@@ -902,7 +908,7 @@ function wrSlow(text,onWord){ stopAll(); const ws=text.split(" ");
     const fin=()=>{ if(ended) return; ended=true; clearInterval(tm); onWord(-1); res(); };
     u.onboundary=e=>{ if(e.name&&e.name!=="word") return; gotB=true; let i=0; while(i+1<starts.length&&starts[i+1]<=e.charIndex) i++; onWord(i); };
     u.onstart=()=>{ onWord(0); k=0; tm=setInterval(()=>{ if(gotB) return; k++; if(k<ws.length) onWord(k); },560); };
-    u.onend=fin; u.onerror=fin; speechSynthesis.speak(u); setTimeout(fin,ws.length*900+3000); }); }
+    u.onend=fin; u.onerror=fin; window._utt=u; const wt=Math.max(0,250-(Date.now()-(window._cancelAt||0))); setTimeout(()=>{ try{ speechSynthesis.resume(); }catch(e){} speechSynthesis.speak(u); },wt); setTimeout(fin,ws.length*900+3000+wt); }); }
 function wrLit(li,i){ app.querySelectorAll(".rl .wd").forEach(e=>e.classList.toggle("lit",+e.dataset.l===li&&+e.dataset.i===i)); }
 async function wrAuto(c){ if(view!=="wr"||wrCur()!==c) return;
   const P=W.P;
@@ -1621,7 +1627,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/22-2 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 11/22-3 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
