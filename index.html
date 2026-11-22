@@ -438,7 +438,7 @@ function phoneBudget(units,today,rank0){ // dad 2026-11-19: 전화영어 = half 
   const got={unit:[],talk:[],tz:[],wm:[],wh:[],gr:[]}, used={unit:0,talk:0,tz:0,wm:0,wh:0,gr:0}; let t=0;
   for(const k of order){ const g=pools[k][used[k]]; if(!g) continue; const c=costOf(g); if(t>0&&t+c>HALF_MIN+.4) continue; used[k]++; got[k].push(...g); t+=c; }
   return [...got.unit,...got.talk,...got.tz,...shuffle(got.wm),...got.wh,...got.gr]; }
-const APPV="11/22-6"; // shown on home (under the chips) and in the parent screen
+const APPV="11/22-7"; // shown on home (under the chips) and in the parent screen
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -902,7 +902,9 @@ function wrPlan(){ const r=wrRec(), today=todayStr(), pk=wrPage(r), page=BOOK_NW
 let W=null;
 function wrQueue(P){ return [{k:"intro"}, ...shuffle(P.words).map(x=>({k:"listen",x})), ...shuffle(P.words).map(x=>({k:"say",x})), ...P.rev.map(x=>({k:"say",x,rev:true})),
     ...P.sight.map(x=>({k:"sight",x})), {k:"sound"}, ...P.snd.words.map(x=>({k:"read",x})), ...(P.cold?[{k:"cold",it:P.cold}]:[]), ...(P.prevLines.length?[{k:"story",pk:P.prevPk,page:P.prevPage,lines:P.prevLines,again:true}]:[]), ...(P.lines.length?[{k:"story",pk:P.pk,page:P.page,lines:P.lines,follow:true},{k:"story",pk:P.pk,page:P.page,lines:P.lines,alone:true}]:[])]; }
-const wrExtra=()=>{ try{ return wrOn()&&!S.days[todayStr()]?wrQueue(wrPlan()).length:0; }catch(e){ return 0; } }; // dad 2026-11-21: one count for the whole mission
+// dad 2026-11-22: the number on top counts 🔤 단어 as ONE card and 📖 읽기 as one card per 소분류 (same study, smaller number)
+const wrUnitIdx=q=>{ const u=[]; let n=-1, last=null; q.forEach(c=>{ const m=wrCatOf(c), key=m[0].includes("단어")?"단어":m[1]; if(key!==last){ n++; last=key; } u.push(n); }); return u; };
+const wrExtra=()=>{ try{ if(!(wrOn()&&!S.days[todayStr()])) return 0; const u=wrUnitIdx(wrQueue(wrPlan())); return u.length?u[u.length-1]+1:0; }catch(e){ return 0; } }; // dad 2026-11-21: one count for the whole mission
 function wrStart(daily){ const P=wrPlan(), q=wrQueue(P), off=daily&&L&&L.queue?L.queue.length:0;
   W={off,q,i:0,t0:Date.now(),tRead:0,wordSecs:0,daily:!!daily,P,base:daily&&S.spk&&S.spk.date===todayStr()?S.spk.secs*1000:0}; view="wr"; wrEnter(); render();
 }
@@ -916,7 +918,17 @@ function wrEnter(){ const c=wrCur(); if(!c) return; c.st={tries:0,heard:"",fb:nu
   if(c.k==="sight"&&!W.tRead){ W.tRead=Date.now(); W.wordSecs=Math.round((W.tRead-W.t0)/1000); }
   setTimeout(()=>wrAuto(c),350); }
 const wrSay=(t,key)=>playSrc(key||("wr:"+t),null,t);
-function wrSlow(text,onWord){ stopAll(); const ws=text.split(" ");
+// dad 2026-11-22: 천천히 듣기 was silent (tablet voice). Now a slow recording: the book's own line (picture-book.json), a 천일문 clip, or a slow single word
+function slowSrc(text){ const ws=text.split(" ");
+  if(ws.length===1){ const k="~"+text.replace(/[^A-Za-z']/g,"").replace(/^'|'$/g,"").toLowerCase(); return TTSX[k]||TTSX[text.replace(/[^A-Za-z' ]/g,"")]||null; }
+  if(BOOK&&BOOK.pages) for(const pg of BOOK.pages) for(const l of (pg.lines||[])) if(l.t===text&&l.a) return "data:audio/mpeg;base64,"+l.a;
+  const it=ITEMS.find(i=>i.text===text&&i.src_audio); if(it) return it.src_audio; return TTSX[text]||null; }
+function playHi(src,ws,onWord){ return new Promise(res=>{ const a=new Audio(src); audioCache.slow=a; let done=false, tm=null;
+  const wt=ws.map(w=>w.replace(/[^A-Za-z']/g,"").length+2), tot=wt.reduce((x,y)=>x+y,0);
+  const fin=()=>{ if(done) return; done=true; clearInterval(tm); onWord(-1); res(); };
+  a.onplaying=()=>{ clearInterval(tm); tm=setInterval(()=>{ const d=a.duration||ws.length*.6; let t=a.currentTime/d*tot, i=0; while(i<ws.length-1&&t>wt[i]){ t-=wt[i]; i++; } onWord(i); },80); };
+  a.onended=fin; a.onpause=fin; a.onerror=fin; a.play().catch(fin); setTimeout(fin,ws.length*1500+5000); }); }
+function wrSlow(text,onWord){ stopAll(); const ws=text.split(" "); { const src=slowSrc(text); if(src) return playHi(src,ws,onWord); }
   return new Promise(res=>{ if(!("speechSynthesis" in window)){ res(); return; }
     const u=new SpeechSynthesisUtterance(text.replace(/["“”]/g,"")); u.lang="en-US"; u.rate=0.62; const en=voices.filter(v=>/^en[-_]US/i.test(v.lang)); if(en[0]) u.voice=en[0];
     let gotB=false, k=-1, tm=null, ended=false; const starts=[]; let pos=0; ws.forEach(w=>{ starts.push(pos); pos+=w.replace(/["“”]/g,"").length+1; });
@@ -1015,7 +1027,7 @@ function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes
     return `<div class="tags">${part}<span class="tag rev">${story?`📚 그림책 ${c.page}쪽${c.again?" · 🔁 어제 읽은 쪽 복습":c.follow?" · 오늘의 새 쪽 · 따라 읽기":" · 오늘의 새 쪽 · 혼자 읽기"}`:"🤫 아는 문장 먼저 읽기"}</span></div>${pg?`<div class="storybox"><img src="${pg.img}" alt=""><div class="story">${inner}</div></div>`:inner}`; }
   return ""; }
 function renderWR(){ const c=wrCur(), pct=Math.round((W.off+W.i)/(W.off+W.q.length)*100);
-  app.innerHTML=`<div class="lesson wr"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로" ${W.i?"":"style=\"opacity:.3\""}>←</button><button class="backbtn" id="fwd" aria-label="앞으로">→</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${W.off+W.i+1} / ${W.off+W.q.length}</div><div class="clock">⏱ ${mmss(W.base+Date.now()-W.t0)}</div></div>
+  app.innerHTML=`<div class="lesson wr"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로" ${W.i?"":"style=\"opacity:.3\""}>←</button><button class="backbtn" id="fwd" aria-label="앞으로">→</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${(()=>{ const u=W.u||(W.u=wrUnitIdx(W.q)); return `${W.off+u[Math.min(W.i,u.length-1)]+1} / ${W.off+u[u.length-1]+1}`; })()}</div><div class="clock">⏱ ${mmss(W.base+Date.now()-W.t0)}</div></div>
    <div class="card">${W.flash?`<div class="combo">COMBO ${W.combo}! 🔥</div>`:""}${wrBody(c)}</div></div>`;
   { const m=wrCatOf(c); stdTags(c.k==="story"?[m[0],`그림책 ${c.page}쪽 · ${c.again?"어제 쪽 다시":c.follow?"따라 읽기":"혼자 읽기"}`]:m); }
   document.getElementById("quit").onclick=()=>{ stopAll(); const d=W.daily; W=null; view=d?"home":"parent"; render(); };
@@ -1043,7 +1055,7 @@ function wrPanel(){ const r=wrRec(), P=wrPlan(), pg=BOOK_NW[P.pk][0];
   return `<div class="panel"><h3>🔤 단어 + 📖 읽기 (말하기 20분 뒤 6분 → 하루 약 26분)</h3>
   <div class="field"><label for="wron">매일 미션에 넣기</label><select id="wron"><option value="1" ${wrOn()?"selected":""}>켜기</option><option value="0" ${wrOn()?"":"selected"}>끄기</option></select></div>
   <div class="note">${r.n}일 했어요 · 배운 단어 ${Object.keys(r.words).length}개 · 다음: 새 단어 ${P.words.map(x=>x.e+" "+h(x.w)).join(", ")}${P.rev.length?` · 복습 ${P.rev.map(x=>h(x.w)).join(", ")}`:""} · 소리 ${h(P.snd.snd)} · 그림책 ${pg}쪽 (어제 쪽 복습 + 새 쪽 따라 읽기, 혼자 읽기)</div>
-  <div class="note">${BOOK?`📘 그림책 "${h(BOOK.title||"")}" 들어 있어요 (${(BOOK.pages||[]).length}쪽).`:`📘 그림책 파일이 아직 없어요. 위 "📦 천일문 파일"에서 picture-book.json 을 골라 주세요. 없으면 그림책 읽기만 빠져요.`}</div>
+  <div class="note">${BOOK?`📘 그림책 "${h(BOOK.title||"")}" 들어 있어요 (${(BOOK.pages||[]).length}쪽).${(BOOK.pages||[]).some(p=>(p.lines||[]).some(l=>l.a))?" 🔊 천천히 듣기 소리 있음":" ⚠️ 천천히 듣기 소리가 없는 옛 파일이에요. 새 picture-book.json 을 골라 주세요."}`:`📘 그림책 파일이 아직 없어요. 위 "📦 천일문 파일"에서 picture-book.json 을 골라 주세요. 없으면 그림책 읽기만 빠져요.`}</div>
   <div><button class="tbtn" id="wrgo" style="font-size:18px;padding:10px 18px">다음 단어·읽기 미리 해 보기 ▶</button> <span class="note">기록에 안 남아요</span></div></div>`; }
 
 // ---------- views ----------
@@ -1080,7 +1092,7 @@ function renderHome(){
     const w=curWeek(), ss=S.session, resume=ss&&ss.qv===QV&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
     const phN=q.filter(c=>c.phone).length, sayN=q.filter(c=>c.type==="say").length, pickN=n(c=>c.type==="pick"), talkN=n(c=>c.type==="talk");
     const whoN=n(c=>c.kind==="hs"), wmN=n(c=>c.kind==="wm"), gmN=n(c=>c.kind==="where"||c.kind==="grab");
-    mission=`<div class="mission"><h2>오늘의 미션 · ${w===-1?"📞 전화영어 데이":w?w+"주차"+(weekRound(w)>1?` <span style="font-size:.75em">🔁 ${weekRound(w)}바퀴째</span>`:""):"전체 복습"}</h2><div class="plan">${w===-1?"오늘은 전화영어 수업 문장만 연습해요":w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${whoN?` · 누구일까 ${whoN}개`:""}${wmN?` · 단어 맞추기 ${wmN}개`:""}${gmN&&w===-1?` · 그림 게임 ${gmN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${wrExtra()?` · 단어·그림책 ${wrExtra()}개`:""}${phN&&w!==-1?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
+    mission=`<div class="mission"><h2>오늘의 미션 · ${w===-1?"📞 전화영어 데이":w?w+"주차"+(weekRound(w)>1?` <span style="font-size:.75em">🔁 ${weekRound(w)}바퀴째</span>`:""):"전체 복습"}</h2><div class="plan">${w===-1?"오늘은 전화영어 수업 문장만 연습해요":w?weekRange(w):`1~${S.bookWeek}주차에서 골고루`}<br>말하기 ${sayN}문장${whoN?` · 누구일까 ${whoN}개`:""}${wmN?` · 단어 맞추기 ${wmN}개`:""}${gmN&&w===-1?` · 그림 게임 ${gmN}개`:""}${talkN?` · 대화 ${talkN}개`:""}${wrExtra()?` · 단어·읽기 ${wrExtra()}개`:""}${phN&&w!==-1?`<br>📞 전화영어 ${phN}개 포함`:""}</div><button class="go" id="start">${resume?`이어서 하기 (${ss.i+1}번째부터) ▶`:"시작하기 ▶"}</button></div>`;
   }
   const dn=["일","월","화","수","목","금","토"], wk=[];
   for(let i=6;i>=0;i--){ const d=addDays(today,-i); const [y,m,dd]=d.split("-").map(Number);
