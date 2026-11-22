@@ -437,6 +437,7 @@ function phoneBudget(units,today,rank0){ // dad 2026-11-19: 전화영어 = half 
   const got={unit:[],talk:[],tz:[],wm:[],wh:[],gr:[]}, used={unit:0,talk:0,tz:0,wm:0,wh:0,gr:0}; let t=0;
   for(const k of order){ const g=pools[k][used[k]]; if(!g) continue; const c=costOf(g); if(t>0&&t+c>HALF_MIN+.4) continue; used[k]++; got[k].push(...g); t+=c; }
   return [...got.unit,...got.talk,...got.tz,...shuffle(got.wm),...got.wh,...got.gr]; }
+const APPV="11/22-4"; // shown on home (under the chips) and in the parent screen
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -1041,7 +1042,7 @@ function render(){
 }
 function topBar(){
   return `<div class="top"><div class="brand" id="logo">💗 서현이 영어 비밀 연구소!</div>
-  <div class="chips"><span class="chip">🔥 ${streak()}</span><span class="chip">⭐ ${S.stickers.length}</span>${S.bestCombo?`<span class="chip">💥 최고 콤보 ${S.bestCombo}</span>`:""}</div></div>`;
+  <div class="chips"><span class="chip">🔥 ${streak()}</span><span class="chip">⭐ ${S.stickers.length}</span>${S.bestCombo?`<span class="chip">💥 최고 콤보 ${S.bestCombo}</span>`:""}</div></div><div style="text-align:right;font-size:13px;color:var(--muted);margin-top:-12px">앱 버전 ${APPV}</div>`;
 }
 function bindLogo(){
   const el=document.getElementById("logo"); if(!el) return; let t=null;
@@ -1627,7 +1628,7 @@ function renderParent(){
     <div class="note">지금 보는 날짜: ${today}${S.offset?` (실제보다 ${S.offset}일 뒤)`:""}</div>
     <div class="tools"><button class="tbtn" id="skip">하루 넘기기 →</button>${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${doneToday()?"":`<button class="tbtn" id="markdone">오늘 미션 완료로 표시</button>`}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}<button class="tbtn" id="pinchg">비밀번호 바꾸기</button>
       ${confirmReset?`<button class="tbtn warn" id="reset2">정말 지울까요? 기록이 모두 지워져요</button><button class="tbtn" id="nores">취소</button>`:`<button class="tbtn warn" id="reset">기록 모두 지우기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 11/22-3 · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
+    <div class="note">${syncState} · 앱 버전 ${APPV} · 전화영어 문장 ${PHONE.length}개</div></div></div>`;
   const $=id=>document.getElementById(id);
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
