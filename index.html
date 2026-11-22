@@ -438,7 +438,7 @@ function phoneBudget(units,today,rank0){ // dad 2026-11-19: 전화영어 = half 
   const got={unit:[],talk:[],tz:[],wm:[],wh:[],gr:[]}, used={unit:0,talk:0,tz:0,wm:0,wh:0,gr:0}; let t=0;
   for(const k of order){ const g=pools[k][used[k]]; if(!g) continue; const c=costOf(g); if(t>0&&t+c>HALF_MIN+.4) continue; used[k]++; got[k].push(...g); t+=c; }
   return [...got.unit,...got.talk,...got.tz,...shuffle(got.wm),...got.wh,...got.gr]; }
-const APPV="11/22-5"; // shown on home (under the chips) and in the parent screen
+const APPV="11/22-6"; // shown on home (under the chips) and in the parent screen
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -1017,6 +1017,7 @@ function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes
 function renderWR(){ const c=wrCur(), pct=Math.round((W.off+W.i)/(W.off+W.q.length)*100);
   app.innerHTML=`<div class="lesson wr"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로" ${W.i?"":"style=\"opacity:.3\""}>←</button><button class="backbtn" id="fwd" aria-label="앞으로">→</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${W.off+W.i+1} / ${W.off+W.q.length}</div><div class="clock">⏱ ${mmss(W.base+Date.now()-W.t0)}</div></div>
    <div class="card">${W.flash?`<div class="combo">COMBO ${W.combo}! 🔥</div>`:""}${wrBody(c)}</div></div>`;
+  { const m=wrCatOf(c); stdTags(c.k==="story"?[m[0],`그림책 ${c.page}쪽 · ${c.again?"어제 쪽 다시":c.follow?"따라 읽기":"혼자 읽기"}`]:m); }
   document.getElementById("quit").onclick=()=>{ stopAll(); const d=W.daily; W=null; view=d?"home":"parent"; render(); };
   document.getElementById("prev").onclick=()=>{ if(!W.i) return; stopAll(); W.flash=false; W.i--; wrEnter(); render(); };
   document.getElementById("fwd").onclick=()=>wrAdvance(); // dad 2026-11-21: ← → in 단어·읽기 too
@@ -1191,6 +1192,12 @@ function stepsHTML(c){
   if(c.type!=="say"||c.steps.length<2||c.steps.some(x=>!N[x])) return `<div class="steps"></div>`;
   return `<div class="steps">${c.steps.map((s,k)=>`<span class="step ${k===c.st.step?"cur":k<c.st.step?"ok":""}">${k<c.st.step?"✓ ":""}${N[s]}</span>`).join("")}</div>`;
 }
+// dad 2026-11-22: every card's name tags = 중분류 + 소분류 (same names as the parent-screen table)
+function stdTags(ms){ const card=app.querySelector(".card"); if(!card||!ms) return; let t=card.querySelector(".tags");
+  const keep=t?[...t.children].filter(e=>/\d\s*\/\s*\d/.test(e.textContent)).map(e=>e.outerHTML).join(""):"";
+  const cls=ms[0].includes("📞")?"phone":ms[0].includes("📖")?"talk":"";
+  const html=`<span class="tag ${cls}">${ms[0]}</span><span class="tag rev">${ms[1]}</span>${keep}`;
+  if(t) t.innerHTML=html; else { t=document.createElement("div"); t.className="tags"; t.innerHTML=html; card.prepend(t); } }
 function renderLesson(){
   const c=cur(); const pct=Math.round(L.i/(L.queue.length+(L.wx||0))*100);
   let body="";
@@ -1203,6 +1210,7 @@ function renderLesson(){
   document.getElementById("quit").onclick=()=>{stopAll();saveSession();view="home";render();};
   document.getElementById("fwd").onclick=()=>{ if(L.i<L.queue.length-1){ stopAll(); L.i++; saveSession(); enterCard(); render(); } else advance(); };
   document.getElementById("prev").onclick=()=>{ stopAll(); if(L.i>0){ L.i--; saveSession(); enterCard(); render(); } else { view="home"; render(); } };
+  if(c.type!=="tip") stdTags(catOf(c));
   bindCard(c);
 }
 function coachMsg(target,heard){
