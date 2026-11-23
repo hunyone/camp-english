@@ -185,6 +185,7 @@ b.vk{color:#7B4FD6;font-size:1.25em;text-decoration:underline;text-underline-off
 .stat.dday{background:var(--maple);border-color:var(--maple);color:#fff}
 .stat.dday .lab{color:#fff;opacity:.85}
 .panel{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.fwrap{position:relative;margin-bottom:8px}.fdrop{position:absolute;z-index:5;top:100%;left:0;background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow:auto;box-shadow:0 6px 18px rgba(0,0,0,.12);min-width:240px}.fdrop label{font-size:17px;white-space:nowrap;cursor:pointer}.fdrop input{width:20px;height:20px;vertical-align:middle}
 .panel h3,.panel .psum{font-size:20px;color:var(--pine);font-weight:700}.panel .psum{cursor:pointer;margin-bottom:10px}.panel details>*:not(summary){margin-top:10px}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;max-width:440px}
 .cal div{aspect-ratio:1;border-radius:10px;background:var(--bg);display:grid;place-items:center;font-size:13px;color:var(--muted);max-width:100%}
@@ -442,7 +443,7 @@ function phoneBudget(units,today,rank0){ // dad 2026-11-19: 전화영어 = half 
   const got={unit:[],talk:[],tz:[],wm:[],wh:[],gr:[]}, used={unit:0,talk:0,tz:0,wm:0,wh:0,gr:0}; let t=0;
   for(const k of order){ const g=pools[k][used[k]]; if(!g) continue; const c=costOf(g); if(t>0&&t+c>HALF_MIN+.4) continue; used[k]++; got[k].push(...g); t+=c; }
   return [...got.unit,...got.talk,...got.tz,...shuffle(got.wm),...got.wh,...got.gr]; }
-const APPV="11/23-3"; // shown on home (under the chips) and in the parent screen
+const APPV="11/23-4"; // shown on home (under the chips) and in the parent screen
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -1694,20 +1695,28 @@ function weekTable(){
 }
 const bigLab=()=>{ const w=curWeek(); return w===-1?"📞 전화영어 데이":w?w+"주차":"전체 복습"; };
 // dad 2026-11-23: card order by day — saved days, today, and tomorrow (computed on a copy, her records untouched)
-function logCards(){ try{ const t=todayStr(), L0=S.cardLog||(S.cardLog={}); L0[t]={big:bigLab(),html:todayTable()}; Object.keys(L0).sort().slice(0,-30).forEach(k=>delete L0[k]); }catch(e){} }
-function tmrTable(){ const bak=S, sv=save; try{ save=()=>{}; S=JSON.parse(JSON.stringify(bak)); S.offset=(S.offset||0)+1; S.session=null; return {big:bigLab(),html:todayTable()}; }catch(e){ return {big:"내일",html:`<div class="note">내일 카드를 계산하지 못했어요.</div>`}; } finally{ S=bak; save=sv; } }
-// dad 2026-11-23: press any week → that week's card table "쫙" (as on its first day: the week's sentences shown as new), computed on a copy
-function weekTable(n){ const bak=S, sv=save; try{ save=()=>{}; S=JSON.parse(JSON.stringify(bak)); S.phoneOnly=null; S.session=null; S.nextWeek=n; S.bookWeek=Math.max(S.bookWeek||1,n);
-    ITEMS.forEach(i=>{ if(i.week===n&&(i.src==="book"||i.src==="drill")) delete S.items[i.id]; }); const bk=ITEMS.filter(i=>i.week===n&&i.src==="book"); return {big:n+"주차",html:`<div class="note">📘 ${n}주차 책 문장 ${bk.length}개 (며칠에 나눠 새로 배워요): ${bk.map(i=>h(i.text)).join(" · ")}</div>`+todayTable()}; }
-  catch(e){ return {big:n+"주차",html:`<div class="note">${n}주차 표를 만들지 못했어요.</div>`}; } finally{ S=bak; save=sv; } }
-let TBL="t", POPEN={};
-function cardTables(){ const t=todayStr(), done=!!S.days[t], lg=S.cardLog||{}, tod=done&&lg[t]?lg[t]:{big:bigLab(),html:todayTable()}, tm=tmrTable();
-  const past=Object.keys(lg).filter(d=>d<t).sort().slice(-7);
-  const opts=[...past.map(d=>[d,`${lg[d].big} · ${d.slice(5).replace("-","/")}`]),["t",`${tod.big} · 오늘`],["n",`${tm.big} · 내일 미리보기`]];
-  const wks=Array.from({length:MAXW},(_,k)=>k+1), isW=/^w\d+$/.test(TBL)&&+TBL.slice(1)<=MAXW;
-  const cur=isW||opts.some(o=>o[0]===TBL)?TBL:"t", body=isW?`<div class="note">${TBL.slice(1)}주차를 하는 날 나오는 카드예요 (그 주 문장을 처음 배우는 날 기준). 전화영어·단어·읽기는 지금 진도로 보여 줘요.</div>${weekTable(+TBL.slice(1)).html}`:cur==="t"?tod.html:cur==="n"?`<div class="note">오늘까지 공부한 기록으로 계산한 내일 카드예요. 오늘 공부를 더 하면 바뀔 수 있어요.</div>${tm.html}`:lg[cur].html;
-  return `<div class="tools">${opts.map(o=>`<button class="tbtn ${o[0]===cur?"next":""}" data-tbl="${o[0]}">${o[1]}</button>`).join("")}</div><div class="tools">${wks.map(n=>`<button class="tbtn ${cur==="w"+n?"next":""}" data-tbl="w${n}">${n}주차</button>`).join("")}</div>${body}`; }
-function todayTable(){ // dad 2026-11-22: today's cards in the order she sees them, 4 levels
+function logCards(){ try{ const t=todayStr(), L0=S.cardLog||(S.cardLog={}); L0[t]={big:bigLab(),rows:todayTable(true)}; Object.keys(L0).sort().slice(0,-30).forEach(k=>delete L0[k]); }catch(e){} }
+function onCopy(fn,mod){ const bak=S, sv=save; try{ save=()=>{}; S=JSON.parse(JSON.stringify(bak)); S.session=null; mod(S); return fn(); }catch(e){ return null; } finally{ S=bak; save=sv; } }
+const tmrRows=()=>onCopy(()=>({big:bigLab(),rows:todayTable(true)}),x=>{ x.offset=(x.offset||0)+1; });
+// dad 2026-11-23: any week's day as on its first day (the week's sentences shown as new), computed on a copy
+const weekRows=n=>onCopy(()=>({big:n+"주차",rows:todayTable(true)}),x=>{ x.phoneOnly=null; x.nextWeek=n; x.bookWeek=Math.max(x.bookWeek||1,n); ITEMS.forEach(i=>{ if(i.week===n&&(i.src==="book"||i.src==="drill")) delete x.items[i.id]; }); });
+let SEL=null, FOPEN=false, POPEN={};
+// dad 2026-11-23: one "대분류 ▼" filter like Excel — tick any weeks / today / tomorrow / past days, the table shows just those
+function cardTables(){ const t=todayStr(), done=!!S.days[t], lg=S.cardLog||{};
+  const opts=[...Object.keys(lg).filter(d=>d<t&&lg[d].rows).sort().slice(-7).map(d=>({k:d,lab:`${lg[d].big} · ${d.slice(5).replace("-","/")} (지난날)`,get:()=>lg[d]})),
+    {k:"t",lab:`${bigLab()} · 오늘`,get:()=>done&&lg[t]&&lg[t].rows?lg[t]:{big:bigLab(),rows:todayTable(true)}},
+    {k:"n",lab:"내일 미리보기",get:tmrRows},
+    ...Array.from({length:MAXW},(_,k)=>k+1).map(n=>({k:"w"+n,lab:`${n}주차`,get:()=>weekRows(n),wk:n}))];
+  if(!SEL) SEL=new Set(["t"]); const on=opts.filter(o=>SEL.has(o.k));
+  const notes=[], rows=[]; on.forEach(o=>{ const r=o.get(); if(!r) return; const tag=o.k==="t"?" (오늘)":o.k==="n"?" (내일)":o.wk?"":` (${o.k.slice(5).replace("-","/")})`;
+    if(o.wk){ const bk=ITEMS.filter(i=>i.week===o.wk&&i.src==="book"); notes.push(`📘 ${o.wk}주차 책 문장 ${bk.length}개: ${bk.map(i=>h(i.text)).join(" · ")}`); }
+    r.rows.forEach((x,k)=>rows.push([k+1,r.big+tag,...x])); });
+  const all=on.length===opts.length;
+  const dd=FOPEN?`<div class="fdrop"><label><input type="checkbox" data-fall ${all?"checked":""}> <b>(전체 선택)</b></label>${opts.map(o=>`<label><input type="checkbox" data-fk="${o.k}" ${SEL.has(o.k)?"checked":""}> ${o.lab}</label>`).join("")}</div>`:"";
+  return `<div class="fwrap"><button class="tbtn" data-fbtn>대분류 ▼ <small>(${on.length?on.map(o=>o.lab.replace(/ \(지난날\)/,"")).join(", "):"선택 없음"})</small></button>${dd}</div>
+    ${notes.length?`<div class="note">${notes.join("<br>")}${on.some(o=>o.wk)?`<br>주차 표는 그 주 문장을 처음 배우는 날 기준이에요. 전화영어·단어·읽기는 지금 진도로 보여 줘요.`:""}</div>`:""}${on.some(o=>o.k==="n")?`<div class="note">내일 미리보기는 오늘까지 공부한 기록으로 계산했어요.</div>`:""}
+    <table class="wtable ttbl"><tr><th>#</th><th>대분류</th><th>중분류</th><th>소분류</th><th style="text-align:left">문장 / 단어</th></tr>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td style="text-align:left">${r[4]}</td></tr>`).join("")}</table>`; }
+function todayTable(raw){ // dad 2026-11-22: today's cards in the order she sees them, 4 levels
   const ss=S.session, q=(ss&&ss.qv===QV&&ss.date===todayStr()&&ss.week===curWeek())?ss.queue:buildQueue();
   const txt=c=>{ const it=byId[c.id];
     if(c.type==="say") return it.text+(it.ko?` <span class="note">${h(it.ko)}</span>`:"");
@@ -1717,7 +1726,7 @@ function todayTable(){ // dad 2026-11-22: today's cards in the order she sees th
   const rows=q.map(c=>[...catOf(c),txt(c)]);
   if(wrOn()&&wrRec().last!==todayStr()){ const P=wrPlan(); wrQueue(P).forEach(c=>{ const [m,sb]=wrCatOf(c);
     rows.push([m,sb,h(c.x?c.x.w+(c.k==="say"?" → "+c.x.s:""):c.k==="intro"?P.words.map(w=>w.w).join(", "):c.k==="sound"?P.snd.snd+" : "+P.snd.words.map(w=>w.w).join(", "):c.k==="cold"?c.it.text:c.k==="story"?c.page+"쪽 "+(c.old?"(예전 쪽 다시)":c.again?"(어제 쪽 다시)":"(오늘의 새 쪽)"):"")]); }); }
-  const big=bigLab();
+  if(raw) return rows; const big=bigLab();
   return `<table class="wtable ttbl"><tr><th>#</th><th>대분류</th><th>중분류</th><th>소분류</th><th style="text-align:left">문장 / 단어</th></tr>${rows.map((r,k)=>`<tr><td>${k+1}</td><td>${big}</td><td>${r[0]}</td><td>${r[1]}</td><td style="text-align:left">${r[2]}</td></tr>`).join("")}</table>`; }
 const PORD={learn:0,weak:1,new:2,know:3}; // dad 2026-11-22: 익히는 중 first
 function renderParent(){
@@ -1754,7 +1763,10 @@ function renderParent(){
 </div>`;
   // dad 2026-11-23: every box folds open/closed by its title; all open at first
   app.querySelectorAll(".parent .panel").forEach((p,k)=>{ const h3=p.querySelector(":scope>h3"); if(!h3) return; const d=document.createElement("details"), sm=document.createElement("summary"); sm.className="psum"; sm.innerHTML=h3.innerHTML; h3.remove(); d.append(sm,...p.childNodes); p.append(d); d.open=POPEN[k]===true; d.ontoggle=()=>{ POPEN[k]=d.open; }; });
-  const bindTbl=()=>app.querySelectorAll("[data-tbl]").forEach(b=>b.onclick=()=>{ TBL=b.dataset.tbl; const el=document.getElementById("ctbl"); if(el){ el.innerHTML=cardTables(); bindTbl(); } }); bindTbl();
+  const reTbl=()=>{ const el=document.getElementById("ctbl"); if(el){ el.innerHTML=cardTables(); bindTbl(); } };
+  const bindTbl=()=>{ app.querySelectorAll("[data-fbtn]").forEach(b=>b.onclick=()=>{ FOPEN=!FOPEN; reTbl(); });
+    app.querySelectorAll("[data-fk]").forEach(b=>b.onchange=()=>{ b.checked?SEL.add(b.dataset.fk):SEL.delete(b.dataset.fk); reTbl(); });
+    app.querySelectorAll("[data-fall]").forEach(b=>b.onchange=()=>{ SEL=new Set(b.checked?[...app.querySelectorAll("[data-fk]")].map(x=>x.dataset.fk):[]); reTbl(); }); }; bindTbl();
   const $=id=>document.getElementById(id)||{}; // dad 2026-11-22: many controls removed from 아빠 화면
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
