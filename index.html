@@ -247,6 +247,9 @@ details summary{cursor:pointer;color:var(--pine);font-family:var(--f-disp);font-
 .wr .mic{width:120px;height:120px}
 .storybox .mic{width:96px;height:96px}
 .storybox .sl b{font-size:clamp(22px,3.9vh,33px)}
+.sl .wd.hid{color:transparent!important;border-bottom:3px solid #C9BEDD;border-radius:0;margin:0 2px}.sl .wd.hid.lit{background:#FFD95A;border-bottom-color:#FFD95A}
+.bub{display:flex;gap:14px;align-items:flex-start;text-align:left}.bub .dog{font-size:56px;line-height:1}.bub p{margin:0;background:#fff;border:3px solid var(--line);border-radius:22px;padding:14px 18px;font-size:clamp(24px,4vh,32px);font-weight:700;color:var(--ink);line-height:1.4}
+.role .sl{display:flex;gap:10px;align-items:baseline}.role .who{flex:none;font-size:15px;font-weight:700;border-radius:10px;padding:2px 8px;background:#EEE8F7;color:#6B5A8E}.role .who.me{background:#FFE3EE;color:#C2447A}
 .rlko{font-size:clamp(26px,4.4vh,34px)!important;color:var(--ink)!important;font-weight:700;line-height:1.3} /* dad 2026-11-22: Korean meaning bigger, English a bit smaller */
 .sl .wd{border-radius:8px;padding:0 3px;transition:background .15s}.sl .wd.lit{background:#FFD95A;color:var(--ink)}.sl .wd.g{color:#2E9E5B}.sl .wd.x{color:#A9A3B5;text-decoration:underline dotted;cursor:pointer}
 .rl{display:flex;flex-direction:column;gap:6px;width:100%}.rl .sl b{font-size:clamp(28px,5vh,44px)}.rlmsg{font-size:22px!important}.sightw{font-size:clamp(80px,15vh,130px)!important}
@@ -439,7 +442,7 @@ function phoneBudget(units,today,rank0){ // dad 2026-11-19: 전화영어 = half 
   const got={unit:[],talk:[],tz:[],wm:[],wh:[],gr:[]}, used={unit:0,talk:0,tz:0,wm:0,wh:0,gr:0}; let t=0;
   for(const k of order){ const g=pools[k][used[k]]; if(!g) continue; const c=costOf(g); if(t>0&&t+c>HALF_MIN+.4) continue; used[k]++; got[k].push(...g); t+=c; }
   return [...got.unit,...got.talk,...got.tz,...shuffle(got.wm),...got.wh,...got.gr]; }
-const APPV="11/22-10"; // shown on home (under the chips) and in the parent screen
+const APPV="11/23-1"; // shown on home (under the chips) and in the parent screen
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -573,7 +576,7 @@ function matches(target,alts,allowIt){
 // ---------- audio ----------
 const audioCache={};
 let voices=[]; function loadVoices(){ try{ voices=speechSynthesis.getVoices(); }catch(e){} } loadVoices(); try{ speechSynthesis.onvoiceschanged=loadVoices; }catch(e){}
-function stopAll(){ if(curRec) curRec.stop(); Object.values(audioCache).forEach(a=>{try{a.pause()}catch(e){}}); try{ if(speechSynthesis.speaking||speechSynthesis.pending){ speechSynthesis.cancel(); window._cancelAt=Date.now(); } }catch(e){} }
+function stopAll(){ hiTok++; if(curRec) curRec.stop(); Object.values(audioCache).forEach(a=>{try{a.pause()}catch(e){}}); try{ if(speechSynthesis.speaking||speechSynthesis.pending){ speechSynthesis.cancel(); window._cancelAt=Date.now(); } }catch(e){} }
 function playSrc(key,src,text,role,rate){ rate=rate||1;
   stopAll();
   if(!src && TTS[text]){ src="data:audio/mpeg;base64,"+TTS[text]; key="t:"+text; }
@@ -781,7 +784,7 @@ function catOf(c){ const it=byId[c.id], ph=c.phone||(it&&it.src==="phone")||(c.t
   else if(c.old) sub="예전 주 복습";
   else sub="복습 · "+({blank:"빈칸 채워 말하기",order:"순서 맞추기",ko:"한국말 보고 말하기"}[c.fmt]||(ph?((()=>{ const s0=S.items[c.id]; return !s0||s0.box<2||s0.recentWrong>0; })()?"빈칸 채워 말하기":"한국말 보고 말하기"):"한국말 보고 말하기"));
   return [mid,sub]; }
-const WRCAT={intro:["🔤 단어","오늘의 새 단어"],listen:["🔤 단어","듣고 그림 고르기"],say:["🔤 단어","그림 보고 말하기"],sight:["📖 읽기","보자마자 읽기"],sound:["📖 읽기","오늘의 소리"],read:["📖 읽기","소리 단어 읽기"],cold:["📖 읽기","아는 문장 먼저 읽기"],story:["📖 읽기","그림책"]};
+const WRCAT={intro:["🔤 단어","오늘의 새 단어"],listen:["🔤 단어","듣고 그림 고르기"],say:["🔤 단어","그림 보고 말하기"],sight:["📖 읽기","보자마자 읽기"],sound:["📖 읽기","오늘의 소리"],read:["📖 읽기","소리 단어 읽기"],cold:["📖 읽기","아는 문장 먼저 읽기"],story:["📖 읽기","그림책"],pic:["📖 읽기","그림 이야기"],role:["📖 읽기","역할 놀이"]};
 const wrCatOf=c=>c.k==="say"&&c.rev?["🔤 단어","예전 단어 다시"]:WRCAT[c.k];
 function doneToday(){ return !!S.days[todayStr()]; }
 function streak(){ let n=0,d=todayStr(); if(!S.days[d]) d=addDays(d,-1); while(S.days[d]){n++; d=addDays(d,-1);} return n; }
@@ -902,13 +905,33 @@ function wrPlan(){ const r=wrRec(), today=todayStr(), pk=wrPage(r), page=BOOK_NW
   const pgs=wrPages(r), rv=r.rv||{}; let oldPk=r.op&&r.op.d===today?r.op.k:-1;
   if(oldPk<0||oldPk===pk||oldPk===prevPk){ oldPk=-1; Object.keys(pgs).map(Number).filter(k=>k!==pk&&k!==prevPk&&pgs[k]<today).sort((a,b)=>((rv[a]||pgs[a])<(rv[b]||pgs[b])?-1:(rv[a]||pgs[a])>(rv[b]||pgs[b])?1:a-b)).slice(0,1).forEach(k=>oldPk=k); }
   const oldPage=oldPk>=0?BOOK_NW[oldPk][0]:0, oldLines=oldPk>=0?bookLines(oldPk,oldPage):[];
-  return {page,pk,words,rev,snd,sight,cold,lines,prevPk,prevPage,prevLines,oldPk,oldPage,oldLines}; }
+  const B3=bk3()?bk3Plan(r,today):null;
+  return {page,pk,words,rev,snd,sight,cold,lines,prevPk,prevPage,prevLines,oldPk,oldPage,oldLines,B3}; }
+// dad 2026-11-23: picture book v3 = the book's FULL text in order, read half a page a day (shadowing): older 4 lines → yesterday's half → picture talk → today's new half → 🎭 role play
+const bk3=()=>!!(BOOK&&BOOK.v>=3&&BOOK.pages&&BOOK.pages.length);
+function bkUnits(){ const u=[]; BOOK.pages.forEach((pg,pk)=>{ const n=pg.lines.length, m=Math.ceil(n/2); u.push({pk,h:0,a:0,b:m}); if(n>m) u.push({pk,h:1,a:m,b:n}); }); return u; }
+const bkLine=k=>{ const [pk,i]=k.split(":").map(Number), l=BOOK.pages[pk].lines[i]; return {t:l.t,ko:l.ko||"",w:l.w,s:l.s,k}; };
+const bkUnitLines=u=>BOOK.pages[u.pk].lines.slice(u.a,u.b).map((l,j)=>bkLine(u.pk+":"+(u.a+j)));
+function bk3Plan(r,today){ const U=bkUnits(), ud=r.u3||{}; let nu=U.findIndex((x,i)=>!ud[i]||ud[i]===today); if(nu<0) nu=U.length-1;
+  let yu=-1; for(const i in ud){ if(+i!==nu&&ud[i]<today&&(yu<0||ud[i]>ud[yu]||ud[i]===ud[yu]&&+i>yu)) yu=+i; }
+  let ok=r.op3&&r.op3.d===today?r.op3.keys:null;
+  if(!ok){ const ln=r.ln3||{}, pool=[]; Object.keys(ud).map(Number).filter(i=>i!==nu&&i!==yu&&ud[i]<today).sort((a,b)=>a-b).forEach(i=>bkUnitLines(U[i]).forEach(l=>pool.push(l.k)));
+    ok=pool.map((k,o)=>[k,(ln[k]||{}).d||"0000",o]).sort((a,b)=>a[1]<b[1]?-1:a[1]>b[1]?1:a[2]-b[2]).slice(0,4).sort((a,b)=>a[2]-b[2]).map(x=>x[0]); }
+  return {U,nu,yu,old:ok}; }
 let W=null;
-function wrQueue(P){ return [{k:"intro"}, ...shuffle(P.words).map(x=>({k:"listen",x})), ...shuffle(P.words).map(x=>({k:"say",x})), ...P.rev.map(x=>({k:"say",x,rev:true})),
+function wrQueue(P){ if(P.B3) return wrQueue3(P); return [{k:"intro"}, ...shuffle(P.words).map(x=>({k:"listen",x})), ...shuffle(P.words).map(x=>({k:"say",x})), ...P.rev.map(x=>({k:"say",x,rev:true})),
     // dad 2026-11-22: 📖 읽기 = picture book only, all shadowing (app reads slowly → she repeats); reviews pile up: an older page (longest unread) + yesterday's page + today's new page
     ...(P.oldLines.length?[{k:"story",pk:P.oldPk,page:P.oldPage,lines:P.oldLines,old:true,follow:true}]:[]), ...(P.prevLines.length?[{k:"story",pk:P.prevPk,page:P.prevPage,lines:P.prevLines,again:true,follow:true}]:[]), ...(P.lines.length?[{k:"story",pk:P.pk,page:P.page,lines:P.lines,follow:true}]:[])]; }
+function wrQueue3(P){ const {U,nu,yu,old}=P.B3, nU=U[nu], pg=k=>BOOK_NW[k]?BOOK_NW[k][0]:BOOK.pages[k].p;
+  const words=[{k:"intro"}, ...shuffle(P.words).map(x=>({k:"listen",x})), ...shuffle(P.words).map(x=>({k:"say",x})), ...P.rev.map(x=>({k:"say",x,rev:true}))];
+  const ol=old.map(bkLine), opk=ol.length?+ol[0].k.split(":")[0]:0;
+  return words.concat(ol.length?[{k:"story",old:true,follow:true,pk:opk,page:BOOK.pages[opk].p,lines:ol}]:[],
+    yu>=0?[{k:"story",again:true,follow:true,pk:U[yu].pk,page:BOOK.pages[U[yu].pk].p,lines:bkUnitLines(U[yu]),u:yu}]:[],
+    [{k:"pic",pk:nU.pk,page:BOOK.pages[nU.pk].p,u:nu,talk:(BOOK.pages[nU.pk].talk||[])[nU.h]||""},
+     {k:"story",follow:true,nw:true,pk:nU.pk,page:BOOK.pages[nU.pk].p,lines:bkUnitLines(nU),u:nu},
+     {k:"role",pk:nU.pk,page:BOOK.pages[nU.pk].p,lines:bkUnitLines(nU),u:nu}]); }
 // dad 2026-11-22: the number on top counts 🔤 단어 as ONE card and 📖 읽기 as one card per 소분류 (same study, smaller number)
-const wrUnitIdx=q=>{ const u=[]; let n=-1, last=null; q.forEach(c=>{ const m=wrCatOf(c), key=m[0].includes("단어")?"단어":c.k==="story"?"s"+c.pk+(c.old?"o":c.again?"a":"n"):m[1]; if(key!==last){ n++; last=key; } u.push(n); }); return u; };
+const wrUnitIdx=q=>{ const u=[]; let n=-1, last=null; q.forEach(c=>{ const m=wrCatOf(c), key=m[0].includes("단어")?"단어":c.k==="story"?"s"+c.pk+(c.old?"o":c.again?"a":"n"):c.k==="pic"||c.k==="role"?c.k+c.u:m[1]; if(key!==last){ n++; last=key; } u.push(n); }); return u; };
 const wrExtra=()=>{ try{ if(!(wrOn()&&!S.days[todayStr()])) return 0; const u=wrUnitIdx(wrQueue(wrPlan())); return u.length?u[u.length-1]+1:0; }catch(e){ return 0; } }; // dad 2026-11-21: one count for the whole mission
 function wrStart(daily){ const P=wrPlan(), q=wrQueue(P), off=daily&&L&&L.queue?L.queue.length:0;
   W={off,q,i:0,t0:Date.now(),tRead:0,wordSecs:0,daily:!!daily,P,base:daily&&S.spk&&S.spk.date===todayStr()?S.spk.secs*1000:0}; view="wr"; wrEnter(); render();
@@ -919,7 +942,9 @@ const wtok=w=>w.toLowerCase().replace(/[^a-z']/g,"");
 function wrEnter(){ const c=wrCur(); if(!c) return; c.st={tries:0,heard:"",fb:null,listening:false,phase:0,line:0,miss:[],empty:0,li:0,round:0};
   if(c.k==="listen"){ c.opts=shuffle(W.P.words); }
   if(isRL(c)){ if(c.k==="cold") c.lines=[{t:c.it.text,ko:c.it.ko||""}]; c.st.green=c.lines.map(l=>l.t.split(" ").map(()=>false)); }
-  if(c.k==="story"&&!c.again&&!c.old&&W.daily){ wrPages(wrRec())[c.pk]=todayStr(); save(); }
+  if(W.P.B3&&W.daily&&(c.k==="story"||c.k==="pic"||c.k==="role")){ const r=wrRec(), t=todayStr(); if(c.u!==undefined&&!c.again) (r.u3||(r.u3={}))[c.u]=t; if(c.old) r.op3={d:t,keys:c.lines.map(l=>l.k)}; save(); }
+  else if(c.k==="story"&&!c.again&&!c.old&&W.daily){ wrPages(wrRec())[c.pk]=todayStr(); save(); }
+  if(c.k==="story"&&W.P.B3){ const ln=wrRec().ln3||{}; c.lines.forEach(l=>{ l.hide=!c.nw&&l.k&&(ln[l.k]||{}).s>=2; }); c.st.rev={}; }
   if(c.k==="story"&&c.old&&W.daily){ const r=wrRec(); r.op={d:todayStr(),k:c.pk}; (r.rv||(r.rv={}))[c.pk]=todayStr(); save(); }
   if(c.k==="story"&&!W.tRead){ W.tRead=Date.now(); W.wordSecs=Math.round((W.tRead-W.t0)/1000); }
   setTimeout(()=>wrAuto(c),350); }
@@ -929,10 +954,12 @@ function slowSrc(text){ const ws=text.split(" ");
   if(ws.length===1){ const k="~"+text.replace(/[^A-Za-z']/g,"").replace(/^'|'$/g,"").toLowerCase(); return TTSX[k]||TTSX[text.replace(/[^A-Za-z' ]/g,"")]||null; }
   if(BOOK&&BOOK.pages) for(const pg of BOOK.pages) for(const l of (pg.lines||[])) if(l.t===text&&l.a) return "data:audio/mpeg;base64,"+l.a;
   const it=ITEMS.find(i=>i.text===text&&i.src_audio); if(it) return it.src_audio; return TTSX[text]||null; }
-function playHi(src,ws,onWord){ return new Promise(res=>{ const a=new Audio(src); audioCache.slow=a; let done=false, tm=null;
-  const wt=ws.map(w=>w.replace(/[^A-Za-z']/g,"").length+2), tot=wt.reduce((x,y)=>x+y,0);
-  const fin=()=>{ if(done) return; done=true; clearInterval(tm); onWord(-1); res(); };
-  a.onplaying=()=>{ clearInterval(tm); tm=setInterval(()=>{ const d=a.duration||ws.length*.6; let t=a.currentTime/d*tot, i=0; while(i<ws.length-1&&t>wt[i]){ t-=wt[i]; i++; } onWord(i); },80); };
+// dad 2026-11-23: the yellow word jumped around when paging with ← → → a stale clip can no longer light the new card, and the light waits for the clip's real length
+let hiTok=0;
+function playHi(src,ws,onWord){ const tok=++hiTok, ow=i=>{ if(tok===hiTok) onWord(i); }; return new Promise(res=>{ const a=new Audio(src); audioCache.slow=a; let done=false, tm=null;
+  const wt=ws.map(w=>w.replace(/[^A-Za-z']/g,"").length+1.5+(/[,.!?]["”]?$/.test(w)?2.5:0)), tot=wt.reduce((x,y)=>x+y,0);
+  const fin=()=>{ if(done) return; done=true; clearInterval(tm); ow(-1); res(); };
+  a.onplaying=()=>{ clearInterval(tm); tm=setInterval(()=>{ if(tok!==hiTok){ clearInterval(tm); return; } const d=a.duration; if(!isFinite(d)||!d){ ow(0); return; } const body=Math.max(.3,d-.35); let t=Math.max(0,a.currentTime-.1)/body*tot, i=0; while(i<ws.length-1&&t>wt[i]){ t-=wt[i]; i++; } ow(i); },80); };
   a.onended=fin; a.onpause=fin; a.onerror=fin; a.play().catch(fin); setTimeout(fin,ws.length*1500+5000); }); }
 function wrSlow(text,onWord){ stopAll(); const ws=text.split(" "); { const src=slowSrc(text); if(src) return playHi(src,ws,onWord); }
   return new Promise(res=>{ if(!("speechSynthesis" in window)){ res(); return; }
@@ -948,10 +975,11 @@ async function wrAuto(c){ if(view!=="wr"||wrCur()!==c) return;
   if(c.k==="intro"){ for(let k=0;k<P.words.length;k++){ if(view!=="wr"||wrCur()!==c) return; c.st.lit=k; render(); await wrSay(P.words[k].w); await new Promise(r=>setTimeout(r,350)); } c.st.lit=-1; render(); return; }
   if(c.k==="listen") return wrSay(c.x.w);
   if(isRL(c)) return wrLineStart(c);
+  if(c.k==="role") return roleMic(c);
   if(c.k==="say"||c.k==="read"||c.k==="sight") return wrMic(c); // reading cards: no sound first, she reads it herself
   if(c.k==="sound"){ for(const x of P.snd.words){ if(view!=="wr"||wrCur()!==c) return; await wrSay(x.w); await new Promise(r=>setTimeout(r,300)); } }
 }
-function wrTarget(c){ if(c.k==="say") return c.st.phase?c.x.s:c.x.w; if(c.k==="read"||c.k==="sight") return c.x.w; if(isRL(c)) return c.lines[c.st.li].t;
+function wrTarget(c){ if(c.k==="role") return roleText(c.lines[Math.min(c.st.li,c.lines.length-1)]); if(c.k==="say") return c.st.phase?c.x.s:c.x.w; if(c.k==="read"||c.k==="sight") return c.x.w; if(isRL(c)) return c.lines[c.st.li].t;
   if(c.k==="listen") return c.x.w; return ""; }
 // word-by-word check of a read line against all 5 recognizer guesses
 function gradeLine(line,alts){ const H=new Set(); (alts||[]).forEach(a=>toks(String(a).replace(/\b(\d+)\b/g,(m,d)=>NUMW[+d]||m)).forEach(x=>H.add(x)));
@@ -962,14 +990,28 @@ const SHSTOP=new Set("a an the and or but so up down to of in on at by for with 
 function shadowOK(line,alts){ const ws=line.split(" "), keyIx=ws.map((w,i)=>toks(w).some(t=>!SHSTOP.has(t))?i:-1).filter(i=>i>=0), ix=keyIx.length?keyIx:ws.map((w,i)=>i);
   const need=Math.max(1,Math.round(ix.length*.75));
   return (alts||[]).some(a=>{ const g=gradeLine(line,[a]); return ix.filter(i=>g[i]).length>=need; }); }
+function lnMark(c,first){ const l=c.lines[c.st.li]; if(!l||!l.k||!W.daily||c.st.marked===c.st.li+":"+c.st.round) return; c.st.marked=c.st.li+":"+c.st.round;
+  const r=wrRec(), ln=r.ln3||(r.ln3={}), o=ln[l.k]||(ln[l.k]={s:0,d:""}); if(first) o.s++; else o.s=0; o.d=todayStr(); save(); }
+const ME=w=>w==="jane"||w==="mummy";
+const ROLE={jane:"🙋 서현 (제인)",mummy:"🙋 서현 (엄마)",peter:"👨 아빠 (피터)",daddy:"👨 아빠 (아빠)",nar:"👨 아빠 (해설)",other:"👨 아빠 (다른 사람)"};
+const roleText=l=>ME(l.w)&&l.s?l.s:l.t;
+async function roleMic(c){ const st=c.st; if(st.listening||st.fb) return; const li=st.li;
+  st.listening=true; render(); const r=await listenOnce(); if(view!=="wr"||wrCur()!==c||st.li!==li||st.fb) return; st.listening=false;
+  const alts=r.alts||[]; if(alts[0]) st.heard=alts[0];
+  if(alts.length&&shadowOK(roleText(c.lines[li]),alts)){ chime(); return roleNext(c); }
+  render(); if(speechOK) setTimeout(()=>{ if(wrCur()===c&&!st.listening&&!st.fb&&!document.hidden) roleMic(c); },r.err?1200:300); }
+function roleNext(c){ const st=c.st; if(curRec) curRec.stop(); st.listening=false; st.heard="";
+  if(st.li<c.lines.length-1){ st.li++; render(); setTimeout(()=>{ if(wrCur()===c&&!st.fb) roleMic(c); },350); return; }
+  st.fb="good"; wrCombo(true); render(); wrNext(c,1500); }
 async function wrMic(c){ if(c.st.listening||(c.st.fb&&!c.st.echo)||c.st.okLine) return; if(c.st.echo&&c.st.echoOk) return;
   const inp=document.getElementById("sayin"); if(!speechOK){ window._typed=inp?inp.value:""; if(!window._typed.trim()){ inp&&inp.focus(); return; } }
   c.st.listening=true; render(); const r=await listenOnce(); if(view!=="wr"||wrCur()!==c) return; c.st.listening=false;
   if((r.err&&!speechOK)||micBusy){ render(); if(speechOK) setTimeout(()=>{ if(wrCur()===c&&!c.st.listening&&!document.hidden) wrMic(c); },1500); return; }
   const tg=wrTarget(c), alts=r.alts||[]; c.st.heard=alts[0]||c.st.heard||""; if(alts[0]){ c.st.raw=alts[0]; c.st.tgt=tg; }
   if(isRL(c)&&alts.length){ const pass=shadowOK(tg,alts); if(W.daily) logHeard(tg,alts,pass);
+    lnMark(c,pass&&!c.st.round);
     if(pass){ chime(); return wrLineDone(c,false); }
-    c.st.round++; if(c.st.round>=2) return wrLineDone(c,true); // dad: never let her get stuck → 2nd try: praise, read it to her, move on
+    c.st.round++; if(c.lines[c.st.li].hide) c.st.rev[c.st.li]=true; if(c.st.round>=2) return wrLineDone(c,true); // dad: never let her get stuck → 2nd try: praise, read it to her, move on
     render(); { const li=c.st.li; await wrSlow(c.lines[li].t,i=>wrLit(li,i)); } if(wrCur()===c&&!c.st.listening) wrMic(c); return; }
   const one=!/\s/.test(tg.trim()), ok=!!(alts.length&&(one?(wrHit(wtok(tg),alts)||(SWOK[wtok(tg)]||[]).some(v=>alts.some(a=>toks(a).includes(v)))):matches(tg,alts,true)));
   if(W.daily&&alts.length) logHeard(tg,alts,ok);
@@ -1010,8 +1052,9 @@ async function wrPick(c,k){ if(c.st.fb) return; const o=c.opts[k], right=c.x.w, 
 function wrMicHTML(c,label){ return micBlock({st:c.st},label); }
 const ul=(w,snd)=>{ const parts=snd.split("_"); if(parts.length===2){ const re=new RegExp(`(${parts[0]})([a-z])(e)$`); return w.replace(re,"<u>$1</u>$2<u>$3</u>"); } return w.replace(snd,`<u>${snd}</u>`); };
 const goodMsg=st=>st.helped?"잘했어요! 같이 들어 봐요 🔊":"딩동댕! 💖";
-function rlHTML(c){ const st=c.st; return `<div class="rl ${c.lines.length>2?"many":""}">${c.lines.map((l,li)=>{ const cur=!st.fb&&li===st.li, past=st.fb||li<st.li, G=st.green[li];
-  return `<div class="sl ${cur?"on":past?"ok":""}" ${!past&&!cur?'style="opacity:.25"':""}><b>${l.t.split(" ").map((w,i)=>`<span class="wd" data-l="${li}" data-i="${i}">${h(w)}</span>`).join(" ")}</b>${past?"<i>✔</i>":""}</div>`; }).join("")}</div>`; }
+const lnWin=(n,li)=>{ const a=Math.max(0,Math.min(li-1,n-4)); return [a,a+4]; }; // dad 2026-11-23: whole-page text → show 4 lines around the current one (no scrolling)
+function rlHTML(c){ const st=c.st, [wa,wb]=lnWin(c.lines.length,st.fb?c.lines.length-1:st.li); return `<div class="rl ${c.lines.length>2?"many":""}">${c.lines.map((l,li)=>{ if(li<wa||li>=wb) return ""; const cur=!st.fb&&li===st.li, past=st.fb||li<st.li, G=st.green[li];
+  return `<div class="sl ${cur?"on":past?"ok":""}" ${!past&&!cur?'style="opacity:.25"':""}><b>${l.t.split(" ").map((w,i)=>`<span class="wd${l.hide&&!past&&!st.okLine&&!(st.rev&&st.rev[li])?" hid":""}" data-l="${li}" data-i="${i}">${h(w)}</span>`).join(" ")}</b>${past?"<i>✔</i>":""}</div>`; }).join("")}</div>`; }
 function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes(c.k)?`<span class="tag">🔤 단어</span>`:`<span class="tag talk">📖 읽기</span>`;
   const nav=(extra)=>`<div class="btns">${extra||""}<button class="big skip" data-w="skip">다음 →</button></div>`;
   if(c.k==="intro") return `<div class="tags">${W.daily?`<span class="tag bonus">말하기 끝! 이제 단어랑 읽기 🎉</span>`:""}${part}<span class="tag rev">오늘의 새 단어 ${P.words.length}개</span></div><div class="ko big">그림을 보고 잘 들어 봐요!</div>
@@ -1031,27 +1074,35 @@ function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes
     <div class="wrow">${P.snd.words.map((x,k)=>`<button class="wtile" data-sw="${k}"><b>${ul(x.w,P.snd.snd)}</b></button>`).join("")}</div><div class="ko">단어를 누르면 들려요. 이제 혼자 읽어 볼 거예요!</div>${nav()}`;
   if(c.k==="read") return `<div class="tags">${part}<span class="tag rev">🔎 ${h(P.snd.snd)} 단어 읽기</span></div>${st.fb?`<div class="pic"><span>${c.x.e}</span></div>`:`<div class="ko big">소리 내서 읽어 봐요!</div>`}
     <div class="en wbig">${ul(c.x.w,P.snd.snd)}</div>${st.fb?`<div class="feedback good">${goodMsg(st)}<small>${h(c.x.ko)}</small></div>`:wrMicHTML(c,"읽어 봐요")}${nav(`<button class="big soft" data-w="ans">🔊 정답 듣기</button>`)}`;
+  if(c.k==="pic"){ const pg=BOOK.pages[c.pk];
+    return `<div class="tags">${part}<span class="tag rev">🖼️ 그림 이야기</span></div><div class="storybox"><img src="${pg.img}" alt=""><div class="story"><div class="bub"><span class="dog">🐩</span><p>${h(c.talk)}</p></div><div class="ko">그림을 보고 아빠랑 이야기해 봐요</div>${nav().replace("다음 →","시작! ▶")}</div></div>`; }
+  if(c.k==="role"){ const pg=BOOK.pages[c.pk], li=Math.min(st.li,c.lines.length-1), cur=c.lines[li];
+    const msg=st.fb?"역할 놀이 끝! 🎉":st.li===0&&!st.heard?"서현아~ 넌 제인이랑 엄마 역할이야. 아빠는 피터랑 해설을 할 거야~":`${ME(cur.w)?"서현이 차례예요!":"아빠 차례예요!"}`;
+    const [wa,wb]=lnWin(c.lines.length,li); const rows=c.lines.map((l,i)=>{ if(i<wa||i>=wb) return ""; const on=!st.fb&&i===li, past=st.fb||i<li; return `<div class="sl ${on?"on":past?"ok":""}" ${!past&&!on?'style="opacity:.35"':""}><span class="who ${ME(l.w)?"me":""}">${ROLE[l.w]||ROLE.nar}</span><b>${h(roleText(l))}</b></div>`; }).join("");
+    const inner=`<div class="ko big rlmsg">${h(msg)}</div><div class="rl role many">${rows}</div>${st.fb?"":wrMicHTML(c,"")}<div class="btns"><button class="big ${st.fb?"next":"skip"}" data-w="${st.fb?"skip":"rnext"}">${st.fb?"끝! ✨":"다음 →"}</button></div>`;
+    return `<div class="tags">${part}<span class="tag rev">🎭 역할 놀이 · 그림책 ${c.page}쪽</span></div><div class="storybox"><img src="${pg.img}" alt=""><div class="story">${inner}</div></div>`; }
   if(isRL(c)){ const li=Math.min(st.li,c.lines.length-1), story=c.k==="story", pg=story&&BOOK&&BOOK.pages&&BOOK.pages[c.pk];
-    const msg=st.fb?"다 읽었어요! 🎉":st.okLine?(st.helped?"괜찮아요, 같이 들어 봐요 🔊":goodMsg(st)):st.round>0?"한 번 더 듣고 따라 읽어 봐요!":c.follow?(st.hearing?"👂 잘 들어 봐요":"🗣️ 이제 따라 읽어 봐요!"):c.alone?"🤫 이번엔 혼자 읽어 봐요!":"🤫 듣기 전에 먼저 혼자 읽어 봐요!";
+    const msg=st.fb?"다 읽었어요! 🎉":st.okLine?(st.helped?"괜찮아요, 같이 들어 봐요 🔊":goodMsg(st)):st.round>0?"한 번 더 듣고 따라 읽어 봐요!":c.follow?(st.hearing?"👂 잘 들어 봐요":c.lines[li].hide&&!(st.rev&&st.rev[li])?"🙈 글자 없이 따라 말해 봐요!":"🗣️ 이제 따라 읽어 봐요!"):c.alone?"🤫 이번엔 혼자 읽어 봐요!":"🤫 듣기 전에 먼저 혼자 읽어 봐요!";
     const inner=`<div class="ko big rlmsg">${msg}</div>${rlHTML(c)}<div class="ko rlko">${h(c.lines[li].ko||"")}</div>${st.fb||st.okLine||st.hearing?"":wrMicHTML(c,"")}
       <div class="btns">${st.fb?"":`<button class="big soft" data-w="grey">🐢 다시 듣기</button>`}<button class="big ${st.fb?"next":"skip"}" data-w="${st.fb?"skip":"line"}">${st.fb?"끝! ✨":"다음 →"}</button></div>`;
-    return `<div class="tags">${part}<span class="tag rev">${story?`📚 그림책 ${c.page}쪽${c.old?" · 🔁 예전 쪽 다시":c.again?" · 🔁 어제 쪽 다시":" · ✨ 오늘의 새 쪽"} · 따라 읽기`:"🤫 아는 문장 먼저 읽기"}</span></div>${pg?`<div class="storybox"><img src="${pg.img}" alt=""><div class="story">${inner}</div></div>`:inner}`; }
+    return `<div class="tags">${part}<span class="tag rev">${story?`📚 그림책 ${c.page}쪽${c.old?(W.P.B3?" · 🔁 예전 문장 다시":" · 🔁 예전 쪽 다시"):c.again?(W.P.B3?" · 🔁 어제 반 쪽 다시":" · 🔁 어제 쪽 다시"):(W.P.B3?" · ✨ 오늘의 새 반 쪽":" · ✨ 오늘의 새 쪽")} · 따라 읽기`:"🤫 아는 문장 먼저 읽기"}</span></div>${pg?`<div class="storybox"><img src="${pg.img}" alt=""><div class="story">${inner}</div></div>`:inner}`; }
   return ""; }
 function renderWR(){ const c=wrCur(), pct=Math.round((W.off+W.i)/(W.off+W.q.length)*100);
   app.innerHTML=`<div class="lesson wr"><div class="lbar"><button class="x" id="quit" aria-label="그만하기">✕</button><button class="backbtn" id="prev" aria-label="뒤로" ${W.i?"":"style=\"opacity:.3\""}>←</button><button class="backbtn" id="fwd" aria-label="앞으로">→</button><div class="prog"><i style="width:${pct}%"></i></div><div class="pnum">${(()=>{ const u=W.u||(W.u=wrUnitIdx(W.q)); return `${W.off+u[Math.min(W.i,u.length-1)]+1} / ${W.off+u[u.length-1]+1}`; })()}</div><div class="clock">⏱ ${mmss(W.base+Date.now()-W.t0)}</div></div>
    <div class="card">${W.flash?`<div class="combo">COMBO ${W.combo}! 🔥</div>`:""}${wrBody(c)}</div></div>`;
-  { const m=wrCatOf(c); stdTags(c.k==="story"?[m[0],`그림책 ${c.page}쪽 · ${c.old?"예전 쪽 다시":c.again?"어제 쪽 다시":"오늘의 새 쪽"}`]:m); }
+  { const m=wrCatOf(c), b3=W.P.B3; stdTags(c.k==="story"?[m[0],`그림책 ${c.page}쪽 · ${c.old?(b3?"예전 문장 다시":"예전 쪽 다시"):c.again?(b3?"어제 반 쪽 다시":"어제 쪽 다시"):(b3?"오늘의 새 반 쪽":"오늘의 새 쪽")}`]:c.k==="pic"||c.k==="role"?[m[0],`${m[1]} · 그림책 ${c.page}쪽`]:m); }
   document.getElementById("quit").onclick=()=>{ stopAll(); const d=W.daily; W=null; view=d?"home":"parent"; render(); };
   document.getElementById("prev").onclick=()=>{ if(!W.i) return; stopAll(); W.flash=false; W.i--; wrEnter(); render(); };
   document.getElementById("fwd").onclick=()=>wrAdvance(); // dad 2026-11-21: ← → in 단어·읽기 too
   app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>wrPick(c,+b.dataset.pick));
   app.querySelectorAll("[data-say]").forEach(b=>b.onclick=()=>wrSay(W.P.words[+b.dataset.say].w));
   app.querySelectorAll("[data-sw]").forEach(b=>b.onclick=()=>wrSay(W.P.snd.words[+b.dataset.sw].w));
-  app.querySelectorAll('[data-act="mic"]').forEach(b=>b.onclick=()=>wrMic(c));
+  app.querySelectorAll('[data-act="mic"]').forEach(b=>b.onclick=()=>c.k==="role"?roleMic(c):wrMic(c));
   app.querySelectorAll(".rl .wd.x").forEach(b=>b.onclick=()=>{ if(curRec) curRec.stop(); wrSlow(b.textContent.replace(/[^A-Za-z']/g,""),()=>{}); });
   app.querySelectorAll("[data-w]").forEach(b=>b.onclick=async()=>{ const a=b.dataset.w;
     if(a==="skip") return wrAdvance();
     if(a==="hear") return wrSay(c.x.w);
+    if(a==="rnext") return roleNext(c);
     if(a==="line"){ stopAll(); if(curRec) curRec.stop(); c.st.listening=false; c.st.okLine=false; c.st.round=0; if(c.st.li<c.lines.length-1){ c.st.li++; render(); return wrLineStart(c); } c.st.fb="good"; render(); if(c.k==="cold") wrNext(c,600); return; }
     if(a==="grey"){ if(curRec) curRec.stop(); c.st.listening=false; render(); { const li=c.st.li; await wrSlow(c.lines[li].t,i=>wrLit(li,i)); } if(wrCur()===c&&!c.st.fb&&speechOK) wrMic(c); return; }
     if(a==="ans"){ stopAll(); c.st.listening=false; c.st.showAns=true; render(); await wrSay(wrTarget(c)); if(wrCur()===c&&!c.st.fb&&speechOK) wrMic(c); }
