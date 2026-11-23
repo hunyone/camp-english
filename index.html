@@ -442,7 +442,7 @@ function phoneBudget(units,today,rank0){ // dad 2026-11-19: 전화영어 = half 
   const got={unit:[],talk:[],tz:[],wm:[],wh:[],gr:[]}, used={unit:0,talk:0,tz:0,wm:0,wh:0,gr:0}; let t=0;
   for(const k of order){ const g=pools[k][used[k]]; if(!g) continue; const c=costOf(g); if(t>0&&t+c>HALF_MIN+.4) continue; used[k]++; got[k].push(...g); t+=c; }
   return [...got.unit,...got.talk,...got.tz,...shuffle(got.wm),...got.wh,...got.gr]; }
-const APPV="11/23-1"; // shown on home (under the chips) and in the parent screen
+const APPV="11/23-2"; // shown on home (under the chips) and in the parent screen
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -944,6 +944,7 @@ function wrEnter(){ const c=wrCur(); if(!c) return; c.st={tries:0,heard:"",fb:nu
   if(isRL(c)){ if(c.k==="cold") c.lines=[{t:c.it.text,ko:c.it.ko||""}]; c.st.green=c.lines.map(l=>l.t.split(" ").map(()=>false)); }
   if(W.P.B3&&W.daily&&(c.k==="story"||c.k==="pic"||c.k==="role")){ const r=wrRec(), t=todayStr(); if(c.u!==undefined&&!c.again) (r.u3||(r.u3={}))[c.u]=t; if(c.old) r.op3={d:t,keys:c.lines.map(l=>l.k)}; save(); }
   else if(c.k==="story"&&!c.again&&!c.old&&W.daily){ wrPages(wrRec())[c.pk]=todayStr(); save(); }
+  if(c.k==="role") c.ra=roleAssign(c.lines);
   if(c.k==="story"&&W.P.B3){ const ln=wrRec().ln3||{}; c.lines.forEach(l=>{ l.hide=!c.nw&&l.k&&(ln[l.k]||{}).s>=2; }); c.st.rev={}; }
   if(c.k==="story"&&c.old&&W.daily){ const r=wrRec(); r.op={d:todayStr(),k:c.pk}; (r.rv||(r.rv={}))[c.pk]=todayStr(); save(); }
   if(c.k==="story"&&!W.tRead){ W.tRead=Date.now(); W.wordSecs=Math.round((W.tRead-W.t0)/1000); }
@@ -979,7 +980,7 @@ async function wrAuto(c){ if(view!=="wr"||wrCur()!==c) return;
   if(c.k==="say"||c.k==="read"||c.k==="sight") return wrMic(c); // reading cards: no sound first, she reads it herself
   if(c.k==="sound"){ for(const x of P.snd.words){ if(view!=="wr"||wrCur()!==c) return; await wrSay(x.w); await new Promise(r=>setTimeout(r,300)); } }
 }
-function wrTarget(c){ if(c.k==="role") return roleText(c.lines[Math.min(c.st.li,c.lines.length-1)]); if(c.k==="say") return c.st.phase?c.x.s:c.x.w; if(c.k==="read"||c.k==="sight") return c.x.w; if(isRL(c)) return c.lines[c.st.li].t;
+function wrTarget(c){ if(c.k==="role") return roleText(c,Math.min(c.st.li,c.lines.length-1)); if(c.k==="say") return c.st.phase?c.x.s:c.x.w; if(c.k==="read"||c.k==="sight") return c.x.w; if(isRL(c)) return c.lines[c.st.li].t;
   if(c.k==="listen") return c.x.w; return ""; }
 // word-by-word check of a read line against all 5 recognizer guesses
 function gradeLine(line,alts){ const H=new Set(); (alts||[]).forEach(a=>toks(String(a).replace(/\b(\d+)\b/g,(m,d)=>NUMW[+d]||m)).forEach(x=>H.add(x)));
@@ -993,12 +994,24 @@ function shadowOK(line,alts){ const ws=line.split(" "), keyIx=ws.map((w,i)=>toks
 function lnMark(c,first){ const l=c.lines[c.st.li]; if(!l||!l.k||!W.daily||c.st.marked===c.st.li+":"+c.st.round) return; c.st.marked=c.st.li+":"+c.st.round;
   const r=wrRec(), ln=r.ln3||(r.ln3={}), o=ln[l.k]||(ln[l.k]={s:0,d:""}); if(first) o.s++; else o.s=0; o.d=todayStr(); save(); }
 const ME=w=>w==="jane"||w==="mummy";
-const ROLE={jane:"🙋 서현 (제인)",mummy:"🙋 서현 (엄마)",peter:"👨 아빠 (피터)",daddy:"👨 아빠 (아빠)",nar:"👨 아빠 (해설)",other:"👨 아빠 (다른 사람)"};
-const roleText=l=>ME(l.w)&&l.s?l.s:l.t;
+// dad 2026-11-23 (2): roles change every day → 서현 gets the characters that make ~60-70% of the day's words (narration lines split if needed)
+const RNM={jane:"제인",mummy:"엄마",peter:"피터",daddy:"책 속 아빠",nar:"해설",other:"다른 사람"};
+const quoteOf=t=>{ const q=(t.match(/"[^"]*"/g)||[]).map(x=>x.slice(1,-1).trim()).join(" ").replace(/,$/,"."); return q||t; };
+function roleAssign(lines){ const wc=l=>l.t.split(" ").length, tot=lines.reduce((a,l)=>a+wc(l),0)||1, by={}; lines.forEach(l=>{ by[l.w]=(by[l.w]||0)+wc(l); });
+  const R=Object.keys(by), pick=(rs)=>{ let best=null; for(let m=1;m<(1<<rs.length)-1;m++){ const set=rs.filter((r,i)=>m>>i&1), sh=set.reduce((a,r)=>a+by[r],0)/tot, sc=Math.abs(sh-.65)+set.length*.001; if(!best||sc<best.sc) best={set,sh,sc}; } return best; };
+  let b=R.length>1?pick(R):null, me;
+  if(b&&Math.abs(b.sh-.65)<=.08) me=lines.map(l=>b.set.includes(l.w));
+  else { const ch=R.filter(r=>r!=="nar"), b2=ch.length>1?pick(ch):ch.length?{set:by.nar?ch:[],sh:0}:{set:[],sh:0}; let got=0; me=lines.map(l=>{ if(l.w!=="nar"){ const v=b2.set.includes(l.w); if(v) got+=wc(l); return v; } return false; });
+    lines.forEach((l,i)=>{ if(l.w==="nar"&&got/tot<.6){ me[i]=true; got+=wc(l); } }); if(me.every(Boolean)) me[me.length-1]=false; if(!me.some(Boolean)) me[0]=true; }
+  const whole=R.filter(r=>lines.every((l,i)=>l.w!==r||me[i])), part=r=>lines.some((l,i)=>l.w===r&&me[i]), dadP=r=>lines.some((l,i)=>l.w===r&&!me[i]);
+  return {me, mine:R.filter(part).map(r=>RNM[r]), dad:R.filter(dadP).map(r=>RNM[r]), narMine:whole.includes("nar")}; }
+const roleText=(c,i)=>{ const l=c.lines[i]; return c.ra.me[i]&&l.w!=="nar"&&!c.ra.narMine?quoteOf(l.t):l.t; };
+const roleLab=(c,i)=>`${c.ra.me[i]?"🙋 서현":"👨 아빠"} (${RNM[c.lines[i].w]||"해설"})`;
+const joinK=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+"랑 "+a[a.length-1];
 async function roleMic(c){ const st=c.st; if(st.listening||st.fb) return; const li=st.li;
   st.listening=true; render(); const r=await listenOnce(); if(view!=="wr"||wrCur()!==c||st.li!==li||st.fb) return; st.listening=false;
   const alts=r.alts||[]; if(alts[0]) st.heard=alts[0];
-  if(alts.length&&shadowOK(roleText(c.lines[li]),alts)){ chime(); return roleNext(c); }
+  if(alts.length&&shadowOK(roleText(c,li),alts)){ chime(); return roleNext(c); }
   render(); if(speechOK) setTimeout(()=>{ if(wrCur()===c&&!st.listening&&!st.fb&&!document.hidden) roleMic(c); },r.err?1200:300); }
 function roleNext(c){ const st=c.st; if(curRec) curRec.stop(); st.listening=false; st.heard="";
   if(st.li<c.lines.length-1){ st.li++; render(); setTimeout(()=>{ if(wrCur()===c&&!st.fb) roleMic(c); },350); return; }
@@ -1077,8 +1090,8 @@ function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes
   if(c.k==="pic"){ const pg=BOOK.pages[c.pk];
     return `<div class="tags">${part}<span class="tag rev">🖼️ 그림 이야기</span></div><div class="storybox"><img src="${pg.img}" alt=""><div class="story"><div class="bub"><span class="dog">🐩</span><p>${h(c.talk)}</p></div><div class="ko">그림을 보고 아빠랑 이야기해 봐요</div>${nav().replace("다음 →","시작! ▶")}</div></div>`; }
   if(c.k==="role"){ const pg=BOOK.pages[c.pk], li=Math.min(st.li,c.lines.length-1), cur=c.lines[li];
-    const msg=st.fb?"역할 놀이 끝! 🎉":st.li===0&&!st.heard?"서현아~ 넌 제인이랑 엄마 역할이야. 아빠는 피터랑 해설을 할 거야~":`${ME(cur.w)?"서현이 차례예요!":"아빠 차례예요!"}`;
-    const [wa,wb]=lnWin(c.lines.length,li); const rows=c.lines.map((l,i)=>{ if(i<wa||i>=wb) return ""; const on=!st.fb&&i===li, past=st.fb||i<li; return `<div class="sl ${on?"on":past?"ok":""}" ${!past&&!on?'style="opacity:.35"':""}><span class="who ${ME(l.w)?"me":""}">${ROLE[l.w]||ROLE.nar}</span><b>${h(roleText(l))}</b></div>`; }).join("");
+    const msg=st.fb?"역할 놀이 끝! 🎉":st.li===0&&!st.heard?`서현아~ 오늘은 넌 ${joinK(c.ra.mine)} 역할이야. 아빠는 ${joinK(c.ra.dad)}를 할 거야~`:`${c.ra.me[li]?"서현이 차례예요!":"아빠 차례예요!"}`;
+    const [wa,wb]=lnWin(c.lines.length,li); const rows=c.lines.map((l,i)=>{ if(i<wa||i>=wb) return ""; const on=!st.fb&&i===li, past=st.fb||i<li; return `<div class="sl ${on?"on":past?"ok":""}" ${!past&&!on?'style="opacity:.35"':""}><span class="who ${c.ra.me[i]?"me":""}">${roleLab(c,i)}</span><b>${h(roleText(c,i))}</b></div>`; }).join("");
     const inner=`<div class="ko big rlmsg">${h(msg)}</div><div class="rl role many">${rows}</div>${st.fb?"":wrMicHTML(c,"")}<div class="btns"><button class="big ${st.fb?"next":"skip"}" data-w="${st.fb?"skip":"rnext"}">${st.fb?"끝! ✨":"다음 →"}</button></div>`;
     return `<div class="tags">${part}<span class="tag rev">🎭 역할 놀이 · 그림책 ${c.page}쪽</span></div><div class="storybox"><img src="${pg.img}" alt=""><div class="story">${inner}</div></div>`; }
   if(isRL(c)){ const li=Math.min(st.li,c.lines.length-1), story=c.k==="story", pg=story&&BOOK&&BOOK.pages&&BOOK.pages[c.pk];
