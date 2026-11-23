@@ -185,6 +185,7 @@ b.vk{color:#7B4FD6;font-size:1.25em;text-decoration:underline;text-underline-off
 .stat.dday{background:var(--maple);border-color:var(--maple);color:#fff}
 .stat.dday .lab{color:#fff;opacity:.85}
 .panel{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+#pvbar{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:50;background:#FFE3EE;color:#9B2C5E;border:2px solid #F3A6C4;border-radius:16px;padding:6px 10px 6px 14px;font-size:15px;font-weight:700;display:flex;gap:10px;align-items:center;white-space:nowrap}#pvbar button{background:#C2447A;color:#fff;border:0;border-radius:10px;padding:6px 12px;font-weight:700;font-size:15px}
 .fwrap{position:relative;margin-bottom:8px}.fdrop{position:absolute;z-index:5;top:100%;left:0;background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow:auto;box-shadow:0 6px 18px rgba(0,0,0,.12);min-width:240px}.fdrop label{font-size:17px;white-space:nowrap;cursor:pointer}.fdrop input{width:20px;height:20px;vertical-align:middle}
 .panel h3,.panel .psum{font-size:20px;color:var(--pine);font-weight:700}.panel .psum{cursor:pointer;margin-bottom:10px}.panel details>*:not(summary){margin-top:10px}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;max-width:440px}
@@ -443,7 +444,7 @@ function phoneBudget(units,today,rank0){ // dad 2026-11-19: 전화영어 = half 
   const got={unit:[],talk:[],tz:[],wm:[],wh:[],gr:[]}, used={unit:0,talk:0,tz:0,wm:0,wh:0,gr:0}; let t=0;
   for(const k of order){ const g=pools[k][used[k]]; if(!g) continue; const c=costOf(g); if(t>0&&t+c>HALF_MIN+.4) continue; used[k]++; got[k].push(...g); t+=c; }
   return [...got.unit,...got.talk,...got.tz,...shuffle(got.wm),...got.wh,...got.gr]; }
-const APPV="11/23-4"; // shown on home (under the chips) and in the parent screen
+const APPV="11/23-5"; // shown on home (under the chips) and in the parent screen
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -461,7 +462,11 @@ function fixOffset(){ // "하루 넘기기" was left on from 11/13: move the rec
   S.days=nd; if(S.session&&S.session.date>="2026-11-14") S.session.date=addDays(S.session.date,-n); if(S.daySnap&&S.daySnap.date>="2026-11-14") S.daySnap.date=addDays(S.daySnap.date,-n);
   if(S.comboLog){ const c2={}; for(const [d,v] of Object.entries(S.comboLog)) c2[d>="2026-11-14"?addDays(d,-n):d]=v; S.comboLog=c2; }
   S.offset=0; S.mig1116=true; save(); }
-function save(){
+// dad 2026-11-23: "▶ 내일 미션 미리 해보기" — dad plays tomorrow's mission exactly as 서현 will; nothing is saved, and ending it brings today back
+let PREVIEW=null;
+function startPreview(){ stopAll(); PREVIEW=JSON.stringify(S); S=JSON.parse(PREVIEW); S.offset=(S.offset||0)+1; S.session=null; S.daySnap=null; L=null; W=null; view="home"; render(); }
+function endPreview(){ if(!PREVIEW) return; stopAll(); S=JSON.parse(PREVIEW); PREVIEW=null; L=null; W=null; view="parent"; render(); }
+function save(){ if(PREVIEW) return;
   S.updatedAt=Date.now();
   try{ localStorage.setItem(LS_KEY,JSON.stringify(S)); }catch(e){}
   if(dbDoc) dbDoc.set(JSON.parse(JSON.stringify(S))).then(()=>{syncState="계정에 저장됨";}).catch(()=>{syncState="계정 저장 실패, 이 기기에 저장됨";});
@@ -1140,6 +1145,7 @@ const app=document.getElementById("app");
 function render(){
   ({home:renderHome,lesson:renderLesson,finish:renderFinish,gate:renderGate,parent:renderParent,wr:renderWR,wrdone:renderWRDone})[view]();
   if(render.last!==view){ window.scrollTo(0,0); render.last=view; }
+  { let b=document.getElementById("pvbar"); if(PREVIEW){ if(!b){ b=document.createElement("div"); b.id="pvbar"; document.body.appendChild(b); } b.innerHTML=`👀 내일(${todayStr().slice(5).replace("-","/")}) 미션 미리 해보는 중 · 기록은 안 남아요 <button id="pvend">끝내기</button>`; b.querySelector("#pvend").onclick=endPreview; } else if(b) b.remove(); }
   // dad 2026-11-17: the answer box must be on screen without scrolling by hand
   if(view==="lesson"){ const f=app.querySelector(".feedback"); if(f){ const r=f.getBoundingClientRect(); if(r.bottom>innerHeight||r.top<0) f.scrollIntoView({block:"center",behavior:"smooth"}); } }
 }
@@ -1754,7 +1760,7 @@ function renderParent(){
     <div class="stat"><div class="lab">he/she 문장 틀린 횟수</div><div class="num">${hsWrong}<small>번</small></div></div>
   </div>
   <div class="panel"><h3>오늘 공부</h3>
-    <div class="tools">${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}</div>
+    <div class="tools">${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}${PREVIEW?"":`<button class="tbtn" id="pvgo">▶ 내일 미션 미리 해보기</button>`}</div>
     <div class="note">${syncState} · 앱 버전 ${APPV} · 전화영어 문장 ${PHONE.length}개${S.offset?` · 지금 보는 날짜 ${today} (실제보다 ${S.offset}일 뒤)`:""}</div></div>
   <div class="panel"><h3>📦 천일문 파일</h3><div class="note">지금 파일: ${MAXW}주차까지 들어 있어요. 새 파일을 받으면 여기서 골라 주세요 (공부 기록은 그대로예요). 그림책 파일(picture-book.json)도 여기서 골라요.</div><div class="note">${BOOK?`📘 그림책 "${h(BOOK.title||"")}" 들어 있어요 (${(BOOK.pages||[]).length}쪽).${(BOOK.pages||[]).some(p=>(p.lines||[]).some(l=>l.a))?" 🔊 천천히 듣기 소리 있음":" ⚠️ 천천히 듣기 소리가 없는 옛 파일이에요. 새 picture-book.json 을 골라 주세요."}`:`📘 그림책 파일이 아직 없어요.`}</div><label class="tbtn" style="cursor:pointer;display:inline-block">새 천일문 파일 고르기<input id="packin2" type="file" hidden></label><span id="packmsg" class="note"></span></div>
   <div class="panel"><h3>📋 카드 순서 (대분류 › 중분류 › 소분류 › 문장)</h3><div id="ctbl">${cardTables()}</div></div>
@@ -1768,6 +1774,7 @@ function renderParent(){
     app.querySelectorAll("[data-fk]").forEach(b=>b.onchange=()=>{ b.checked?SEL.add(b.dataset.fk):SEL.delete(b.dataset.fk); reTbl(); });
     app.querySelectorAll("[data-fall]").forEach(b=>b.onchange=()=>{ SEL=new Set(b.checked?[...app.querySelectorAll("[data-fk]")].map(x=>x.dataset.fk):[]); reTbl(); }); }; bindTbl();
   const $=id=>document.getElementById(id)||{}; // dad 2026-11-22: many controls removed from 아빠 화면
+  $("pvgo").onclick=startPreview;
   $("back").onclick=()=>{view="home";confirmReset=false;render();};
   $("wrgo").onclick=()=>wrStart(false);
   $("wron").onchange=e=>{ S.wrOn=e.target.value==="1"; save(); render(); };
