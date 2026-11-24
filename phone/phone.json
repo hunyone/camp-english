@@ -1084,8 +1084,8 @@
   {
    "id": "p1118s0",
    "lesson": "2026-11-18",
-   "text": "There is a monster under the bridge.",
-   "ko": "다리 아래에 괴물이 있어요",
+   "text": "There is a troll under the bridge.",
+   "ko": "다리 아래에 트롤이 있어요",
    "url": null,
    "pri": true
   },
@@ -1174,8 +1174,8 @@
    "lesson": "2026-11-18",
    "base": "p1118s1",
    "stage": 2,
-   "text": "The monster is very hungry.",
-   "ko": "괴물은 정말 배고파요",
+   "text": "The troll is very hungry.",
+   "ko": "트롤은 정말 배고파요",
    "url": null
   },
   {
@@ -1236,8 +1236,8 @@
    "lesson": "2026-11-18",
    "base": "p1118s2",
    "stage": 2,
-   "text": "The monster wants to eat the goats.",
-   "ko": "괴물은 염소들을 먹고 싶어 해요",
+   "text": "The troll wants to eat the goats.",
+   "ko": "트롤은 염소들을 먹고 싶어 해요",
    "url": null
   },
   {
@@ -1366,8 +1366,8 @@
   {
    "id": "p1118s6",
    "lesson": "2026-11-18",
-   "text": "The monster can't swim.",
-   "ko": "괴물은 수영을 못해요",
+   "text": "The troll can't swim.",
+   "ko": "트롤은 수영을 못해요",
    "url": null,
    "pri": true
   },
@@ -1376,8 +1376,8 @@
    "lesson": "2026-11-18",
    "base": "p1118s6",
    "stage": 1,
-   "text": "The monster can't fly.",
-   "ko": "괴물은 날 수 없어요",
+   "text": "The troll can't fly.",
+   "ko": "트롤은 날 수 없어요",
    "url": null
   },
   {
@@ -1385,8 +1385,8 @@
    "lesson": "2026-11-18",
    "base": "p1118s6",
    "stage": 1,
-   "text": "The monster can't run.",
-   "ko": "괴물은 달릴 수 없어요",
+   "text": "The troll can't run.",
+   "ko": "트롤은 달릴 수 없어요",
    "url": null
   },
   {
@@ -1440,6 +1440,358 @@
    "stage": 2,
    "text": "My mom likes story books.",
    "ko": "엄마는 이야기책을 좋아해요",
+   "url": null
+  },
+  {
+   "id": "p1124s0",
+   "lesson": "2026-11-24",
+   "text": "My favorite color is purple.",
+   "ko": "내가 제일 좋아하는 색은 보라색이에요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1124s0a0",
+   "lesson": "2026-11-24",
+   "base": "p1124s0",
+   "stage": 1,
+   "text": "My favorite color is pink.",
+   "ko": "내가 제일 좋아하는 색은 분홍색이에요",
+   "url": null
+  },
+  {
+   "id": "p1124s0a1",
+   "lesson": "2026-11-24",
+   "base": "p1124s0",
+   "stage": 1,
+   "text": "My favorite color is light pink.",
+   "ko": "내가 제일 좋아하는 색은 연분홍색이에요",
+   "url": null
+  },
+  {
+   "id": "p1124s0a2",
+   "lesson": "2026-11-24",
+   "base": "p1124s0",
+   "stage": 1,
+   "text": "My favorite color is blue.",
+   "ko": "내가 제일 좋아하는 색은 파란색이에요",
+   "url": null
+  },
+  {
+   "id": "p1124s0b0",
+   "lesson": "2026-11-24",
+   "base": "p1124s0",
+   "stage": 2,
+   "text": "My mom's favorite color is red.",
+   "ko": "엄마가 제일 좋아하는 색은 빨간색이에요",
+   "url": null
+  },
+  {
+   "id": "p1124s0b1",
+   "lesson": "2026-11-24",
+   "base": "p1124s0",
+   "stage": 2,
+   "text": "My teacher's favorite color is pink.",
+   "ko": "선생님이 제일 좋아하는 색은 분홍색이에요",
+   "url": null
+  },
+  {
+   "id": "p1124s1",
+   "lesson": "2026-11-24",
+   "text": "It's too dark.",
+   "ko": "너무 어두워요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1124s1a0",
+   "lesson": "2026-11-24",
+   "base": "p1124s1",
+   "stage": 1,
+   "text": "It's too big.",
+   "ko": "너무 커요",
+   "url": null
+  },
+  {
+   "id": "p1124s1a1",
+   "lesson": "2026-11-24",
+   "base": "p1124s1",
+   "stage": 1,
+   "text": "It's too small.",
+   "ko": "너무 작아요",
+   "url": null
+  },
+  {
+   "id": "p1124s1a2",
+   "lesson": "2026-11-24",
+   "base": "p1124s1",
+   "stage": 1,
+   "text": "It's too cold.",
+   "ko": "너무 추워요",
+   "url": null
+  },
+  {
+   "id": "p1124s1b0",
+   "lesson": "2026-11-24",
+   "base": "p1124s1",
+   "stage": 2,
+   "text": "This color is too dark.",
+   "ko": "이 색은 너무 어두워요",
+   "url": null
+  },
+  {
+   "id": "p1124s1b1",
+   "lesson": "2026-11-24",
+   "base": "p1124s1",
+   "stage": 2,
+   "text": "My room is too dark.",
+   "ko": "내 방은 너무 어두워요",
+   "url": null
+  },
+  {
+   "id": "p1124s2",
+   "lesson": "2026-11-24",
+   "text": "Tangerines are very yummy.",
+   "ko": "귤은 정말 맛있어요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1124s2a0",
+   "lesson": "2026-11-24",
+   "base": "p1124s2",
+   "stage": 1,
+   "text": "Tangerines are very sweet.",
+   "ko": "귤은 정말 달아요",
+   "url": null
+  },
+  {
+   "id": "p1124s2a1",
+   "lesson": "2026-11-24",
+   "base": "p1124s2",
+   "stage": 1,
+   "text": "Tangerines are very small.",
+   "ko": "귤은 정말 작아요",
+   "url": null
+  },
+  {
+   "id": "p1124s2b0",
+   "lesson": "2026-11-24",
+   "base": "p1124s2",
+   "stage": 2,
+   "text": "Apples are very yummy.",
+   "ko": "사과는 정말 맛있어요",
+   "url": null
+  },
+  {
+   "id": "p1124s2b1",
+   "lesson": "2026-11-24",
+   "base": "p1124s2",
+   "stage": 2,
+   "text": "Strawberries are very yummy.",
+   "ko": "딸기는 정말 맛있어요",
+   "url": null
+  },
+  {
+   "id": "p1124s3",
+   "lesson": "2026-11-24",
+   "text": "There is a big mountain on Jeju Island.",
+   "ko": "제주도에는 큰 산이 있어요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1124s3a0",
+   "lesson": "2026-11-24",
+   "base": "p1124s3",
+   "stage": 1,
+   "text": "There is a big beach on Jeju Island.",
+   "ko": "제주도에는 큰 바닷가가 있어요",
+   "url": null
+  },
+  {
+   "id": "p1124s3a1",
+   "lesson": "2026-11-24",
+   "base": "p1124s3",
+   "stage": 1,
+   "text": "There is a nice hotel on Jeju Island.",
+   "ko": "제주도에는 멋진 호텔이 있어요",
+   "url": null
+  },
+  {
+   "id": "p1124s3b0",
+   "lesson": "2026-11-24",
+   "base": "p1124s3",
+   "stage": 2,
+   "text": "There is a big park in my town.",
+   "ko": "우리 동네에는 큰 공원이 있어요",
+   "url": null
+  },
+  {
+   "id": "p1124s3b1",
+   "lesson": "2026-11-24",
+   "base": "p1124s3",
+   "stage": 2,
+   "text": "There is a big tree in my school.",
+   "ko": "우리 학교에는 큰 나무가 있어요",
+   "url": null
+  },
+  {
+   "id": "p1124s4",
+   "lesson": "2026-11-24",
+   "text": "There are no people on the island.",
+   "ko": "그 섬에는 사람이 없어요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1124s4a0",
+   "lesson": "2026-11-24",
+   "base": "p1124s4",
+   "stage": 1,
+   "text": "There are no houses on the island.",
+   "ko": "그 섬에는 집이 없어요",
+   "url": null
+  },
+  {
+   "id": "p1124s4a1",
+   "lesson": "2026-11-24",
+   "base": "p1124s4",
+   "stage": 1,
+   "text": "There are no trees on the island.",
+   "ko": "그 섬에는 나무가 없어요",
+   "url": null
+  },
+  {
+   "id": "p1124s4a2",
+   "lesson": "2026-11-24",
+   "base": "p1124s4",
+   "stage": 1,
+   "text": "There are no cars on the island.",
+   "ko": "그 섬에는 차가 없어요",
+   "url": null
+  },
+  {
+   "id": "p1124s5",
+   "lesson": "2026-11-24",
+   "text": "I don't have my book.",
+   "ko": "나는 책이 없어요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1124s5a0",
+   "lesson": "2026-11-24",
+   "base": "p1124s5",
+   "stage": 1,
+   "text": "I don't have my pencil.",
+   "ko": "나는 연필이 없어요",
+   "url": null
+  },
+  {
+   "id": "p1124s5a1",
+   "lesson": "2026-11-24",
+   "base": "p1124s5",
+   "stage": 1,
+   "text": "I don't have my notebook.",
+   "ko": "나는 공책이 없어요",
+   "url": null
+  },
+  {
+   "id": "p1124s5a2",
+   "lesson": "2026-11-24",
+   "base": "p1124s5",
+   "stage": 1,
+   "text": "I don't have my bag.",
+   "ko": "나는 가방이 없어요",
+   "url": null
+  },
+  {
+   "id": "p1124s5b0",
+   "lesson": "2026-11-24",
+   "base": "p1124s5",
+   "stage": 2,
+   "text": "My brother doesn't have his book.",
+   "ko": "남동생은 책이 없어요",
+   "url": null
+  },
+  {
+   "id": "p1124s6",
+   "lesson": "2026-11-24",
+   "text": "This is a pet shop.",
+   "ko": "여기는 애완동물 가게예요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1124s6a0",
+   "lesson": "2026-11-24",
+   "base": "p1124s6",
+   "stage": 1,
+   "text": "This is a toy shop.",
+   "ko": "여기는 장난감 가게예요",
+   "url": null
+  },
+  {
+   "id": "p1124s6a1",
+   "lesson": "2026-11-24",
+   "base": "p1124s6",
+   "stage": 1,
+   "text": "This is a sweet shop.",
+   "ko": "여기는 사탕 가게예요",
+   "url": null
+  },
+  {
+   "id": "p1124s6a2",
+   "lesson": "2026-11-24",
+   "base": "p1124s6",
+   "stage": 1,
+   "text": "This is a train station.",
+   "ko": "여기는 기차역이에요",
+   "url": null
+  },
+  {
+   "id": "p1124s7",
+   "lesson": "2026-11-24",
+   "text": "I want to go there.",
+   "ko": "나는 거기 가고 싶어요",
+   "url": null,
+   "pri": true
+  },
+  {
+   "id": "p1124s7a0",
+   "lesson": "2026-11-24",
+   "base": "p1124s7",
+   "stage": 1,
+   "text": "I want to go to Jeju Island.",
+   "ko": "나는 제주도에 가고 싶어요",
+   "url": null
+  },
+  {
+   "id": "p1124s7a1",
+   "lesson": "2026-11-24",
+   "base": "p1124s7",
+   "stage": 1,
+   "text": "I want to go to the beach.",
+   "ko": "나는 바닷가에 가고 싶어요",
+   "url": null
+  },
+  {
+   "id": "p1124s7a2",
+   "lesson": "2026-11-24",
+   "base": "p1124s7",
+   "stage": 1,
+   "text": "I want to go home.",
+   "ko": "나는 집에 가고 싶어요",
+   "url": null
+  },
+  {
+   "id": "p1124s7b0",
+   "lesson": "2026-11-24",
+   "base": "p1124s7",
+   "stage": 2,
+   "text": "My dad wants to go there.",
+   "ko": "아빠는 거기 가고 싶어 해요",
    "url": null
   }
  ],
@@ -2079,8 +2431,8 @@
    "lesson": "2026-11-17",
    "lines": [
     {
-     "text": "Is the monster scary?",
-     "ko": "괴물 무서워?",
+     "text": "Is the troll scary?",
+     "ko": "트롤 무서워?",
      "url": null
     },
     {
@@ -2103,8 +2455,8 @@
      "url": null
     },
     {
-     "text": "There is a monster.",
-     "ko": "괴물이 있어요",
+     "text": "There is a troll.",
+     "ko": "트롤이 있어요",
      "url": null
     }
    ]
@@ -2206,8 +2558,8 @@
    "stage": 3,
    "lines": [
     {
-     "text": "Can the monster swim?",
-     "ko": "괴물은 수영할 수 있어?",
+     "text": "Can the troll swim?",
+     "ko": "트롤은 수영할 수 있어?",
      "url": null
     },
     {
@@ -2257,8 +2609,8 @@
    "lesson": "2026-11-18",
    "lines": [
     {
-     "text": "Where is the monster?",
-     "ko": "괴물은 어디 있어?",
+     "text": "Where is the troll?",
+     "ko": "트롤은 어디 있어?",
      "url": null
     },
     {
@@ -2291,8 +2643,8 @@
    "lesson": "2026-11-18",
    "lines": [
     {
-     "text": "What does the monster want?",
-     "ko": "괴물은 뭘 원해?",
+     "text": "What does the troll want?",
+     "ko": "트롤은 뭘 원해?",
      "url": null
     },
     {
@@ -2308,13 +2660,259 @@
    "lesson": "2026-11-18",
    "lines": [
     {
-     "text": "Who hits the monster?",
-     "ko": "누가 괴물을 쳐?",
+     "text": "Who hits the troll?",
+     "ko": "누가 트롤을 쳐?",
      "url": null
     },
     {
-     "text": "The very big goat hits the monster.",
-     "ko": "아주 큰 염소가 괴물을 쳐요",
+     "text": "The very big goat hits the troll.",
+     "ko": "아주 큰 염소가 트롤을 쳐요",
+     "url": null
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1124s0q",
+   "lesson": "2026-11-24",
+   "base": "p1124s0",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "What is your favorite color?",
+     "ko": "제일 좋아하는 색이 뭐야?",
+     "url": null
+    },
+    {
+     "text": "My favorite color is purple.",
+     "ko": "보라색이요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1124s1q",
+   "lesson": "2026-11-24",
+   "base": "p1124s1",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "Do you like hot pink?",
+     "ko": "진분홍 좋아해?",
+     "url": null
+    },
+    {
+     "text": "No, it's too dark.",
+     "ko": "아니요, 너무 어두워요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1124s2q",
+   "lesson": "2026-11-24",
+   "base": "p1124s2",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "Do you like tangerines?",
+     "ko": "귤 좋아해?",
+     "url": null
+    },
+    {
+     "text": "Yes, tangerines are very yummy.",
+     "ko": "네, 귤은 정말 맛있어요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1124s3q",
+   "lesson": "2026-11-24",
+   "base": "p1124s3",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "What is on Jeju Island?",
+     "ko": "제주도에는 뭐가 있어?",
+     "url": null
+    },
+    {
+     "text": "There is a big mountain.",
+     "ko": "큰 산이 있어요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1124s4q",
+   "lesson": "2026-11-24",
+   "base": "p1124s4",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "Are there people on the island?",
+     "ko": "그 섬에 사람이 있어?",
+     "url": null
+    },
+    {
+     "text": "No, there are no people.",
+     "ko": "아니요, 사람이 없어요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1124s5q",
+   "lesson": "2026-11-24",
+   "base": "p1124s5",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "Do you have your book?",
+     "ko": "책 있어?",
+     "url": null
+    },
+    {
+     "text": "No, I don't have my book.",
+     "ko": "아니요, 책이 없어요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1124s6q",
+   "lesson": "2026-11-24",
+   "base": "p1124s6",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "What is this place?",
+     "ko": "여기는 어디야?",
+     "url": null
+    },
+    {
+     "text": "This is a pet shop.",
+     "ko": "애완동물 가게예요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1124s7q",
+   "lesson": "2026-11-24",
+   "base": "p1124s7",
+   "stage": 3,
+   "lines": [
+    {
+     "text": "Do you want to go to Jeju Island?",
+     "ko": "제주도 가고 싶어?",
+     "url": null
+    },
+    {
+     "text": "Yes, I want to go there.",
+     "ko": "네, 거기 가고 싶어요",
+     "url": null
+    }
+   ]
+  },
+  {
+   "id": "p1124t0",
+   "lesson": "2026-11-24",
+   "lines": [
+    {
+     "text": "What is your favorite color?",
+     "ko": "제일 좋아하는 색이 뭐야?",
+     "url": null
+    },
+    {
+     "text": "My favorite color is purple.",
+     "ko": "보라색이요",
+     "url": null
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1124t1",
+   "lesson": "2026-11-24",
+   "lines": [
+    {
+     "text": "How is the weather in Korea?",
+     "ko": "한국 날씨 어때?",
+     "url": "phone/4167396773a9.mp3"
+    },
+    {
+     "text": "It's very cold.",
+     "ko": "정말 추워요",
+     "url": "phone/c318e6a9526e.mp3"
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1124t2",
+   "lesson": "2026-11-24",
+   "lines": [
+    {
+     "text": "Do you like Jeju Island?",
+     "ko": "제주도 좋아해?",
+     "url": null
+    },
+    {
+     "text": "Yes, I like Jeju Island.",
+     "ko": "네, 제주도 좋아요",
+     "url": null
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1124t3",
+   "lesson": "2026-11-24",
+   "lines": [
+    {
+     "text": "Do you have your book?",
+     "ko": "책 있어?",
+     "url": null
+    },
+    {
+     "text": "No, I don't have my book.",
+     "ko": "아니요, 책이 없어요",
+     "url": null
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1124t4",
+   "lesson": "2026-11-24",
+   "lines": [
+    {
+     "text": "I live in the sea. I have eight arms. What am I?",
+     "ko": "나는 바다에 살아요. 팔이 8개예요. 나는 누구일까?",
+     "url": null
+    },
+    {
+     "text": "You are an octopus!",
+     "ko": "문어예요!",
+     "url": null
+    }
+   ],
+   "pri": true
+  },
+  {
+   "id": "p1124t5",
+   "lesson": "2026-11-24",
+   "lines": [
+    {
+     "text": "Do you want to go to the hotel in the water?",
+     "ko": "물속 호텔에 가고 싶어?",
+     "url": null
+    },
+    {
+     "text": "No, it's scary!",
+     "ko": "아니요, 무서워요!",
      "url": null
     }
    ],
@@ -2645,8 +3243,8 @@
   {
    "id": "pm18",
    "lesson": "2026-11-18",
-   "text": "monster",
-   "ko": "괴물",
+   "text": "troll",
+   "ko": "트롤 (못생긴 괴물)",
    "emoji": "👹",
    "near": [
     "goat"
@@ -2727,6 +3325,105 @@
    "emoji": "🏊",
    "near": [
     "swing"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm26",
+   "lesson": "2026-11-24",
+   "text": "scarf",
+   "ko": "목도리",
+   "emoji": "🧣",
+   "near": [
+    "skirt"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm27",
+   "lesson": "2026-11-24",
+   "text": "fish tank",
+   "ko": "어항",
+   "emoji": "🐠",
+   "near": [
+    "fish shop"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm28",
+   "lesson": "2026-11-24",
+   "text": "traffic light",
+   "ko": "신호등",
+   "emoji": "🚦",
+   "near": [
+    "train station"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm29",
+   "lesson": "2026-11-24",
+   "text": "station",
+   "ko": "역",
+   "emoji": "🚉",
+   "near": [
+    "street"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm30",
+   "lesson": "2026-11-24",
+   "text": "island",
+   "ko": "섬",
+   "emoji": "🏝️",
+   "near": [
+    "mountain"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm31",
+   "lesson": "2026-11-24",
+   "text": "mountain",
+   "ko": "산",
+   "emoji": "⛰️",
+   "near": [
+    "island"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm32",
+   "lesson": "2026-11-24",
+   "text": "tangerine",
+   "ko": "귤",
+   "emoji": "🍊",
+   "near": [
+    "orange"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm33",
+   "lesson": "2026-11-24",
+   "text": "octopus",
+   "ko": "문어",
+   "emoji": "🐙",
+   "near": [
+    "snake"
+   ],
+   "url": null
+  },
+  {
+   "id": "pm34",
+   "lesson": "2026-11-24",
+   "text": "snake",
+   "ko": "뱀",
+   "emoji": "🐍",
+   "near": [
+    "octopus"
    ],
    "url": null
   }
