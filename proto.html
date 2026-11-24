@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>시안: 낱말퀴즈·키우기</title>
+<style>
+:root{--bg:#F6F1FC;--card:#fff;--ink:#3B2E55;--muted:#7E7299;--line:#E6DCF4;--pine:#8E6FD0;--pine-soft:#EEE6FB;--maple:#E06A92;--sun:#FFCF6B;--ok:#5DBB8A}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:system-ui,"Noto Sans KR",sans-serif}
+#app{height:100%;display:flex;flex-direction:column;padding:12px 16px;gap:10px}
+.tabs{display:flex;gap:8px;align-items:center}
+.tab{border:0;border-radius:999px;padding:10px 18px;font-size:20px;font-weight:700;background:var(--card);color:var(--muted)}
+.tab.on{background:var(--pine);color:#fff}
+.treat{margin-left:auto;font-size:20px;font-weight:700}
+.view{flex:1;min-height:0;display:none}
+.view.on{display:flex}
+/* crossword */
+#cw{gap:16px}
+.left{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.right{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;justify-content:center}
+.grid{display:grid;gap:4px}
+.cell{background:transparent;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;text-transform:uppercase;position:relative}
+.cell.w{background:var(--card);border:3px solid var(--line);cursor:pointer}
+.cell.sel{background:var(--pine-soft);border-color:var(--pine)}
+.cell.cur{border-color:var(--maple)}
+.cell.done{background:#E3F5EA;border-color:var(--ok)}
+.cell .n{position:absolute;top:2px;left:5px;font-size:13px;color:var(--muted);font-weight:700}
+.clue{background:var(--card);border:3px solid var(--line);border-radius:16px;padding:8px 12px;display:flex;align-items:center;gap:10px;font-size:22px;cursor:pointer}
+.clue.sel{border-color:var(--pine);background:var(--pine-soft)}
+.clue.done{border-color:var(--ok);background:#E3F5EA}
+.clue .e{font-size:34px}.clue .k{flex:1;font-weight:700}
+.clue .num{color:var(--muted);font-size:16px;width:58px}
+.btn{border:0;border-radius:14px;background:var(--pine);color:#fff;font-size:20px;font-weight:700;padding:8px 14px}
+.btn.soft{background:var(--pine-soft);color:var(--pine)}
+.tiles{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.tile{width:64px;height:64px;border-radius:16px;border:0;background:var(--sun);color:var(--ink);font-size:34px;font-weight:800;text-transform:uppercase;box-shadow:0 4px 0 #E3AE3B}
+.tile.bad{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.msg{font-size:22px;font-weight:700;min-height:30px;text-align:center}
+.row{display:flex;gap:8px;justify-content:center}
+/* pet */
+#pet{flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.stage{font-size:22px;font-weight:700;color:var(--muted)}
+.petbox{position:relative;line-height:1;cursor:pointer;transition:transform .2s}
+.petbox.jump{animation:jump .5s}
+@keyframes jump{40%{transform:translateY(-40px)}}
+.petbox .p{display:block}
+.acc{position:absolute;font-size:.38em}
+.say{min-height:34px;font-size:26px;font-weight:700;color:var(--maple)}
+.bar{width:min(500px,80vw);height:22px;background:var(--card);border-radius:999px;border:2px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--maple)}
+.items,.pets{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.it{width:62px;height:62px;border-radius:14px;border:3px solid var(--line);background:var(--card);font-size:32px;position:relative}
+.it.on{border-color:var(--maple);background:#FDE6EE}
+.it.lock{opacity:.45}
+.it small{position:absolute;bottom:-2px;right:2px;font-size:12px;color:var(--muted)}
+.overlay{position:fixed;inset:0;background:#0006;display:none;align-items:center;justify-content:center}
+.overlay.on{display:flex}
+.pop{background:var(--card);border-radius:24px;padding:24px 32px;text-align:center;font-size:24px;font-weight:700}
+.pop .big{font-size:72px}
+@media (orientation:portrait){#cw{flex-direction:column}.right{flex:none}}
+</style></head><body>
+<div id="app">
+  <div class="tabs">
+    <button class="tab on" data-v="cw">✏️ 낱말퀴즈</button>
+    <button class="tab" data-v="pet">🐾 키우기</button>
+    <span class="treat">🦴 <span id="tn">0</span></span>
+  </div>
+  <div class="view on" id="cw">
+    <div class="left">
+      <div class="grid" id="grid"></div>
+      <div class="msg" id="msg">칸이나 그림을 눌러요</div>
+      <div class="tiles" id="tiles"></div>
+    </div>
+    <div class="right">
+      <div id="clues" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="row">
+        <button class="btn soft" id="hint">💡 한 글자</button>
+        <button class="btn soft" id="say">🔊 듣기</button>
+        <button class="btn soft" id="next">다른 퀴즈 →</button>
+      </div>
+    </div>
+  </div>
+  <div class="view" id="pet">
+    <div class="stage" id="stage"></div>
+    <div class="petbox" id="petbox"><span class="p" id="pemo"></span></div>
+    <div class="say" id="psay"></div>
+    <div class="bar"><i id="pbar"></i></div>
+    <div style="font-size:18px;color:var(--muted)" id="pnext"></div>
+    <div class="items" id="items"></div>
+    <div class="pets" id="pets"></div>
+    <div class="row"><button class="btn soft" id="plus">아빠용: 간식 +10</button><button class="btn soft" id="reset">처음으로</button></div>
+  </div>
+</div>
+<div class="overlay" id="ov"><div class="pop" id="pop"></div></div>
+<script>
+// ---------- audio ----------
+let TTS={};fetch('tts/tts.json').then(r=>r.json()).then(j=>TTS=j).catch(()=>{});
+function speak(t){
+  try{speechSynthesis.cancel()}catch(e){}
+  const u=TTS[t]||TTS[t.toLowerCase()];
+  if(u){const a=new Audio(u);a.play().catch(()=>dev(t));a.onerror=()=>dev(t);return}
+  dev(t);
+}
+function dev(t){try{const s=new SpeechSynthesisUtterance(t);s.lang='en-US';s.rate=.85;speechSynthesis.speak(s)}catch(e){}}
+function boing(){try{const c=new (window.AudioContext||webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(600,c.currentTime);o.frequency.exponentialRampToValueAtTime(200,c.currentTime+.25);g.gain.value=.2;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.25)}catch(e){}}
+// ---------- store ----------
+const K='proto-pet';let P;try{P=JSON.parse(localStorage.getItem(K))}catch(e){}
+P=P||{t:0,pet:'🐩',wear:[]};
+function save(){try{localStorage.setItem(K,JSON.stringify(P))}catch(e){}document.getElementById('tn').textContent=P.t}
+// ---------- crossword ----------
+// each word: w, r, c, d ('a' across / 'd' down), e emoji, k Korean
+const PUZ=[
+ [{w:'cat',r:0,c:0,d:'a',e:'🐱',k:'고양이'},{w:'cup',r:0,c:0,d:'d',e:'🥤',k:'컵'},{w:'tent',r:0,c:2,d:'d',e:'⛺',k:'텐트'},{w:'pen',r:2,c:0,d:'a',e:'🖊️',k:'펜'}],
+ [{w:'bus',r:0,c:0,d:'a',e:'🚌',k:'버스'},{w:'bed',r:0,c:0,d:'d',e:'🛏️',k:'침대'},{w:'swim',r:0,c:2,d:'d',e:'🏊',k:'수영하다'},{w:'map',r:3,c:2,d:'a',e:'🗺️',k:'지도'}],
+ [{w:'fish',r:0,c:0,d:'a',e:'🐟',k:'물고기'},{w:'hat',r:0,c:3,d:'d',e:'👒',k:'모자'},{w:'cat',r:2,c:1,d:'a',e:'🐱',k:'고양이'},{w:'car',r:2,c:1,d:'d',e:'🚗',k:'자동차'}],
+];
+let pi=0,W,F,sel=0,cells;
+function cellsOf(x){const a=[];for(let i=0;i<x.w.length;i++)a.push([x.r+(x.d=='d'?i:0),x.c+(x.d=='a'?i:0)]);return a}
+function load(i){
+  pi=i%PUZ.length;W=PUZ[pi];F={};
+  W.forEach(x=>{const cs=cellsOf(x);F[cs[0]]=x.w[0]}); // first letters given
+  sel=0;draw();pickWord(0,true);
+}
+function sol(){const s={};W.forEach(x=>cellsOf(x).forEach((p,i)=>s[p]=x.w[i]));return s}
+function full(x){return cellsOf(x).every(p=>F[p])}
+function draw(){
+  const S=sol();let R=0,C=0;Object.keys(S).forEach(k=>{const[r,c]=k.split(',').map(Number);R=Math.max(R,r+1);C=Math.max(C,c+1)});
+  const port=innerHeight>innerWidth;
+  const sz=Math.floor(Math.min((port?innerWidth*.8:innerWidth*.46)/C,(port?innerHeight*.36:innerHeight*.5)/R,96));
+  const g=document.getElementById('grid');g.style.gridTemplateColumns=`repeat(${C},${sz}px)`;g.innerHTML='';
+    // numbers: by start cell, unique per start
+  const starts={};let n=0;W.forEach(x=>{const k=[x.r,x.c]+'';if(!starts[k])starts[k]=++n;x.n=starts[k]});
+  const sc=cellsOf(W[sel]).map(String);const cur=sc.find(p=>!F[p]);
+  for(let r=0;r<R;r++)for(let c=0;c<C;c++){
+    const k=[r,c]+'',d=document.createElement('div');d.className='cell';d.style.height=d.style.width=sz+'px';d.style.fontSize=sz*.55+'px';
+    if(S[k]!==undefined){d.classList.add('w');
+      if(W.some(x=>full(x)&&cellsOf(x).map(String).includes(k)))d.classList.add('done');
+      if(sc.includes(k))d.classList.add('sel');if(k===cur)d.classList.add('cur');
+      d.innerHTML=(starts[k]?`<span class="n">${starts[k]}</span>`:'')+(F[k]||'');
+      d.onclick=()=>{const own=W.map((x,i)=>i).filter(i=>cellsOf(W[i]).map(String).includes(k));pickWord(own.includes(sel)&&own.length>1?own.find(i=>i!==sel):own[0])};
+    }
+    g.appendChild(d);
+  }
+  const cl=document.getElementById('clues');cl.innerHTML='';
+  W.forEach((x,i)=>{const d=document.createElement('div');d.className='clue'+(i==sel?' sel':'')+(full(x)?' done':'');
+    d.innerHTML=`<span class="num">${x.n} ${x.d=='a'?'가로':'세로'}</span><span class="e">${x.e}</span><span class="k">${x.k}</span><span>${full(x)?'⭐':'🔊'}</span>`;
+    d.onclick=()=>pickWord(i);cl.appendChild(d)});
+  tiles();
+}
+function pickWord(i,quiet){sel=i;draw();if(!quiet)speak(W[i].w);msg(full(W[i])?'다 채웠어요! 다른 칸을 눌러요':`${W[sel].e} 영어로 뭘까? 글자를 눌러요`)}
+function msg(t){document.getElementById('msg').textContent=t}
+function tiles(){
+  const x=W[sel],t=document.getElementById('tiles');t.innerHTML='';if(full(x))return;
+  const need=cellsOf(x).filter(p=>!F[p]).map(p=>x.w[cellsOf(x).findIndex(q=>q+''==p+'')]);
+  const pool='abcdefghijklmnoprstuw'.split('').filter(l=>!need.includes(l)).sort(()=>Math.random()-.5).slice(0,3);
+  [...new Set(need)].concat(pool).sort(()=>Math.random()-.5).forEach(l=>{const b=document.createElement('button');b.className='tile';b.textContent=l;b.onclick=()=>put(l,b);t.appendChild(b)});
+}
+function put(l,b){
+  const x=W[sel],cs=cellsOf(x),i=cs.findIndex(p=>!F[p]);if(i<0)return;
+  if(x.w[i]===l){F[cs[i]]=l;draw();
+    if(full(x))wordDone(x);
+  }else{boing();if(b){b.classList.remove('bad');void b.offsetWidth;b.classList.add('bad')}msg('뿅? 다시 해봐요')}
+}
+function wordDone(x){
+  speak(x.w);msg(`⭐ ${x.w.toUpperCase()}! 따라 말해봐요 🎤`);
+  setTimeout(()=>listen(x.w,ok=>{msg(ok?'🎉 잘 말했어요!':'좋아요! 다음 단어 가볼까요?');
+    if(W.every(full)){P.t+=5;save();setTimeout(()=>pop(`<div class="big">🏆</div>다 풀었어요!<br>🦴 간식 +5`),700)}
+    else{const n=W.findIndex(y=>!full(y));setTimeout(()=>pickWord(n),900)}
+  }),900);
+}
+function listen(word,cb){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){cb(false);return}
+  let done=false;const r=new SR();r.lang='en-US';r.maxAlternatives=5;r.interimResults=false;
+  const end=v=>{if(done)return;done=true;try{r.stop()}catch(e){}cb(v)};
+  r.onresult=e=>{const alts=[...e.results[0]].map(a=>a.transcript.toLowerCase());end(alts.some(a=>a.includes(word)))};
+  r.onerror=()=>end(false);r.onend=()=>end(false);
+  try{r.start()}catch(e){end(false)}setTimeout(()=>end(false),7000);
+}
+document.getElementById('hint').onclick=()=>{const x=W[sel],cs=cellsOf(x),i=cs.findIndex(p=>!F[p]);if(i>=0)put(x.w[i])};
+document.getElementById('say').onclick=()=>speak(W[sel].w);
+document.getElementById('next').onclick=()=>load(pi+1);
+addEventListener('keydown',e=>{if(/^[a-z]$/i.test(e.key)&&document.getElementById('cw').classList.contains('on'))put(e.key.toLowerCase())});
+// ---------- pet ----------
+const STAGES=[[0,'아기',.55],[20,'꼬마',.75],[50,'큰',.95],[100,'👑 왕',1.1]];
+const ITEMS=[['🎀',10,'top:-6%;left:58%'],['🎩',25,'top:-30%;left:30%'],['🕶️',40,'top:22%;left:28%'],['🎒',60,'top:55%;left:-14%'],['✈️',80,'top:-20%;left:-30%'],['🏕️',120,'top:60%;left:80%']];
+const PETS=['🐩','🐶','🐱','🐰','🐹','🦄','🐼','🦊','🐧','🐢'];
+const LINES=['I am happy.','Thank you!','I love you!','Yummy!','Good job!'];
+function stage(){let s=STAGES[0];STAGES.forEach(x=>{if(P.t>=x[0])s=x});return s}
+function drawPet(){
+  const s=stage(),i=STAGES.indexOf(s),nx=STAGES[i+1];
+  document.getElementById('stage').textContent=`${s[1]} ${P.pet}`;
+  const box=document.getElementById('petbox'),px=Math.min(innerHeight*.3,innerWidth*.4)*s[2];
+  box.style.fontSize=px+'px';
+  box.innerHTML=`<span class="p">${P.pet}</span>`+(s[1].includes('왕')&&!P.wear.includes('🎩')?`<span class="acc" style="top:-28%;left:32%">👑</span>`:'')+
+    P.wear.map(w=>{const it=ITEMS.find(x=>x[0]==w);return it?`<span class="acc" style="${it[2]}">${w}</span>`:''}).join('');
+  document.getElementById('pbar').style.width=(nx?Math.min(100,(P.t-s[0])/(nx[0]-s[0])*100):100)+'%';
+  document.getElementById('pnext').textContent=nx?`${nx[1]} ${P.pet}까지 🦴 ${nx[0]-P.t}개`:'다 자랐어요!';
+  const it=document.getElementById('items');it.innerHTML='';
+  ITEMS.forEach(([e,c])=>{const b=document.createElement('button');const lock=P.t<c;b.className='it'+(lock?' lock':'')+(P.wear.includes(e)?' on':'');
+    b.innerHTML=lock?`🔒<small>🦴${c}</small>`:e;b.onclick=()=>{if(lock){boing();return}P.wear=P.wear.includes(e)?P.wear.filter(x=>x!=e):P.wear.concat(e);save();drawPet()};it.appendChild(b)});
+  const ps=document.getElementById('pets');ps.innerHTML='';
+  PETS.forEach(e=>{const b=document.createElement('button');b.className='it'+(P.pet==e?' on':'');b.style.width=b.style.height='48px';b.style.fontSize='26px';b.textContent=e;b.onclick=()=>{P.pet=e;save();drawPet()};ps.appendChild(b)});
+}
+document.getElementById('petbox').onclick=()=>{const b=document.getElementById('petbox');b.classList.remove('jump');void b.offsetWidth;b.classList.add('jump');
+  const l=LINES[Math.floor(Math.random()*LINES.length)];document.getElementById('psay').textContent='💬 '+l;speak(l)};
+document.getElementById('plus').onclick=()=>{const before=stage();P.t+=10;save();drawPet();if(stage()!==before)pop(`<div class="big">${P.pet}</div>${stage()[1]} ${P.pet}로 자랐어요!`)};
+document.getElementById('reset').onclick=()=>{P={t:0,pet:P.pet,wear:[]};save();drawPet()};
+// ---------- shell ----------
+function pop(h){document.getElementById('pop').innerHTML=h;document.getElementById('ov').classList.add('on')}
+document.getElementById('ov').onclick=()=>document.getElementById('ov').classList.remove('on');
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab,.view').forEach(x=>x.classList.remove('on'));t.classList.add('on');document.getElementById(t.dataset.v).classList.add('on');t.dataset.v=='pet'?drawPet():draw()});
+addEventListener('resize',()=>{draw();drawPet()});
+save();load(0);
+</script>
+</body></html>
