@@ -1,4 +1,23 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>서현이 영어 비밀 연구소</title><meta name="robots" content="noindex"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style></head><body><title>서현이 영어 비밀 연구소</title>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>서현이 영어 비밀 연구소</title><meta name="robots" content="noindex"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}/* 🧩 bonus 낱말퀴즈 (2026-11-24) */
+.cwx{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;padding:12px 16px;gap:10px;overflow:hidden}
+.cwtop{display:flex;align-items:center;gap:12px;font-family:var(--f-disp);font-size:24px}.cwtop span{color:var(--muted);font-size:20px}
+.cwtop button{margin-left:auto;border:0;border-radius:999px;padding:8px 16px;background:var(--card);color:var(--muted);font-size:18px}
+.cwbody{flex:1;min-height:0;display:flex;gap:16px}.cwx.port .cwbody{flex-direction:column}
+.cwl{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.cwr{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;justify-content:center}.cwx.port .cwr{flex:none}
+.cwg{display:grid;gap:4px}.cwg i{display:block}
+.cwg b{background:var(--card);border:3px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;position:relative;cursor:pointer;color:var(--ink)}
+.cwg b s{position:absolute;top:1px;left:5px;font-size:13px;color:var(--muted);text-decoration:none;font-weight:700}
+.cwg b.sel{background:var(--pine-soft);border-color:var(--pine)}.cwg b.cur{border-color:var(--maple)}.cwg b.done{background:#E3F5EA;border-color:#5DBB8A}
+.cwmsg{font-family:var(--f-disp);font-size:22px;min-height:30px;text-align:center}
+.cwtiles{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:64px}
+.cwtiles button[data-l]{width:62px;height:62px;border-radius:16px;border:0;background:var(--sun);color:var(--ink);font-size:32px;font-weight:800;box-shadow:0 4px 0 #E3AE3B}
+.cwtiles button.bad{animation:cwshake .35s}@keyframes cwshake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.cwc{background:var(--card);border:3px solid var(--line);border-radius:16px;padding:6px 12px;display:flex;align-items:center;gap:10px;font-size:21px;cursor:pointer;min-height:52px}
+.cwc.sel{border-color:var(--pine);background:var(--pine-soft)}.cwc.done{border-color:#5DBB8A;background:#E3F5EA}
+.cwc .e{font-size:30px}.cwc .k{flex:1;font-weight:700}.cwc .n{color:var(--muted);font-size:15px;width:52px;flex:none}
+.cwbtn{display:flex;gap:8px;justify-content:center}.cwbtn button{border:0;border-radius:14px;background:var(--pine-soft);color:var(--pine);font-size:19px;font-weight:700;padding:8px 14px}
+</style></head><body><title>서현이 영어 비밀 연구소</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Fredoka:wght@500;600&family=Gowun+Dodum&display=swap">
 <style>
@@ -446,7 +465,7 @@ function phoneBudget(units,today,rank0){ // dad 2026-11-19: 전화영어 = half 
   const got={unit:[],talk:[],tz:[],wm:[],wh:[],gr:[]}, used={unit:0,talk:0,tz:0,wm:0,wh:0,gr:0}; let t=0;
   for(const k of order){ const g=pools[k][used[k]]; if(!g) continue; const c=costOf(g); if(t>0&&t+c>HALF_MIN+.4) continue; used[k]++; got[k].push(...g); t+=c; }
   return [...got.unit,...got.talk,...got.tz,...shuffle(got.wm),...got.wh,...got.gr]; }
-const APPV="11/24-1"; // shown on home (under the chips) and in the parent screen
+const APPV="11/24-2"; // shown on home (under the chips) and in the parent screen
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -1145,7 +1164,7 @@ function wrPanel(){ const r=wrRec(), P=wrPlan(), pg=BOOK_NW[P.pk][0];
 let view="home", L=null, gate=null, confirmReset=false, confirmToday=false;
 const app=document.getElementById("app");
 function render(){
-  ({home:renderHome,lesson:renderLesson,finish:renderFinish,gate:renderGate,parent:renderParent,wr:renderWR,wrdone:renderWRDone})[view]();
+  ({home:renderHome,lesson:renderLesson,finish:renderFinish,gate:renderGate,parent:renderParent,cw:renderCW,wr:renderWR,wrdone:renderWRDone})[view]();
   if(render.last!==view){ window.scrollTo(0,0); render.last=view; }
   { let b=document.getElementById("pvbar"); if(PREVIEW){ if(!b){ b=document.createElement("div"); b.id="pvbar"; document.body.appendChild(b); } b.innerHTML=`👀 내일(${todayStr().slice(5).replace("-","/")}) 미션 미리 해보는 중 · 기록은 안 남아요 <button id="pvend">끝내기</button>`; b.querySelector("#pvend").onclick=endPreview; } else if(b) b.remove(); }
   // dad 2026-11-17: the answer box must be on screen without scrolling by hand
@@ -1170,7 +1189,7 @@ function renderHome(){
   let mission;
   const wrLeft=wrOn()&&wrRec().last!==today&&(doneToday()||(S.spk&&S.spk.date===today)); // dad 2026-11-20: one mission straight through, no extra buttons
   if(wrLeft) mission=`<div class="mission"><h2>오늘의 미션 · 이어서 하기</h2><div class="plan">말하기 끝! 👏 이제 🔤 단어 + 📖 읽기만 하면 돼요</div><button class="go" id="wrstart">이어서 하기 ▶</button></div>`;
-  else if(doneToday()) mission=`<div class="mission done"><div class="spark" aria-hidden="true">✨ 🌟 ✨</div><h2>야호! 오늘 미션 성공! 🎉</h2><div class="donerow"><span class="donestk">${h(S.days[today].sticker)}</span><div class="done-msg">새 스티커를 받았어요!<br>서현이 최고! 💜 내일 또 만나요</div></div><div class="sub">오늘 배운 문장을 아빠한테 영어로 자랑해 봐요.</div></div>`;
+  else if(doneToday()) mission=`<div class="mission done"><div class="spark" aria-hidden="true">✨ 🌟 ✨</div><h2>야호! 오늘 미션 성공! 🎉</h2><div class="donerow"><span class="donestk">${h(S.days[today].sticker)}</span><div class="done-msg">새 스티커를 받았어요!<br>서현이 최고! 💜 내일 또 만나요</div></div><div class="sub">오늘 배운 문장을 아빠한테 영어로 자랑해 봐요.</div><div style="display:flex;justify-content:center;margin-top:10px">${cwBonusBtn()}</div></div>`;
   else if(!q.some(c=>c.type!=="tip")) mission=`<div class="mission"><h2>오늘은 할 게 없어요</h2><div class="sub">내일 다시 와요!</div></div>`;
   else {
     const w=curWeek(), ss=S.session, resume=ss&&ss.qv===QV&&ss.date===today&&ss.week===w&&ss.i>0&&ss.i<ss.queue.length;
@@ -1186,7 +1205,7 @@ function renderHome(){
   const banner=S.offset?`<div class="testbanner">⚠️ 테스트 날짜 모드예요 (실제보다 ${S.offset}일 뒤). 아빠 화면 → "오늘로 돌아오기"를 눌러 주세요.</div>`:"";
   app.innerHTML=topBar()+banner+mission+`<div class="section-t">이번 주 <small>매일 하면 불꽃이 커져요</small></div><div class="week">${wk.join("")}</div>`+
     `<div class="section-t">스티커 모음 <small>${S.stickers.length}개 모았어요</small></div><div class="board">${slots.join("")}</div>`;
-  bindLogo(); const s=document.getElementById("start"); if(s) s.onclick=startLesson; const ws=document.getElementById("wrstart"); if(ws) ws.onclick=()=>wrStart(true);
+  bindLogo(); cwBind(); const s=document.getElementById("start"); if(s) s.onclick=startLesson; const ws=document.getElementById("wrstart"); if(ws) ws.onclick=()=>wrStart(true);
 }
 
 function elapsed(){ return L? L.base+(Date.now()-L.tStart) : 0; }
@@ -1675,11 +1694,100 @@ function fanfare(){ try{ const C=window.AudioContext||window.webkitAudioContext;
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.3,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+(d>.6?.6:.22)); o.connect(g).connect(c.destination); o.start(t); o.stop(t+.7); }); }catch(e){} }
 function renderFinish(){
   const d=S.days[todayStr()];
-  app.innerHTML=`<div class="finish"><div class="crown">🎉 👑 🎉</div>${L&&L.stkOpts?`<h2>야호! 미션 성공!</h2><div class="cheer">마음에 드는 스티커를 골라요!</div><div class="pickstk">${L.stkOpts.map(x=>`<button class="${x===d.sticker&&L.stkPicked?"on":""}" data-stk="${x}">${x}</button>`).join("")}</div>`:`<div class="bigsticker">${h(d.sticker)}</div><h2>야호! 미션 성공!</h2>`}<div class="cheer">서현이 정말 대단해요! 💜</div><div class="ko">오늘 ${d.n}개를 연습했어요${d.secs?` (${Math.floor(d.secs/60)}분 ${d.secs%60}초)`:""}. 🔥 ${streak()}일 연속!</div><button class="big next" id="home">스티커 붙이러 가기 ✨</button></div>`;
-  confetti();
+  app.innerHTML=`<div class="finish"><div class="crown">🎉 👑 🎉</div>${L&&L.stkOpts?`<h2>야호! 미션 성공!</h2><div class="cheer">마음에 드는 스티커를 골라요!</div><div class="pickstk">${L.stkOpts.map(x=>`<button class="${x===d.sticker&&L.stkPicked?"on":""}" data-stk="${x}">${x}</button>`).join("")}</div>`:`<div class="bigsticker">${h(d.sticker)}</div><h2>야호! 미션 성공!</h2>`}<div class="cheer">서현이 정말 대단해요! 💜</div><div class="ko">오늘 ${d.n}개를 연습했어요${d.secs?` (${Math.floor(d.secs/60)}분 ${d.secs%60}초)`:""}. 🔥 ${streak()}일 연속!</div>${cwBonusBtn()}<button class="big next" id="home">스티커 붙이러 가기 ✨</button></div>`;
+  confetti(); cwBind();
   document.getElementById("home").onclick=()=>{view="home";render();};
   app.querySelectorAll("[data-stk]").forEach(b=>b.onclick=()=>{ const x=b.dataset.stk; const k=S.stickers.lastIndexOf(d.sticker); if(k>=0) S.stickers[k]=x; d.sticker=x; L.stkPicked=true; save(); app.querySelectorAll("[data-stk]").forEach(y=>y.classList.toggle("on",y===b)); chime(true); });
 }
+
+// ---------- 🧩 bonus 낱말퀴즈 (dad 2026-11-24: after the mission, 5 words a day, always 1 sight word) ----------
+const CWDICT=(()=>{ const d={}; LIFE.concat(BOOKW).forEach(x=>{ if(x&&x.w&&x.e) d[x.w]={e:x.e,ko:x.ko}; }); return d; })();
+const cwOkW=w=>/^[a-z]{3,6}$/.test(w);
+function cwPools(){ const r=wrRec();
+  const learned=Object.entries(r.words||{}).filter(([w])=>CWDICT[w]&&cwOkW(w)).sort((a,b)=>a[1].d<b[1].d?1:-1).map(([w])=>w);
+  let pic=learned.slice(0,12); if(pic.length<10) pic=pic.concat(shuffle(Object.keys(CWDICT).filter(w=>cwOkW(w)&&!pic.includes(w))).slice(0,10-pic.length));
+  const isSight=w=>/^[a-z]{2,6}$/.test(w)&&!CWDICT[w]&&!CWDICT[w.replace(/s$/,"")];
+  let sight=Object.keys(r.sight||{}).filter(w=>SIGHT[w]&&isSight(w)); if(!sight.length) sight=Object.keys(SIGHT).filter(isSight).slice(0,8);
+  return {pic,sight}; }
+function cwBuild(list){ // place words crossing each other, crossword rules (no touching side by side)
+  const G={}, P=[]; const at=(r,c)=>G[r+","+c];
+  const fits=(w,r,c,d)=>{ const dr=d==="d"?1:0, dc=d==="a"?1:0; let cross=0;
+    if(at(r-dr,c-dc)||at(r+dr*w.length,c+dc*w.length)) return false;
+    for(let i=0;i<w.length;i++){ const rr=r+dr*i, cc=c+dc*i, g=at(rr,cc);
+      if(g){ if(g!==w[i]) return false; cross++; } else if(at(rr+dc,cc+dr)||at(rr-dc,cc-dr)) return false; }
+    return cross>0&&cross<w.length; };
+  const put=(x)=>{ for(let i=0;i<x.w.length;i++) G[(x.r+(x.d==="d"?i:0))+","+(x.c+(x.d==="a"?i:0))]=x.w[i]; P.push(x); };
+  put({w:list[0],r:0,c:0,d:"a"});
+  for(const w of list.slice(1)){ const opts=[];
+    for(const p of P) for(let i=0;i<p.w.length;i++) for(let j=0;j<w.length;j++){ if(p.w[i]!==w[j]) continue;
+      const d=p.d==="a"?"d":"a", pr=p.r+(p.d==="d"?i:0), pc=p.c+(p.d==="a"?i:0), r=pr-(d==="d"?j:0), c=pc-(d==="a"?j:0);
+      if(fits(w,r,c,d)) opts.push({w,r,c,d}); }
+    if(!opts.length) return null; put(opts[Math.floor(Math.random()*opts.length)]); }
+  const R=P.flatMap(x=>[x.r,x.r+(x.d==="d"?x.w.length-1:0)]), C=P.flatMap(x=>[x.c,x.c+(x.d==="a"?x.w.length-1:0)]);
+  const r0=Math.min(...R), c0=Math.min(...C); P.forEach(x=>{x.r-=r0;x.c-=c0;});
+  return {words:P,R:Math.max(...R)-r0+1,C:Math.max(...C)-c0+1}; }
+function cwMake(){ const {pic,sight}=cwPools(); let best=null;
+  for(let t=0;t<400;t++){ const pk=shuffle(pic.slice(0,t<200?8:pic.length)).slice(0,4), sw=sight[Math.floor(Math.random()*sight.length)];
+    const list=shuffle(pk.concat(sw)); list.sort((a,b)=>b.length-a.length); // longest first crosses best
+    const b=cwBuild(list); if(!b) continue; const sc=Math.max(b.R,b.C)*10+b.R*b.C/10;
+    if(!best||sc<best.sc){ best=b; best.sc=sc; } if(best.sc<70&&t>40) break; }
+  if(!best) return null;
+  const starts={}; let n=0; best.words.slice().sort((a,b)=>a.r-b.r||a.c-b.c).forEach(x=>{ const k=x.r+","+x.c; if(!starts[k]) starts[k]=++n; x.n=starts[k]; });
+  best.words.sort((a,b)=>a.n-b.n||(a.d==="a"?-1:1));
+  best.words.forEach(x=>{ if(CWDICT[x.w]){ x.e=CWDICT[x.w].e; x.ko=CWDICT[x.w].ko; } else { x.sight=true; x.sent=SIGHT[x.w]; } });
+  return best; }
+const cwCells=x=>[...x.w].map((_,i)=>(x.r+(x.d==="d"?i:0))+","+(x.c+(x.d==="a"?i:0)));
+function cwRec(){ const today=todayStr(); S.cw=S.cw||{}; let r=S.cw[today];
+  if(!r||!r.b){ const b=seeded("cw"+today,cwMake); if(!b) return null; r=S.cw[today]={b,F:{},hints:0,done:false};
+    b.words.forEach(x=>{ r.F[cwCells(x)[0]]=x.w[0]; }); // first letters given
+    Object.keys(S.cw).sort().slice(0,-30).forEach(k=>delete S.cw[k]); save(); }
+  return r; }
+let CW=null; // {sel, msg, busy}
+function cwStart(){ if(!cwRec()) return; CW={sel:0,msg:"그림이나 칸을 눌러요",busy:false}; stopAll(); view="cw"; render(); }
+const cwFull=(r,x)=>cwCells(x).every(k=>r.F[k]);
+function cwSay(x){ return x.sight?playSrc("cw:"+x.sent,null,x.sent):playSrc("cw:"+x.w,null,x.w); }
+function renderCW(){ const r=cwRec(); if(!r){ view="home"; return render(); } const b=r.b, W5=b.words, x=W5[CW.sel];
+  const port=innerHeight>innerWidth, sz=Math.floor(Math.min((port?innerWidth*.86:innerWidth*.46)/b.C,(port?innerHeight*.34:innerHeight*.56)/b.R,90));
+  const sol={}; W5.forEach(w=>cwCells(w).forEach((k,i)=>sol[k]=w.w[i])); const sc=cwCells(x), cur=sc.find(k=>!r.F[k]);
+  const num={}; W5.forEach(w=>num[w.r+","+w.c]=w.n);
+  let grid=""; for(let i=0;i<b.R;i++) for(let j=0;j<b.C;j++){ const k=i+","+j;
+    if(sol[k]===undefined){ grid+=`<i></i>`; continue; }
+    const done=W5.some(w=>cwFull(r,w)&&cwCells(w).includes(k));
+    grid+=`<b class="w ${done?"done":""} ${sc.includes(k)?"sel":""} ${k===cur?"cur":""}" data-cell="${k}" style="font-size:${sz*.55}px">${num[k]?`<s>${num[k]}</s>`:""}${(r.F[k]||"").toUpperCase()}</b>`; }
+  const need=sc.filter(k=>!r.F[k]).map(k=>sol[k]);
+  const tiles=cwFull(r,x)||CW.busy?[]:seeded("cwt"+todayStr()+CW.sel+need.length,()=>shuffle([...new Set(need)].concat(shuffle("abcdefghiklmnoprstuwy".split("").filter(l=>!need.includes(l))).slice(0,3))));
+  const clue=w=>w.sight?`<span class="e">💬</span><span class="k">${h(w.sent.replace(new RegExp("\\b"+w.w+"\\b","i"),"___"))}</span>`:`<span class="e">${w.e}</span><span class="k">${h(w.ko)}</span>`;
+  app.innerHTML=`<div class="cwx ${port?"port":""}"><div class="cwtop"><b>🎁 보너스 낱말퀴즈</b><span>${W5.filter(w=>cwFull(r,w)).length} / ${W5.length}</span><button id="cwx">✕ 닫기</button></div>
+   <div class="cwbody"><div class="cwl"><div class="cwg" style="grid-template-columns:repeat(${b.C},${sz}px);grid-auto-rows:${sz}px">${grid}</div>
+     <div class="cwmsg">${h(CW.msg)}</div><div class="cwtiles">${tiles.map(l=>`<button data-l="${l}">${l.toUpperCase()}</button>`).join("")}</div></div>
+   <div class="cwr">${W5.map((w,i)=>`<div class="cwc ${i===CW.sel?"sel":""} ${cwFull(r,w)?"done":""}" data-clue="${i}"><span class="n">${w.n} ${w.d==="a"?"가로":"세로"}</span>${clue(w)}<span>${cwFull(r,w)?"⭐":"🔊"}</span></div>`).join("")}
+     <div class="cwbtn"><button id="cwhint">💡 한 글자</button><button id="cwsay">🔊 다시 듣기</button></div></div></div></div>`;
+  document.getElementById("cwx").onclick=()=>{ stopAll(); CW=null; view="home"; render(); };
+  app.querySelectorAll("[data-clue]").forEach(e=>e.onclick=()=>cwPick(+e.dataset.clue));
+  app.querySelectorAll("[data-cell]").forEach(e=>e.onclick=()=>{ const k=e.dataset.cell, own=W5.map((w,i)=>i).filter(i=>cwCells(W5[i]).includes(k)); cwPick(own.includes(CW.sel)&&own.length>1?own.find(i=>i!==CW.sel):own[0]); });
+  app.querySelectorAll("[data-l]").forEach(e=>e.onclick=()=>cwPut(e.dataset.l,e));
+  document.getElementById("cwhint").onclick=()=>{ const k=cwCells(x).find(k=>!r.F[k]); if(k&&!CW.busy){ r.hints++; cwPut(sol[k]); } };
+  document.getElementById("cwsay").onclick=()=>cwSay(x);
+}
+function cwPick(i){ if(CW.busy) return; const r=cwRec(), x=r.b.words[i]; CW.sel=i;
+  CW.msg=cwFull(r,x)?"다 채웠어요! 다른 열쇠를 눌러요":x.sight?"문장을 듣고 빈칸 단어를 채워요":`${x.e} 영어로 뭘까? 글자를 눌러요`; render(); cwSay(x); }
+async function cwPut(l,btn){ if(CW.busy) return; const r=cwRec(), x=r.b.words[CW.sel], cs=cwCells(x), i=cs.findIndex(k=>!r.F[k]); if(i<0) return;
+  if(x.w[i]!==l){ buzz(); CW.msg="뿅? 다시 골라 봐요"; render(); const b2=app.querySelector(`[data-l="${l}"]`); if(b2) b2.classList.add("bad"); return; }
+  r.F[cs[i]]=l; save(); if(!cwFull(r,x)){ CW.msg=x.sight?"문장을 듣고 빈칸 단어를 채워요":`${x.e} 영어로 뭘까? 글자를 눌러요`; render(); return; }
+  // word done → hear it, say it once (never blocks), then the next word
+  chime(); CW.busy=true; CW.msg=`⭐ ${x.w.toUpperCase()}! 🎤 따라 말해 봐요`; render(); const me=CW;
+  await playSrc("cw:"+x.w,null,x.w); if(CW!==me||view!=="cw") return;
+  const res=await listenOnce(); if(CW!==me||view!=="cw") return;
+  const alts=res.alts||[], ok=wrHit(x.w,alts)||alts.some(a=>String(a).toLowerCase().split(/[^a-z']+/).some(t=>(SWOK[x.w]||[]).includes(t)));
+  logHeard(x.w,alts,ok); CW.msg=ok?"딩동댕! 잘 말했어요 🎉":"좋아요! 다음 단어 가 볼까요?"; render();
+  await new Promise(z=>setTimeout(z,1100)); if(CW!==me||view!=="cw") return; CW.busy=false;
+  if(r.b.words.every(w=>cwFull(r,w))){ r.done=true; save(); fanfare(); confetti(); CW.msg="🏆 다 풀었어요! 서현이 최고!"; render();
+    const box=app.querySelector(".cwtiles"); if(box) box.innerHTML=`<button class="big next" id="cwend" style="width:auto">🏆 다 풀었어요! 홈으로</button>`;
+    const e=document.getElementById("cwend"); if(e) e.onclick=()=>{ CW=null; view="home"; render(); }; return; }
+  const n=r.b.words.findIndex(w=>!cwFull(r,w)); cwPick(n); }
+addEventListener("keydown",e=>{ if(view==="cw"&&CW&&/^[a-z]$/i.test(e.key)) cwPut(e.key.toLowerCase()); });
+const cwBonusBtn=()=>{ const r=S.cw&&S.cw[todayStr()]; return `<button class="big" id="cwgo" style="background:var(--sun);color:var(--ink)">🎁 보너스 낱말퀴즈${r&&r.done?" ✅":""}</button>`; };
+const cwBind=()=>{ const e=document.getElementById("cwgo"); if(e) e.onclick=cwStart; };
 
 // ---------- parent ----------
 function openGate(){ gate={mode:S.pin?"enter":"new",input:"",first:null,err:""}; view="gate"; render(); }
@@ -1768,7 +1876,7 @@ function renderParent(){
   </div>
   <div class="panel"><h3>오늘 공부</h3>
     <div class="tools">${S.offset?`<button class="tbtn" id="real">오늘로 돌아오기</button>`:""}${confirmToday?`<button class="tbtn warn" id="today0">정말 오늘 공부를 지울까요?</button><button class="tbtn" id="today0no">취소</button>`:`<button class="tbtn" id="today0ask">오늘 공부 처음부터</button>`}${PREVIEW?"":`<button class="tbtn" id="pvgo">▶ 내일 미션 미리 해보기</button>`}</div>
-    <div class="note">${syncState} · 앱 버전 ${APPV} · 전화영어 문장 ${PHONE.length}개${S.offset?` · 지금 보는 날짜 ${today} (실제보다 ${S.offset}일 뒤)`:""}</div></div>
+    <div class="note">${syncState} · 앱 버전 ${APPV} · 전화영어 문장 ${PHONE.length}개 · 🧩 낱말퀴즈 오늘 ${(S.cw&&S.cw[today]&&S.cw[today].done)?"다 풀었어요 ✅":(S.cw&&S.cw[today])?"하는 중":"아직"}${S.offset?` · 지금 보는 날짜 ${today} (실제보다 ${S.offset}일 뒤)`:""}</div></div>
   <div class="panel"><h3>📦 천일문 파일</h3><div class="note">지금 파일: ${MAXW}주차까지 들어 있어요. 새 파일을 받으면 여기서 골라 주세요 (공부 기록은 그대로예요). 그림책 파일(picture-book.json)도 여기서 골라요.</div><div class="note">${BOOK?`📘 그림책 "${h(BOOK.title||"")}" 들어 있어요 (${(BOOK.pages||[]).length}쪽).${(BOOK.pages||[]).some(p=>(p.lines||[]).some(l=>l.a))?" 🔊 천천히 듣기 소리 있음":" ⚠️ 천천히 듣기 소리가 없는 옛 파일이에요. 새 picture-book.json 을 골라 주세요."}`:`📘 그림책 파일이 아직 없어요.`}</div><label class="tbtn" style="cursor:pointer;display:inline-block">새 천일문 파일 고르기<input id="packin2" type="file" hidden></label><span id="packmsg" class="note"></span></div>
   <div class="panel"><h3>📋 카드 순서 (대분류 › 중분류 › 소분류 › 문장)</h3><div id="ctbl">${cardTables()}</div></div>
   <div class="panel"><h3>자주 틀리는 문장 <span class="note">요즘 틀린 문장이 먼저, 그다음 많이 틀린 순서 (최대 8개)</span></h3><div class="list">${weak.length?weak.map(row).join(""):`<div class="note">아직 틀린 문장이 없어요.</div>`}</div></div>
