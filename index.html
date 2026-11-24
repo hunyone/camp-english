@@ -273,6 +273,10 @@ details summary{cursor:pointer;color:var(--pine);font-family:var(--f-disp);font-
 .sl .wd.hid{color:transparent!important;border-bottom:3px solid #C9BEDD;border-radius:0;margin:0 2px}.sl .wd.hid.lit{background:#FFD95A;border-bottom-color:#FFD95A}
 .bub{display:flex;gap:14px;align-items:flex-start;text-align:left}.bub .dog{font-size:56px;line-height:1}.bub p{margin:0;background:#fff;border:3px solid var(--line);border-radius:22px;padding:14px 18px;font-size:clamp(24px,4vh,32px);font-weight:700;color:var(--ink);line-height:1.4}
 .role .sl{display:flex;gap:10px;align-items:baseline}.role .who{flex:none;font-size:15px;font-weight:700;border-radius:10px;padding:2px 8px;background:#EEE8F7;color:#6B5A8E}.role .who.me{background:#FFE3EE;color:#C2447A}
+.stk{display:flex;flex-direction:column;align-items:center;gap:6px;margin:0}.stkn{font-size:clamp(32px,5.5vh,50px);line-height:1.1;font-weight:800;color:#E2572B}
+.wkrow{display:flex;gap:8px}.wkc{width:clamp(36px,5.4vh,50px);display:flex;flex-direction:column;align-items:center;gap:2px}.wkc span{width:100%;aspect-ratio:1;border-radius:50%;background:#EEE8F7;display:flex;align-items:center;justify-content:center;font-size:clamp(20px,3.4vh,30px);color:#B9AECF}.wkc.on span{background:#FFE7A8}.wkc.tdy span{outline:3px solid #C2447A}.wkc b{font-size:14px;color:#6B5A8E}
+.stkm{font-size:clamp(18px,3vh,24px);font-weight:700;color:var(--ink)}
+.slko{font-size:clamp(20px,3.4vh,28px);color:var(--ink);font-weight:700;line-height:1.25;text-align:left;padding:2px 14px 0;margin-bottom:-4px} /* dad 11/24: meaning right above the line she shadows */
 .rlko{font-size:clamp(26px,4.4vh,34px)!important;color:var(--ink)!important;font-weight:700;line-height:1.3} /* dad 2026-11-22: Korean meaning bigger, English a bit smaller */
 .sl .wd{border-radius:8px;padding:0 3px;transition:background .15s}.sl .wd.lit{background:#FFD95A;color:var(--ink)}.sl .wd.g{color:#2E9E5B}.sl .wd.x{color:#A9A3B5;text-decoration:underline dotted;cursor:pointer}
 .rl{display:flex;flex-direction:column;gap:6px;width:100%}.rl .sl b{font-size:clamp(28px,5vh,44px)}.rlmsg{font-size:22px!important}.sightw{font-size:clamp(80px,15vh,130px)!important}
@@ -364,7 +368,7 @@ const ITEMS = DATA.items.filter(i=>!SKIP.has(i.text)), TALKS = DATA.talks;
 const MAXW = Math.max(...DATA.items.map(i=>i.week));
 const byId = Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const talkById = Object.fromEntries(TALKS.map(t=>[t.id,t]));
-ITEMS.forEach(it=>{ it.src_audio = it.b64 ? "data:audio/mpeg;base64,"+it.b64 : null; delete it.b64; });
+ITEMS.forEach(it=>{ it.src_audio = it.b64 ? "data:audio/mpeg;base64,"+it.b64 : null; delete it.b64; it.src_chunk = it.b64c ? "data:audio/mpeg;base64,"+it.b64c : null; delete it.b64c; });
 TALKS.forEach(t=>t.lines.forEach(l=>{ l.src_audio = l.b64 ? "data:audio/mpeg;base64,"+l.b64 : null; delete l.b64; }));
 // 전화영어 corner: sentences from 서현's phone-English classes (phone/phone.json in the repo)
 const PHONE=(DATA.phone&&DATA.phone.items)||[], PTALKS=(DATA.phone&&DATA.phone.talks)||[];
@@ -465,7 +469,7 @@ function phoneBudget(units,today,rank0){ // dad 2026-11-19: 전화영어 = half 
   const got={unit:[],talk:[],tz:[],wm:[],wh:[],gr:[]}, used={unit:0,talk:0,tz:0,wm:0,wh:0,gr:0}; let t=0;
   for(const k of order){ const g=pools[k][used[k]]; if(!g) continue; const c=costOf(g); if(t>0&&t+c>HALF_MIN+.4) continue; used[k]++; got[k].push(...g); t+=c; }
   return [...got.unit,...got.talk,...got.tz,...shuffle(got.wm),...got.wh,...got.gr]; }
-const APPV="11/24-3"; // shown on home (under the chips) and in the parent screen
+const APPV="11/24-4"; // shown on home (under the chips) and in the parent screen
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -525,6 +529,9 @@ function status(s){ if(!s) return "new"; if(s.box>=3&&s.recentWrong===0) return 
 const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
 let speechOK = !!SR, micBusy = false;
 let curRec=null;
+async function micDenied(){ try{ const p=await navigator.permissions.query({name:"microphone"}); return p.state==="denied"; }catch(e){ return false; } }
+async function micDeniedCheck(){ if(await micDenied()){ speechOK=false; render(); } }
+function micBack(){ if(document.hidden||!SR) return; micBusy=false; if(!speechOK) micDenied().then(d=>{ if(!d){ speechOK=true; render(); } }); }
 async function listenOnce(onStart){ // dad 2026-11-20: the poodle must never stop by itself → a busy/blocked mic is retried quietly before giving up
   for(let k=0;k<4;k++){ const r=await listenRaw(onStart); if(!(r.err&&(r.err==="audio-capture"||r.err==="start"||r.err==="aborted"&&!r.aborted))) return r; micBusy=false; await new Promise(z=>setTimeout(z,700)); }
   return listenRaw(onStart); }
@@ -535,7 +542,7 @@ function listenRaw(onStart){
     const fin=v=>{ if(done) return; done=true; curRec=null; try{r.abort()}catch(e){} res(v); };
     curRec={stop:()=>fin({alts:[],aborted:true})}; r.onstart=()=>{ onStart&&onStart(); };
     r.onresult=e=>{ micBusy=false; const alts=[]; for(const res0 of e.results) for(const a of res0) alts.push(a.transcript); fin({alts}); };
-    r.onerror=e=>{ if(e.error==="not-allowed"||e.error==="service-not-allowed"){ speechOK=false; } micBusy = e.error==="audio-capture"; fin({err:e.error}); };
+    r.onerror=e=>{ if((e.error==="not-allowed"||e.error==="service-not-allowed")&&!document.hidden) micDeniedCheck(); micBusy = e.error==="audio-capture"; fin({err:e.error}); }; // dad 11/24: leaving the app sends "not-allowed" once → never switch the poodle off for that
     r.onend=()=>fin({alts:[]});
     setTimeout(()=>fin({alts:[]}),8000);
     try{ r.start(); }catch(e){ fin({err:"start"}); } // a restart while the last one is still closing throws: retried by listenOnce, never switches the poodle off
@@ -961,8 +968,11 @@ function wrQueue3(P){ const {U,nu,yu,old}=P.B3, nU=U[nu], pg=k=>BOOK_NW[k]?BOOK_
 // dad 2026-11-22: the number on top counts 🔤 단어 as ONE card and 📖 읽기 as one card per 소분류 (same study, smaller number)
 const wrUnitIdx=q=>{ const u=[]; let n=-1, last=null; q.forEach(c=>{ const m=wrCatOf(c), key=m[0].includes("단어")?"단어":c.k==="story"?"s"+c.pk+(c.old?"o":c.again?"a":"n"):c.k==="pic"||c.k==="role"?c.k+c.u:m[1]; if(key!==last){ n++; last=key; } u.push(n); }); return u; };
 const wrExtra=()=>{ try{ if(!(wrOn()&&!S.days[todayStr()])) return 0; const u=wrUnitIdx(wrQueue(wrPlan())); return u.length?u[u.length-1]+1:0; }catch(e){ return 0; } }; // dad 2026-11-21: one count for the whole mission
-function wrStart(daily){ const P=wrPlan(), q=wrQueue(P), off=daily&&L&&L.queue?L.queue.length:0;
-  W={off,q,i:0,t0:Date.now(),tRead:0,wordSecs:0,daily:!!daily,P,base:daily&&S.spk&&S.spk.date===todayStr()?S.spk.secs*1000:0}; view="wr"; wrEnter(); render();
+function wrStart(daily){ const today=todayStr(), ws=S.wsess, again=daily&&ws&&ws.date===today&&ws.rec&&!PREVIEW; let P, q;
+  if(again){ const real=S.wr; S.wr=JSON.parse(JSON.stringify(ws.rec)); try{ P=wrPlan(); q=wrQueue(P); } finally{ S.wr=real; } } // dad 11/24: 이어서 하기 = the very same cards, from where she stopped
+  else { if(daily) S.wsess={date:today,rec:JSON.parse(JSON.stringify(wrRec())),i:0}; P=wrPlan(); q=wrQueue(P); if(daily) save(); }
+  const off=daily&&L&&L.queue?L.queue.length:0, i0=again?Math.min(ws.i||0,q.length-1):0;
+  W={off,q,i:i0,t0:Date.now(),tRead:0,wordSecs:0,daily:!!daily,P,base:daily&&S.spk&&S.spk.date===todayStr()?S.spk.secs*1000:0}; view="wr"; wrEnter(); render();
 }
 const wrCur=()=>W?W.q[W.i]:null;
 const isRL=c=>c.k==="cold"||c.k==="story"; // read-a-line cards: she reads first, then each word turns green or stays grey
@@ -1074,11 +1084,12 @@ async function wrGood(c){ const st=c.st; if(!st.echo&&!(c.k==="say"&&st.phase)) 
   if(c.k==="say"&&!st.phase&&c.rev){ st.fb="good"; render(); await wrSay(c.x.w); if(wrCur()!==c) return; st.phase=1; st.fb=null; st.helped=false; render(); return wrMic(c); } // review: say the sentence alone first
   if(c.k==="say"&&!st.phase){ st.fb="good"; render(); await wrSay(c.x.w); await new Promise(r=>setTimeout(r,400)); if(wrCur()!==c) return; st.phase=1; st.fb=null; st.helped=false; render(); await wrSay(c.x.s); return wrMic(c); }
   st.fb="good"; render();
+  if(c.k==="say"&&st.phase){ await wrSay(c.x.s); if(wrCur()!==c) return; return wrNext(c,700); } // dad 11/24: show + read the right sentence before moving on
   if(c.k==="read"||c.k==="sight"){ await wrSay(c.x.w); return wrNext(c,c.k==="sight"?1400:900); }
   wrNext(c,900); }
 function wrCombo(ok){ if(!W) return; if(ok){ W.combo=(W.combo||0)+1; W.flash=W.combo>=2; if(W.combo>(S.bestCombo||0)){ S.bestCombo=W.combo; } } else { W.combo=0; W.flash=false; } }
 function wrNext(c,wait){ setTimeout(()=>{ if(view==="wr"&&wrCur()===c) wrAdvance(); },wait||0); }
-function wrAdvance(){ stopAll(); W.flash=false; W.i++; if(W.i>=W.q.length) return wrFinish(); wrEnter(); render(); }
+function wrAdvance(){ stopAll(); W.flash=false; W.i++; if(W.daily&&S.wsess&&S.wsess.date===todayStr()&&W.i<W.q.length){ S.wsess.i=W.i; save(); } if(W.i>=W.q.length) return wrFinish(); wrEnter(); render(); }
 function wrFinish(){ W.end=Date.now();
   if(!W.daily){ view="wrdone"; render(); fanfare(); return; }
   const r=wrRec(), today=todayStr();
@@ -1095,7 +1106,7 @@ const ul=(w,snd)=>{ const parts=snd.split("_"); if(parts.length===2){ const re=n
 const goodMsg=st=>st.helped?"잘했어요! 같이 들어 봐요 🔊":"딩동댕! 💖";
 const lnWin=(n,li)=>{ const a=Math.max(0,Math.min(li-1,n-4)); return [a,a+4]; }; // dad 2026-11-23: whole-page text → show 4 lines around the current one (no scrolling)
 function rlHTML(c){ const st=c.st, [wa,wb]=lnWin(c.lines.length,st.fb?c.lines.length-1:st.li); return `<div class="rl ${c.lines.length>2?"many":""}">${c.lines.map((l,li)=>{ if(li<wa||li>=wb) return ""; const cur=!st.fb&&li===st.li, past=st.fb||li<st.li, G=st.green[li];
-  return `<div class="sl ${cur?"on":past?"ok":""}" ${!past&&!cur?'style="opacity:.25"':""}><b>${l.t.split(" ").map((w,i)=>`<span class="wd${l.hide&&!past&&!st.okLine&&!(st.rev&&st.rev[li])?" hid":""}" data-l="${li}" data-i="${i}">${h(w)}</span>`).join(" ")}</b>${past?"<i>✔</i>":""}</div>`; }).join("")}</div>`; }
+  return `${cur&&c.k==="story"&&l.ko?`<div class="slko">${h(l.ko)}</div>`:""}<div class="sl ${cur?"on":past?"ok":""}" ${!past&&!cur?'style="opacity:.25"':""}><b>${l.t.split(" ").map((w,i)=>`<span class="wd${l.hide&&!past&&!st.okLine&&!(st.rev&&st.rev[li])?" hid":""}" data-l="${li}" data-i="${i}">${h(w)}</span>`).join(" ")}</b>${past?"<i>✔</i>":""}</div>`; }).join("")}</div>`; }
 function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes(c.k)?`<span class="tag">🔤 단어</span>`:`<span class="tag talk">📖 읽기</span>`;
   const nav=(extra)=>`<div class="btns">${extra||""}<button class="big skip" data-w="skip">다음 →</button></div>`;
   if(c.k==="intro") return `<div class="tags">${W.daily?`<span class="tag bonus">말하기 끝! 이제 단어랑 읽기 🎉</span>`:""}${part}<span class="tag rev">오늘의 새 단어 ${P.words.length}개</span></div><div class="ko big">그림을 보고 잘 들어 봐요!</div>
@@ -1106,8 +1117,8 @@ function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes
     <div class="wgrid">${c.opts.map((o,k)=>`<button class="wtile ${st.miss.includes(k)?"no":""}" data-pick="${k}"><span class="we">${o.e}</span></button>`).join("")}</div>${nav(`<button class="big soft" data-w="hear">🔊 다시 듣기</button>`)}`; }
   if(c.k==="say"){ const ph=st.phase;
     return `<div class="tags">${part}<span class="tag rev">${c.rev?"🔁 복습 · ":""}🗣️ 그림 보고 말하기</span></div><div class="pic"><span>${c.x.e}</span></div>
-    ${ph?`<div class="ko big">${h(c.x.sko)}</div>${c.rev&&!st.showAns&&!st.helped?`<div class="ko">이번엔 문장을 혼자 말해 봐요!</div>`:`<div class="en">${h(c.x.s)}</div><div class="ko">문장으로 따라 말해 봐요!</div>`}`:st.fb?`<div class="feedback good">${goodMsg(st)}<div class="en">${h(c.x.w)}</div></div>`:`<div class="ko big">이건 영어로 뭘까요?</div>${st.showAns?`<div class="en">${h(c.x.w)}</div>`:""}`}
-    ${st.fb&&!ph?"":wrMicHTML(c,"영어로 말해요")}${nav(`<button class="big soft" data-w="ans">🔊 정답 듣기</button>`)}`; }
+    ${ph&&st.fb?`<div class="feedback good">${goodMsg(st)}<div class="en">${h(c.x.s)}</div></div><div class="ko">${h(c.x.sko)}</div>`:ph?`<div class="ko big">${h(c.x.sko)}</div>${c.rev&&!st.showAns&&!st.helped?`<div class="ko">이번엔 문장을 혼자 말해 봐요!</div>`:`<div class="en">${h(c.x.s)}</div><div class="ko">문장으로 따라 말해 봐요!</div>`}`:st.fb?`<div class="feedback good">${goodMsg(st)}<div class="en">${h(c.x.w)}</div></div>`:`<div class="ko big">이건 영어로 뭘까요?</div>${st.showAns?`<div class="en">${h(c.x.w)}</div>`:""}`}
+    ${st.fb?"":wrMicHTML(c,"영어로 말해요")}${nav(`<button class="big soft" data-w="ans">🔊 정답 듣기</button>`)}`; }
   if(c.k==="sight"){ const ln=c.x.line;
     return `<div class="tags">${part}<span class="tag rev">👀 보자마자 읽기 · 자주 나오는 단어</span></div><div class="ko big">${st.fb?goodMsg(st):"이 단어 읽어 봐요!"}</div><div class="en wbig sightw">${h(c.x.w)}</div>
     ${st.fb&&ln?`<div class="en" style="font-size:clamp(26px,4.4vh,36px)">${h(ln.t).replace(new RegExp("\\b"+c.x.w+"\\b","i"),m=>`<u>${m}</u>`)}</div><div class="ko">오늘 그림책에 나와요</div>`:""}${st.fb?"":wrMicHTML(c,"")}${nav(`<button class="big soft" data-w="ans">🔊 정답 듣기</button>`)}`; }
@@ -1124,7 +1135,7 @@ function wrBody(c){ const st=c.st, P=W.P, part=["intro","listen","say"].includes
     return `<div class="tags">${part}<span class="tag rev">🎭 역할 놀이 · 그림책 ${c.page}쪽</span></div><div class="storybox"><img src="${pg.img}" alt=""><div class="story">${inner}</div></div>`; }
   if(isRL(c)){ const li=Math.min(st.li,c.lines.length-1), story=c.k==="story", pg=story&&BOOK&&BOOK.pages&&BOOK.pages[c.pk];
     const msg=st.fb?"다 읽었어요! 🎉":st.okLine?(st.helped?"괜찮아요, 같이 들어 봐요 🔊":goodMsg(st)):st.round>0?"한 번 더 듣고 따라 읽어 봐요!":c.follow?(st.hearing?"👂 잘 들어 봐요":c.lines[li].hide&&!(st.rev&&st.rev[li])?"🙈 글자 없이 따라 말해 봐요!":"🗣️ 이제 따라 읽어 봐요!"):c.alone?"🤫 이번엔 혼자 읽어 봐요!":"🤫 듣기 전에 먼저 혼자 읽어 봐요!";
-    const inner=`<div class="ko big rlmsg">${msg}</div>${rlHTML(c)}<div class="ko rlko">${h(c.lines[li].ko||"")}</div>${st.fb||st.okLine||st.hearing?"":wrMicHTML(c,"")}
+    const inner=`<div class="ko big rlmsg">${msg}</div>${rlHTML(c)}${story?"":`<div class="ko rlko">${h(c.lines[li].ko||"")}</div>`}${st.fb||st.okLine||st.hearing?"":wrMicHTML(c,"")}
       <div class="btns">${st.fb?"":`<button class="big soft" data-w="grey">🐢 다시 듣기</button>`}<button class="big ${st.fb?"next":"skip"}" data-w="${st.fb?"skip":"line"}">${st.fb?"끝! ✨":"다음 →"}</button></div>`;
     return `<div class="tags">${part}<span class="tag rev">${story?`📚 그림책 ${c.page}쪽${c.old?(W.P.B3?" · 🔁 예전 문장 다시":" · 🔁 예전 쪽 다시"):c.again?(W.P.B3?" · 🔁 어제 반 쪽 다시":" · 🔁 어제 쪽 다시"):(W.P.B3?" · ✨ 오늘의 새 반 쪽":" · ✨ 오늘의 새 쪽")} · 따라 읽기`:"🤫 아는 문장 먼저 읽기"}</span></div>${pg?`<div class="storybox"><img src="${pg.img}" alt=""><div class="story">${inner}</div></div>`:inner}`; }
   return ""; }
@@ -1216,10 +1227,7 @@ function startLesson(){
   const ss=S.session, resume=ss&&ss.qv===QV&&ss.date===todayStr()&&ss.week===curWeek()&&ss.i<ss.queue.length;
   if(!S.daySnap||S.daySnap.date!==todayStr()) S.daySnap={date:todayStr(),items:JSON.parse(JSON.stringify(S.items)),talks:JSON.parse(JSON.stringify(S.talks)),weekPass:JSON.parse(JSON.stringify(S.weekPass||{})),wr:JSON.parse(JSON.stringify(S.wr||null)),nextWeek:S.nextWeek};
   const queue=resume?ss.queue:buildQueue();
-  if(resume){ // phone cards not reached yet are rebuilt, so a mission saved before an update still gets the newest phone sentences
-    const isPh=c=>c.phone||(byId[c.id]&&byId[c.id].src==="phone")||(c.type==="talk"&&talkById[c.id]&&talkById[c.id].src==="phone")||c.kind==="tense"||c.kind==="wm"||c.kind==="where"||c.kind==="grab";
-    const done=queue.slice(0,ss.i), rest=queue.slice(ss.i).filter(c=>!isPh(c)), fresh=phoneCards().filter(c=>!done.some(d=>d.id===c.id));
-    queue.splice(0,queue.length,...done,...fresh,...rest); }
+  // dad 11/24: 이어서 하기 keeps the saved cards exactly (no re-picking)
   L={queue,i:resume?ss.i:0,total:queue.length,wrong:new Set(),retried:new Set(),done:new Set(),base:resume?(ss.elapsed||0):0,tStart:Date.now()};
   L.wx=wrExtra(); saveSession();
   view="lesson"; enterCard(); render();
@@ -1340,12 +1348,11 @@ function coachMsg(target,heard){
   if(extra.length) return `"${extra[0]}"는 빼고 말해 볼까?`;
   return "순서를 바꿔서 말해 볼까? 💡 힌트를 눌러 봐요";
 }
-document.addEventListener("visibilitychange",()=>{ if(document.hidden||view!=="lesson"||!L) return; const c=cur(); if(c&&c.st&&!c.st.fb&&!c.st.listening&&speechOK&&((c.type==="say"&&c.steps&&/^(speak|r\d|tf)$/.test(c.steps[c.st.step]))||(c.type==="talk"&&c.mode!=="choose"))) setTimeout(()=>act(c,"mic"),400); });
+document.addEventListener("visibilitychange",()=>{ micBack(); if(!document.hidden&&view==="wr"&&W){ const c=wrCur(); setTimeout(()=>{ if(view!=="wr"||wrCur()!==c||!c||!c.st||c.st.listening||c.st.fb||!speechOK||document.hidden) return; if(!document.querySelector("#app .mic")) return; if(c.k==="role") roleMic(c); else if(!c.st.hearing&&!c.st.okLine) wrMic(c); },600); } if(document.hidden||view!=="lesson"||!L) return; const c=cur(); if(c&&c.st&&!c.st.fb&&!c.st.listening&&speechOK&&((c.type==="say"&&c.steps&&/^(speak|r\d|tf)$/.test(c.steps[c.st.step]))||(c.type==="talk"&&c.mode!=="choose"))) setTimeout(()=>act(c,"mic"),400); });
 function micBlock(c,label){
   if(!speechOK) return `<div class="hint">${label}</div>
     <div class="typein"><input id="sayin" type="text" lang="en" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="여기를 누르고 키보드 🎤 로 말해요"><button class="big next" data-act="mic">확인</button></div>
-    <div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>
-    <button class="linkbtn" data-act="selfsaid">키보드 음성이 안 되면: 아빠한테 말하고 누르기</button>`;
+    <div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>`;
   return `<button class="mic ${c.st.listening?"on":""}" data-act="mic" aria-label="말하기">${POODLE}</button><div class="heard">${c.st.heard?`이렇게 들렸어요: <b>${h(c.st.heard)}</b>`:""}</div>${micBusy&&!c.st.listening?`<div class="again">마이크를 다른 앱(줌 등)이 쓰고 있어요. 그 앱을 끄고 다시 눌러 주세요.</div>`:""}${!micBusy&&c.st.tries>=3&&!c.st.fb&&c.st.tgt?`<div class="coach">🐩 ${h(coachMsg(c.st.tgt,c.st.raw))}</div>`:!micBusy&&c.st.tries>0&&!c.st.fb&&!c.st.listening?`<div class="again">앗, 다시 한 번 말해 봐요!</div>`:""}`;
 }
 const wkey=w=>w.toLowerCase().replace(/[^a-z']/g,"");
@@ -1359,8 +1366,9 @@ function blankOf(it){ // blank the word(s) the pattern swaps: compare with the b
 // dad 2026-11-21: a new sentence is first heard word by word, then slowly joined, then at natural speed ("It. is. a. secret." → slow → normal)
 async function ladderPlay(c){ const it=byId[c.id], st=c.steps&&c.steps[c.st.step];
   // dad 2026-11-21 (2nd note): NOT word by word (choppy, "a" read as 에이) — the whole sentence, slow first, then a bit faster, then normal
-  const rate=c.steps&&c.steps.length===4?({r1:0.7,r2:0.85}[st]||1):1;
-  return playSrc(it.id,it.src_audio,it.text,null,rate); }
+  // dad 11/24: 1st step = the book's chunked reading ("I like / sports"), later steps and reviews = natural reading (pack v8 has both for weeks 9-16)
+  if(st==="r1"&&it.src_chunk) return playSrc(it.id+":c",it.src_chunk,it.text);
+  return playSrc(it.id,it.src_audio,it.text); }
 function sayBody(c){
   const it=byId[c.id], step=c.steps[c.st.step]==="tf"&&c.st.fb?"speak":c.steps[c.st.step];
   if(/^r\d$/.test(step)){
@@ -1693,9 +1701,14 @@ function confetti(){
 function fanfare(){ try{ const C=window.AudioContext||window.webkitAudioContext; const c=chime.c||(chime.c=new C()); if(c.state==="suspended") c.resume();
   [[523,0],[659,.12],[784,.24],[1047,.36],[784,.52],[1047,.64]].forEach(([f,d])=>{ const o=c.createOscillator(),g=c.createGain(); o.type="triangle"; o.frequency.value=f; const t=c.currentTime+d;
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.3,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+(d>.6?.6:.22)); o.connect(g).connect(c.destination); o.start(t); o.stop(t+.7); }); }catch(e){} }
+// dad 11/24: no count/time on the success screen (she got hung up on them) → only the streak
+const MILES=[3,5,7,10,14,21,30,50,100];
+function streakBox(){ const n=streak(), today=todayStr(), dt=new Date(today+"T00:00:00"), mon=addDays(today,-((dt.getDay()+6)%7)), nx=MILES.find(m=>m>n);
+  const cells=["월","화","수","목","금","토","일"].map((nm,k)=>{ const d=addDays(mon,k), x=S.days[d]; return `<div class="wkc ${d===today?"tdy":""} ${x?"on":""}"><span>${x?h(x.sticker||"⭐"):d<today?"·":""}</span><b>${nm}</b></div>`; }).join("");
+  return `<div class="stk"><div class="stkn">🔥 ${n}일 연속!</div><div class="wkrow">${cells}</div><div class="stkm">${MILES.includes(n)?`🏅 ${n}일 연속 달성! `:""}${nx?`${nx}일 연속까지 ${nx-n}일 남았어요!`:""}</div></div>`; }
 function renderFinish(){
   const d=S.days[todayStr()];
-  app.innerHTML=`<div class="finish"><div class="crown">🎉 👑 🎉</div>${L&&L.stkOpts?`<h2>야호! 미션 성공!</h2><div class="cheer">마음에 드는 스티커를 골라요!</div><div class="pickstk">${L.stkOpts.map(x=>`<button class="${x===d.sticker&&L.stkPicked?"on":""}" data-stk="${x}">${x}</button>`).join("")}</div>`:`<div class="bigsticker">${h(d.sticker)}</div><h2>야호! 미션 성공!</h2>`}<div class="cheer">서현이 정말 대단해요! 💜</div><div class="ko">오늘 ${d.n}개를 연습했어요${d.secs?` (${Math.floor(d.secs/60)}분 ${d.secs%60}초)`:""}. 🔥 ${streak()}일 연속!</div>${cwBonusBtn()}<button class="big next" id="home">스티커 붙이러 가기 ✨</button></div>`;
+  app.innerHTML=`<div class="finish"><div class="crown">🎉 👑 🎉</div>${L&&L.stkOpts?`<h2>야호! 미션 성공!</h2><div class="cheer">마음에 드는 스티커를 골라요!</div><div class="pickstk">${L.stkOpts.map(x=>`<button class="${x===d.sticker&&L.stkPicked?"on":""}" data-stk="${x}">${x}</button>`).join("")}</div>`:`<div class="bigsticker">${h(d.sticker)}</div><h2>야호! 미션 성공!</h2>`}<div class="cheer">서현이 정말 대단해요! 💜</div>${streakBox()}${cwBonusBtn()}<button class="big next" id="home">스티커 붙이러 가기 ✨</button></div>`;
   confetti(); cwBind();
   document.getElementById("home").onclick=()=>{view="home";render();};
   app.querySelectorAll("[data-stk]").forEach(b=>b.onclick=()=>{ const x=b.dataset.stk; const k=S.stickers.lastIndexOf(d.sticker); if(k>=0) S.stickers[k]=x; d.sticker=x; L.stkPicked=true; save(); app.querySelectorAll("[data-stk]").forEach(y=>y.classList.toggle("on",y===b)); chime(true); });
@@ -1912,7 +1925,7 @@ function renderParent(){
   if($("today0")) $("today0").onclick=()=>{ confirmToday=false; const today=todayStr(), sn=S.daySnap; // undo everything done today: answers, timer, sticker
     if(sn&&sn.date===today){ S.items=sn.items; S.talks=sn.talks; S.weekPass=sn.weekPass; S.nextWeek=sn.nextWeek; if("wr" in sn) S.wr=sn.wr; } S.spk=null;
     if(S.days[today]){ const k=S.stickers.lastIndexOf(S.days[today].sticker); if(k>=0) S.stickers.splice(k,1); delete S.days[today]; }
-    S.heardLog=(S.heardLog||[]).filter(x=>x.d!==today); S.session=null; S.daySnap=null; save(); view="home"; render(); };
+    S.heardLog=(S.heardLog||[]).filter(x=>x.d!==today); S.session=null; S.daySnap=null; S.wsess=null; if(S.cw) delete S.cw[today]; CW=null; save(); view="home"; render(); };
   if($("real")) $("real").onclick=()=>{S.offset=0;save();render();};
   $("pinchg").onclick=()=>{ gate={mode:"new",input:"",first:null,err:""}; view="gate"; render(); };
   if($("reset")) $("reset").onclick=()=>{confirmReset=true;render();};
