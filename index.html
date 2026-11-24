@@ -141,6 +141,8 @@ b.vk{color:#7B4FD6;font-size:1.25em;text-decoration:underline;text-underline-off
 .g-top{position:absolute;left:30px;right:30px;bottom:130px;height:16px;background:#B07A4F;border-radius:6px}
 .g-leg{position:absolute;bottom:0;width:14px;height:130px;background:#8B5A3C;border-radius:4px}
 .g-box{position:absolute;left:75px;width:150px;bottom:0;height:100px;background:#D9A066;border:4px solid #A86F3A;border-top:none;border-radius:0 0 10px 10px;z-index:2}
+.g-lid{position:absolute;left:67px;width:166px;bottom:100px;height:16px;background:#C98B50;border:4px solid #A86F3A;border-radius:6px;z-index:3}
+.opt.no{opacity:.35;text-decoration:line-through;pointer-events:none}
 .grabrow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;max-width:520px;margin:10px auto}
 .grabrow button{font-size:64px;background:#fff;border:3px solid var(--line,#E5DDF5);border-radius:22px;padding:14px 0;cursor:pointer}
 .grabrow button.ok{border-color:var(--pine);background:var(--pine-soft);animation:fly .8s ease forwards}
@@ -444,7 +446,7 @@ function phoneBudget(units,today,rank0){ // dad 2026-11-19: 전화영어 = half 
   const got={unit:[],talk:[],tz:[],wm:[],wh:[],gr:[]}, used={unit:0,talk:0,tz:0,wm:0,wh:0,gr:0}; let t=0;
   for(const k of order){ const g=pools[k][used[k]]; if(!g) continue; const c=costOf(g); if(t>0&&t+c>HALF_MIN+.4) continue; used[k]++; got[k].push(...g); t+=c; }
   return [...got.unit,...got.talk,...got.tz,...shuffle(got.wm),...got.wh,...got.gr]; }
-const APPV="11/23-5"; // shown on home (under the chips) and in the parent screen
+const APPV="11/24-1"; // shown on home (under the chips) and in the parent screen
 const HE="👦", SHE="👧";
 const POODLE='<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#F7C9D4"/><ellipse class="ear l" cx="30" cy="52" rx="14" ry="24" fill="#8B5A3C"/><ellipse class="ear r" cx="90" cy="52" rx="14" ry="24" fill="#8B5A3C"/><circle cx="60" cy="62" r="32" fill="#C98B5E"/><circle cx="48" cy="58" r="5" fill="#2B1B12"/><circle cx="72" cy="58" r="5" fill="#2B1B12"/><circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/><ellipse cx="60" cy="72" rx="12" ry="9" fill="#F3DCC6"/><ellipse cx="60" cy="68" rx="5" ry="3.6" fill="#2B1B12"/><path d="M55 76 Q60 81 65 76" stroke="#2B1B12" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="70" r="5" fill="#F48FB1" opacity=".7"/><circle cx="80" cy="70" r="5" fill="#F48FB1" opacity=".7"/></svg>';
 const LIMIT=Infinity; // dad 2026-11-11: no answer time limit
@@ -1407,8 +1409,8 @@ function talkBody(c){
     const done=c.st.fb;
     return `${tag}<div class="chat"><div class="bubble a"><div class="en">${h(A.text)}</div>${koA(c,A)}</div>
       ${done?`<div class="bubble b"><div class="en">${h(B.text)}</div><div class="ko">${h(B.ko)}</div></div>`:""}</div>
-      ${done?"":`<div class="hint">뭐라고 대답할까?</div>`}
-      ${done?"":`<div class="opts">${c.opts.map((o,k)=>`<button class="opt" data-opt="${k}">${h(o)}</button>`).join("")}</div>`}
+      ${done?(done==="bad"?`<div class="hint">정답은 이거예요 👆</div>`:""):`<div class="hint">${(c.st.tried||[]).length?"앗, 다시 골라 봐요! 🤔":"뭐라고 대답할까?"}</div>`}
+      ${done?"":`<div class="opts">${c.opts.map((o,k)=>{ const no=(c.st.tried||[]).includes(k); return `<button class="opt ${no?"no":""}" data-opt="${k}" ${no?"disabled":""}>${h(o)}</button>`; }).join("")}</div>`}
       ${done?`${c.st.echoOk?`<div class="feedback good">따라 말하기 성공! 💖</div>`:micBlock(c,"이제 대답을 따라 말해 봐요!")}<div class="btns"><button class="big soft" data-act="replay">🔊 다시 듣기</button><button class="big skip" data-act="skip">다음 →</button></div>`:`<div class="btns"><button class="big soft" data-act="playA">🔊 듣기</button></div>`}`;
   }
   const meSay = c.mode==="sayB" ? B : A, other = c.mode==="sayB" ? A : B;
@@ -1437,10 +1439,11 @@ function pickBody(c){
       ${done?"":`<div class="opts">${c.opts.map((o,k)=>`<button class="opt ${done&&o===c.right?"right":""} ${done&&c.st.chosen===k&&o!==c.right?"wrong":""}" data-pick="${k}" ${done?"disabled":""}>${mark(o)}</button>`).join("")}</div>`}
       ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! 💖":"앗!"}${echoBlock(c,`<small>${h(z.note)}</small>`)}</div>`:""}`; }
   if(c.kind==="where"){ const g=GZ[c.id]; const tb=g.obj==="table";
-    const an=`<span class="g-an" style="bottom:${tb?(g.place==="on"?146:8):(g.place==="on"?104:80)}px">${g.animal}</span>`;
-    const scene=tb?`<div class="g-top"></div><div class="g-leg" style="left:44px"></div><div class="g-leg" style="right:44px"></div>`:`<div class="g-box"></div>`;
+    // dad 2026-11-24: make in / on / under unmistakable — on: whole animal above (closed lid on the box), in: only the top of the head peeks out, under: whole animal on the floor below the table
+    const an=`<span class="g-an" style="bottom:${tb?(g.place==="on"?150:0):(g.place==="on"?124:70)}px">${g.animal}</span>`;
+    const scene=tb?`<div class="g-top"></div><div class="g-leg" style="left:44px"></div><div class="g-leg" style="right:44px"></div>`:`<div class="g-box ${g.place==="on"?"shut":""}"></div>${g.place==="on"?`<div class="g-lid"></div>`:""}`;
     return `<div class="tags"><span class="tag phone">📞 📦 어디 있을까?</span></div><div class="gamebox">${scene}${an}</div><div class="ko big">${done?h(g.ko):h(g.ko.split(" ")[0])+" 어디에 있을까요?"}</div>
-      ${done?"":`<div class="opts">${c.opts.map((o,k)=>`<button class="opt" data-pick="${k}">${o}</button>`).join("")}</div>`}
+      ${done?"":`${(c.st.tried||[]).length?`<div class="hint">앗, 다시 골라 봐요! 🤔</div>`:""}<div class="opts">${c.opts.map((o,k)=>{ const no=(c.st.tried||[]).includes(k); return `<button class="opt ${no?"no":""}" data-pick="${k}" ${no?"disabled":""}>${o}</button>`; }).join("")}</div>`}
       ${done?`<div class="feedback ${done}">${done==="good"?"맞아요! 💖":"앗! 이렇게 말해요"}${echoBlock(c)}</div>`:""}`; }
   if(c.kind==="grab"){ // dad 2026-11-18: take = 집어서 가져가요. Hear a real-life line, move the right thing into the bag, then say "I took ___."
     const g=TK[c.id], inBag=c.st.phase>=1;
@@ -1498,9 +1501,13 @@ function bindCard(c){
   if(inp){ inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); const btn=app.querySelector('[data-act="mic"]'); btn&&btn.click(); } }); }
   app.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{ c.st.picked.push(+b.dataset.p); checkOrder(c); });
   app.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{ c.st.picked.splice(+b.dataset.a,1); render(); });
-  app.querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>{ const t=talkById[c.id]; const k=+b.dataset.opt; c.st.chosen=k; const ok=c.opts[k]===t.lines[1].text; c.st.fb=ok?"good":"bad"; srs(S.talks,c.id,ok); ok?chime():buzz(); c.st.echo=true; render(); // dad 2026-11-17: time to say the answer aloud before moving on
+  app.querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>{ const t=talkById[c.id]; const k=+b.dataset.opt; c.st.chosen=k; const ok=c.opts[k]===t.lines[1].text, tr=c.st.tried||(c.st.tried=[]);
+    if(!ok&&!tr.length){ tr.push(k); c.st.firstTry=false; buzz(); render(); return; } // dad 2026-11-24: a wrong pick says "다시 골라 봐요" first; the answer shows only after the 2nd miss
+    c.st.fb=ok?"good":"bad"; srs(S.talks,c.id,ok&&!tr.length); ok?chime():buzz(); c.st.echo=true; render(); // dad 2026-11-17: time to say the answer aloud before moving on
     playLine(t,1).then(()=>setTimeout(()=>{ if(cur()===c&&view==="lesson"&&speechOK&&!c.st.listening&&!c.st.echoOk) act(c,"mic"); },350)); });
-  app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{ const k=+b.dataset.pick; c.st.chosen=k; const ok=c.opts[k]===c.right; c.st.fb=ok?"good":"bad"; ok?chime():buzz(); render();
+  app.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{ const k=+b.dataset.pick; c.st.chosen=k; const ok=c.opts[k]===c.right;
+    if(c.kind==="where"&&!ok&&!(c.st.tried||[]).length){ (c.st.tried=[]).push(k); c.st.firstTry=false; buzz(); render(); return; } // dad 2026-11-24: one more try
+    c.st.fb=ok?"good":"bad"; ok?chime():buzz(); render();
     if(c.kind==="tense"||c.kind==="wm"||c.kind==="can"||c.kind==="an"||c.kind==="be") srs(S.items,c.id,ok);
     if(ECHO.has(c.kind)&&c.kind!=="where"){ c.st.echo=true; render(); new Promise(r=>setTimeout(r,300)).then(()=>echoPlay(c)).then(()=>setTimeout(()=>{ if(cur()===c&&view==="lesson"&&speechOK&&!c.st.listening&&!c.st.echoOk) act(c,"mic"); },350)); return; }
     if(c.kind==="where"){ const g=GZ[c.id]; c.st.echo=true; new Promise(r=>setTimeout(r,300)).then(()=>playSrc(g.id,g.url,g.text)).then(()=>setTimeout(()=>{ if(cur()===c&&view==="lesson"&&speechOK&&!c.st.listening&&!c.st.echoOk) act(c,"mic"); },350)); return; }
@@ -1734,7 +1741,7 @@ function todayTable(raw){ // dad 2026-11-22: today's cards in the order she sees
     rows.push([m,sb,h(c.x?c.x.w+(c.k==="say"?" → "+c.x.s:""):c.k==="intro"?P.words.map(w=>w.w).join(", "):c.k==="sound"?P.snd.snd+" : "+P.snd.words.map(w=>w.w).join(", "):c.k==="cold"?c.it.text:c.k==="story"?c.page+"쪽 "+(c.old?"(예전 쪽 다시)":c.again?"(어제 쪽 다시)":"(오늘의 새 쪽)"):"")]); }); }
   if(raw) return rows; const big=bigLab();
   return `<table class="wtable ttbl"><tr><th>#</th><th>대분류</th><th>중분류</th><th>소분류</th><th style="text-align:left">문장 / 단어</th></tr>${rows.map((r,k)=>`<tr><td>${k+1}</td><td>${big}</td><td>${r[0]}</td><td>${r[1]}</td><td style="text-align:left">${r[2]}</td></tr>`).join("")}</table>`; }
-const PORD={learn:0,weak:1,new:2,know:3}; // dad 2026-11-22: 익히는 중 first
+const PORD={know:0,learn:1,weak:2,new:3}; // dad 2026-11-24: 아는 문장 → 익히는 중 → 헷갈림 → 아직
 function renderParent(){
   const today=todayStr();
   const avail=ITEMS.filter(unlocked);
